@@ -1,4 +1,6 @@
-export const tokens = {
+import { LineWeight } from "@mui/icons-material";
+
+const tokens = {
     grey: {
       100: "#f0f0f3",
       200: "#e1e2e7",
@@ -34,13 +36,9 @@ export const tokens = {
       800: "#614822",
       900: "#302411",
     },
-    tertiary: {
-      // purple
-      500: "#8884d8",
-    },
     background: {
-      light: "#2d2d34",
-      main: "#1f2026",
+      light: "#ffffff",
+      main: "#fbfbfb",
     },
   };
   
@@ -49,15 +47,12 @@ export const tokens = {
     palette: {
       primary: {
         ...tokens.primary,
-        main: tokens.primary[500],
-        light: tokens.primary[400],
+        main: tokens.primary[600],
+        light: tokens.primary[500],
       },
       secondary: {
         ...tokens.secondary,
         main: tokens.secondary[500],
-      },
-      tertiary: {
-        ...tokens.tertiary,
       },
       grey: {
         ...tokens.grey,
@@ -67,38 +62,60 @@ export const tokens = {
         default: tokens.background.main,
         light: tokens.background.light,
       },
+      cosmetics: {
+        radius: 5,
+        colorPrimary: tokens.grey[200],
+        colorSecondary: tokens.grey[100],
+        width: 1,
+        borderStyle: "Solid",
+        spacing: 1
+      }
     },
     typography: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
+      fontFamily: ["Reddit Mono", "monospace"].join(","),
       fontSize: 12,
       h1: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 32,
+        fontWeight: "bold",
+        color: tokens.grey[800],
       },
       h2: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
-        fontSize: 24,
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
+        fontSize: 13,
+        fontWeight: "bold",
+        textTransform: "uppercase",
+        color: tokens.grey[800],
       },
       h3: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
-        fontSize: 20,
-        fontWeight: 800,
-        color: tokens.grey[200],
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
+        fontSize: 13,
+        fontWeight: "bold",
+        textTransform: "uppercase",
+        color: tokens.grey[600],
       },
-      h4: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
-        fontSize: 14,
-        fontWeight: 600,
-        color: tokens.grey[300],
-      },
-      h5: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+      body1: {
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 12,
-        fontWeight: 400,
-        color: tokens.grey[500],
+        color: tokens.grey[800],
       },
-      h6: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+      body2: {
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
+        fontSize: 12,
+        color: tokens.grey[800],
+      },
+      body3: {
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
+        fontSize: 12,
+        color: tokens.grey[600],
+      },
+      credit: {
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
+        fontSize: 12,
+        color: tokens.primary[600],
+      },
+      debit: {
+        fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 10,
         color: tokens.grey[700],
       },

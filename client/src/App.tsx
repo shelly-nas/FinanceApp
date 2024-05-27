@@ -3,8 +3,9 @@ import { themeSettings } from './theme';
 import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { useMemo } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Navbar from "@/scenes/navbar";
+import Header from "@/scenes/header";
 import Dashboard from "@/scenes/dashboard";
+import DateFilter from '@/scenes/dateFilter';
 
 function App() {
   const theme = useMemo(() => createTheme(themeSettings), []);
@@ -15,10 +16,12 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box width="100%" height="100%" padding="1rem 2rem 4rem 2rem">
-          <Navbar />
+          <Header />
+          <DateFilter />
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/Predictions" element={<div>Predictions Page</div>} />
+            <Route path="/Review Transactions" element={<div>Review Transactions Page</div>} />
+            <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} />
           </Routes>
         </Box>
       </ThemeProvider>
