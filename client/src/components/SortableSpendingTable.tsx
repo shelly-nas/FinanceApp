@@ -8,16 +8,18 @@ interface Item {
   color: string;
 }
 
-interface SortableTableProps {
+interface SortableSpendingTableProps {
   title: string;
   items: Item[];
   totalAmount: number;
+  onRowClick: (category: string) => void;
 }
 
-const SortableTable: React.FC<SortableTableProps> = ({ title, items, totalAmount }) => {
+const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, items, totalAmount, onRowClick }) => {
   const { palette, typography } = useTheme();
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [orderBy, setOrderBy] = useState<'amount' | 'percentage'>('amount');
+  const [selectedRow, setSelectedRow] = useState<string | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
@@ -31,6 +33,11 @@ const SortableTable: React.FC<SortableTableProps> = ({ title, items, totalAmount
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
+  };
+
+  const handleRowClick = (category: string) => {
+    setSelectedRow(selectedRow === category ? null : category);
+    onRowClick(category);
   };
 
   const sortedItems = [...items].sort((a, b) => {
@@ -72,16 +79,27 @@ const SortableTable: React.FC<SortableTableProps> = ({ title, items, totalAmount
         </TableHead>
         <TableBody>
           {sortedItems.map((item) => (
-            <TableRow key={item.name}>
-              <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 120, textAlign: 'left' }}>{item.name}</TableCell>
-              <TableCell sx={{ width: '50%', minWidth: 100, textAlign: 'center' }}>
+            <TableRow
+              key={item.name}
+              onClick={() => handleRowClick(item.name)}
+              sx={{
+                cursor: 'pointer',
+                transition: 'background-color 0.1s ease-in-out',
+                // backgroundColor: selectedRow === item.name ? palette.grey[100] : 'inherit',
+                '&:hover': {
+                  backgroundColor: palette.action.hover,
+                },
+              }}
+            >
+              <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 120, textAlign: 'left', fontWeight: selectedRow === item.name ? "bold" : 'inherit', }}>{item.name}</TableCell>
+              <TableCell sx={{ width: '50%', minWidth: 100, textAlign: 'center', fontWeight: selectedRow === item.name ? "bold" : 'inherit', }}>
                 <MultiColorProgress
                   segments={[{ value: (item.amount / totalAmount) * 100, color: item.color }]}
                   height={8}
                 />
               </TableCell>
-              <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 100, textAlign: 'right' }}>{formatCurrency(item.amount)}</TableCell>
-              <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 60, textAlign: 'right' }}>{formatPercentage((item.amount / totalAmount) * 100)}</TableCell>
+              <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 100, textAlign: 'right', fontWeight: selectedRow === item.name ? "bold" : 'inherit' }}>{formatCurrency(item.amount)}</TableCell>
+              <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 60, textAlign: 'right', fontWeight: selectedRow === item.name ? "bold" : 'inherit' }}>{formatPercentage((item.amount / totalAmount) * 100)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -90,4 +108,4 @@ const SortableTable: React.FC<SortableTableProps> = ({ title, items, totalAmount
   );
 };
 
-export default SortableTable;
+export default SortableSpendingTable;

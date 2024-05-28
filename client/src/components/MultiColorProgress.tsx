@@ -37,6 +37,8 @@ const MultiColorProgress: React.FC<MultiColorProgressProps> = ({ segments, heigh
                 opacity: 0.8, // Slightly reduce opacity on hover
                 boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)', // Add shadow effect on hover
               },
+              transition: 'all 0.3s ease-in-out',
+              opacity: selectedSegment && selectedSegment !== segment.name ? 0.3 : 1, // Adjust opacity of other segments
             }}
           />
         ))}
@@ -49,14 +51,13 @@ const MultiColorProgress: React.FC<MultiColorProgressProps> = ({ segments, heigh
             left: "50%",
             transform: 'translateX(-50%)', // Center horizontally
             p: 0.75,
-            backgroundColor: 'rgba(128, 128, 128, 0.7)', // Slightly transparent grey background
-            borderRadius: 1,
-            boxShadow: 1,
-            zIndex: 10,
+            backgroundColor: palette.grey[200], // Slightly transparent grey background
+            borderRadius: 3,
+            boxShadow: 3,
             pointerEvents: 'none', // Make the box non-interactive
           }}
         >
-          <Typography variant="body1" align="center" color="white">{selectedSegment}</Typography>
+          <Typography variant="body2" fontWeight="bold" align="center" color={palette.grey[700]}>{selectedSegment}</Typography>
         </Box>
       )}
     </Box>

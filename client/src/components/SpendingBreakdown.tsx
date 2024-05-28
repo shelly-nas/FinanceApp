@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Divider, LinearProgress, useTheme, TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import MultiColorProgress from '@/components/MultiColorProgress';
-import SortableTable from './SortableTable';
+import SortableSpendingTable from './SortableSpendingTable';
 
 interface IncomeItem {
   name: string;
@@ -19,15 +19,11 @@ interface ExpenseItem {
 interface SpendingBreakdownProps {
   income: IncomeItem[];
   expenses: ExpenseItem[];
+  onCategorySelect: (category: string) => void;
 }
 
-const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses }) => {
+const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses, onCategorySelect }) => {
   const { palette } = useTheme();
-  const [incomeOrder, setIncomeOrder] = useState<'asc' | 'desc'>('asc');
-  const [incomeOrderBy, setIncomeOrderBy] = useState<'amount' | 'percentage'>('amount');
-  const [expensesOrder, setExpensesOrder] = useState<'asc' | 'desc'>('asc');
-  const [expensesOrderBy, setExpensesOrderBy] = useState<'amount' | 'percentage'>('amount');
-
   const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
 
@@ -79,10 +75,10 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses 
       <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 2, mb: 1 }} />
 
       {/* INCOME TABLE */}
-      <SortableTable title="INCOME" items={income} totalAmount={totalIncome} />
+      <SortableSpendingTable title="INCOME" items={income} totalAmount={totalIncome} onRowClick={onCategorySelect} />
 
       {/* EXPENSES TABLE */}
-      <SortableTable title="EXPENSES" items={expenses} totalAmount={totalExpenses} />
+      <SortableSpendingTable title="EXPENSES" items={expenses} totalAmount={totalExpenses} onRowClick={onCategorySelect} />
     </DashboardBox>
   );
 };
