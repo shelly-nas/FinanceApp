@@ -1,6 +1,6 @@
 import { LineWeight } from "@mui/icons-material";
 
-const tokens = {
+export const tokens = {
     grey: {
       100: "#f0f0f3",
       200: "#e1e2e7",

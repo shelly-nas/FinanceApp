@@ -1,16 +1,89 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import React, { useState } from 'react';
+import { Box, Typography, Divider, LinearProgress, useTheme, TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody } from '@mui/material';
+import DashboardBox from '@/components/DashboardBox';
+import MultiColorProgress from '@/components/MultiColorProgress';
+import SortableTable from './SortableTable';
 
-const SpendingBreakdown: React.FC = () => {
-  const spending = useSelector((state: RootState) => state.spending);
+interface IncomeItem {
+  name: string;
+  amount: number;
+  color: string;
+}
+
+interface ExpenseItem {
+  name: string;
+  amount: number;
+  color: string;
+}
+
+interface SpendingBreakdownProps {
+  income: IncomeItem[];
+  expenses: ExpenseItem[];
+}
+
+const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses }) => {
+  const { palette } = useTheme();
+  const [incomeOrder, setIncomeOrder] = useState<'asc' | 'desc'>('asc');
+  const [incomeOrderBy, setIncomeOrderBy] = useState<'amount' | 'percentage'>('amount');
+  const [expensesOrder, setExpensesOrder] = useState<'asc' | 'desc'>('asc');
+  const [expensesOrderBy, setExpensesOrderBy] = useState<'amount' | 'percentage'>('amount');
+
+  const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
+  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+  };
 
   return (
-    <div>
-      <h2>Spending Breakdown</h2>
-      <div>Income: ${spending.income.toFixed(2)}</div>
-      <div>Expenses: ${spending.expenses.homeAuto + spending.expenses.food + spending.expenses.shopping + spending.expenses.alcohol + spending.expenses.ridesharing}</div>
-    </div>
+    <DashboardBox sx={{ mb: 1.5 }}>
+      <Typography variant="h3">Spending Breakdown</Typography>
+      <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1, mb: 1 }} />
+
+      {/* INCOME PROGRESSBAR */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 1, mt: 2 }}>
+        <Typography variant="body1" fontWeight="bold">
+          INCOME
+        </Typography>
+        <Typography variant="credit" fontWeight="bold" sx={{ mr: 1 }}>
+          {formatCurrency(totalIncome)}
+        </Typography>
+      </Box>
+      <MultiColorProgress
+        segments={income.map(item => ({
+          value: (item.amount / totalIncome) * 100,
+          color: item.color,
+          name: item.name,
+        }))}
+        height={18}
+      />
+
+      {/* EXPENSES PROGRESSBAR */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 1, mt: 2 }}>
+        <Typography variant="body1" fontWeight="bold">
+          EXPENSES
+        </Typography>
+        <Typography variant="body2" fontWeight="bold" sx={{ mr: 1 }}>
+          {formatCurrency(totalExpenses)}
+        </Typography>
+      </Box>
+      <MultiColorProgress
+        segments={expenses.map(item => ({
+          value: (item.amount / totalIncome) * 100,
+          color: item.color,
+          name: item.name,
+        }))}
+        height={18}
+      />
+
+      <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 2, mb: 1 }} />
+
+      {/* INCOME TABLE */}
+      <SortableTable title="INCOME" items={income} totalAmount={totalIncome} />
+
+      {/* EXPENSES TABLE */}
+      <SortableTable title="EXPENSES" items={expenses} totalAmount={totalExpenses} />
+    </DashboardBox>
   );
 };
 

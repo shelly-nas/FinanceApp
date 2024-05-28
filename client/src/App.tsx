@@ -11,22 +11,30 @@ function App() {
   const theme = useMemo(() => createTheme(themeSettings), []);
   
   return (
-  <div className='app'>
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Box width="100%" height="100%" padding="1rem 2rem 4rem 2rem">
-          <Header />
-          <DateFilter />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/Review Transactions" element={<div>Review Transactions Page</div>} />
-            <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} />
-          </Routes>
-        </Box>
-      </ThemeProvider>
-    </BrowserRouter>
-  </div>
+    <div className='app'>
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '1rem 2rem 4rem 2rem',
+            }}
+          >
+            <Box maxWidth="1400px" width="100%">
+              <Header />
+              <DateFilter />
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/Review Transactions" element={<div>Review Transactions Page</div>} />
+                <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} />
+              </Routes>
+            </Box>
+          </Box>
+        </ThemeProvider>
+      </BrowserRouter>
+    </div>
   );
 }
 

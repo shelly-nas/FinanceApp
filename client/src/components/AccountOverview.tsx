@@ -37,13 +37,13 @@ const AccountsOverview: React.FC<AccountsOverviewProps> = ({ categories }) => {
   };
 
   return (
-    <DashboardBox>
+    <DashboardBox sx={{ mb: 1.5 }}>
       <Typography mb={palette.cosmetics.spacing} variant="h3">Account Overview</Typography>
-      <Divider color={palette.cosmetics.colorSecondary} />  
+      <Divider color={palette.cosmetics.colorSecondary} sx={{mt: 1, mb:1 }} />
       <List sx={{ml: -1.5}}>
         {categories.map((category) => (
           <div key={category.name}>
-            <ListItemButton onClick={() => handleToggle(category.name)} sx={{pl:-3, py: 0.5 }}>
+            <ListItemButton onClick={() => handleToggle(category.name)} sx={{ py: 0.5 }}>
               {open[category.name] ? <ExpandLess /> : <ExpandMore />}
               <ListItemText 
                 primary={`${category.name} (${category.items.length})`} 
@@ -69,8 +69,8 @@ const AccountsOverview: React.FC<AccountsOverviewProps> = ({ categories }) => {
           </div>
         ))}
       </List>
-      <Divider color={palette.cosmetics.colorSecondary} />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mr:1, ml:1, mt:1 }}>
+      <Divider color={palette.cosmetics.colorSecondary} sx={{mt: 1, mb:1 }} />
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mr:2, ml:1, mt:1 }}>
         <Typography variant="body1" fontWeight="bold">
           Estd. Net Worth
         </Typography>
