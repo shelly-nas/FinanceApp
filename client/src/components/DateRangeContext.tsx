@@ -1,5 +1,5 @@
 // DateRangeContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface DateRangeContextProps {
   firstDay: Date;
@@ -12,13 +12,25 @@ const DateRangeContext = createContext<DateRangeContextProps | undefined>(undefi
 
 export const DateRangeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [dateOneMonthAgo, setDateOneMonthAgo] = useState(new Date());
 
+  useEffect(() => {
+    const now = new Date();
+    setCurrentDate(now);
+
+    // Calculate the date one month ago
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    setDateOneMonthAgo(oneMonthAgo);
+  }, []);
+  
   const incrementMonth = () => {
-    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
+    setCurrentDate(new Date(dateOneMonthAgo.setMonth(dateOneMonthAgo.getMonth() + 1)));
   };
 
   const decrementMonth = () => {
-    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
+    setCurrentDate(new Date(dateOneMonthAgo.setMonth(dateOneMonthAgo.getMonth() - 1)));
   };
 
   const getFirstAndLastDayOfMonth = (date: Date) => {
@@ -29,7 +41,7 @@ export const DateRangeProvider: React.FC<{ children: ReactNode }> = ({ children 
     return { firstDay, lastDay };
   };
 
-  const { firstDay, lastDay } = getFirstAndLastDayOfMonth(currentDate);
+  const { firstDay, lastDay } = getFirstAndLastDayOfMonth(dateOneMonthAgo);
 
   return (
     <DateRangeContext.Provider value={{ firstDay, lastDay, incrementMonth, decrementMonth }}>

@@ -64,4 +64,15 @@ router.get('/transactions', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/category-sums', async (req: Request, res: Response) => {
+  const { startDate, endDate } = req.query;
+
+  try {
+    const categorySums = await userManager.getCategorySums(startDate as string, endDate as string);
+    res.status(200).json(categorySums);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
 export default router;

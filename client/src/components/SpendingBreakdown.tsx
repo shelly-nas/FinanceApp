@@ -3,29 +3,49 @@ import { Box, Typography, Divider, LinearProgress, useTheme, TableContainer, Tab
 import DashboardBox from '@/components/DashboardBox';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import SortableSpendingTable from './SortableSpendingTable';
+import { formatDate, useDateRange } from '@/components/DateRangeContext';
+import { useGetCategorySumsQuery } from '@/api';
 
-interface IncomeItem {
-  name: string;
-  amount: number;
-  color: string;
-}
-
-interface ExpenseItem {
-  name: string;
-  amount: number;
+export interface CategorySums {
+  category: string;
+  total_amount: number;
   color: string;
 }
 
 interface SpendingBreakdownProps {
-  income: IncomeItem[];
-  expenses: ExpenseItem[];
   onCategorySelect: (category: string) => void;
 }
 
-const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses, onCategorySelect }) => {
+function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: CategorySums[] } {
+  let categorySums: CategorySums[] = (items as unknown as CategorySums[]) || [];
+
+  let income: CategorySums[] = [];
+  let expenses: CategorySums[] = [];
+
+  categorySums.forEach(c => {
+    if (c.total_amount > 0) {
+      income.push({ ...c, total_amount: Math.abs(c.total_amount) });
+    } else {
+      expenses.push({ ...c, total_amount: Math.abs(c.total_amount) });
+    }
+  });
+
+  return { income, expenses };
+}
+
+const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect }) => {
   const { palette } = useTheme();
-  const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+  const { firstDay, lastDay } = useDateRange();
+
+  const { data: results, error, isLoading } = useGetCategorySumsQuery({
+    startDate: formatDate(firstDay),
+    endDate: formatDate(lastDay),
+  });
+  
+  const result = categorizeItems(results);
+
+  const totalIncome = result.income.reduce((sum, item) => sum + item.total_amount, 0);
+  const totalExpenses = result.expenses.reduce((sum, item) => sum + item.total_amount, 0);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
@@ -46,10 +66,10 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses,
         </Typography>
       </Box>
       <MultiColorProgress
-        segments={income.map(item => ({
-          value: (item.amount / totalIncome) * 100,
+        segments={result.income.map(item => ({
+          value: (item.total_amount / totalIncome) * 100,
           color: item.color,
-          name: item.name,
+          name: item.category,
         }))}
         height={18}
       />
@@ -64,10 +84,10 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses,
         </Typography>
       </Box>
       <MultiColorProgress
-        segments={expenses.map(item => ({
-          value: (item.amount / totalIncome) * 100,
+        segments={result.expenses.map(item => ({
+          value: (item.total_amount / totalIncome) * 100,
           color: item.color,
-          name: item.name,
+          name: item.category,
         }))}
         height={18}
       />
@@ -75,10 +95,10 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ income, expenses,
       <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 2, mb: 1 }} />
 
       {/* INCOME TABLE */}
-      <SortableSpendingTable title="INCOME" items={income} totalAmount={totalIncome} onRowClick={onCategorySelect} />
+      <SortableSpendingTable title="INCOME" items={result.income} totalAmount={totalIncome} onRowClick={onCategorySelect} />
 
       {/* EXPENSES TABLE */}
-      <SortableSpendingTable title="EXPENSES" items={expenses} totalAmount={totalExpenses} onRowClick={onCategorySelect} />
+      <SortableSpendingTable title="EXPENSES" items={result.expenses} totalAmount={totalExpenses} onRowClick={onCategorySelect} />
     </DashboardBox>
   );
 };

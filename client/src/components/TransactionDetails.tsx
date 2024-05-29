@@ -3,6 +3,8 @@ import { Typography, Divider, useTheme, Box } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import SortableTransactionTable from './SortableTransactionTable';
 import '@/styles.css'; // Import your CSS styles for transitions
+import { formatDate, useDateRange } from '@/components/DateRangeContext';
+import { useGetTransactionsQuery } from '@/api';
 
 interface Transaction {
   date_str: string;
@@ -17,14 +19,21 @@ interface Transaction {
 }
 
 interface TransactionDetailsProps {
-  transactions: Transaction[];
   selectedCategory: string | null;
 }
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transactions, selectedCategory }) => {
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({selectedCategory }) => {
   const { palette } = useTheme();
+  const { firstDay, lastDay } = useDateRange();
+  
+  const { data: results, error, isLoading } = useGetTransactionsQuery({
+    startDate: formatDate(firstDay),
+    endDate: formatDate(lastDay),
+  });
 
-  const filteredTransactions = selectedCategory
+  let transactions: Transaction[] = results as unknown as Transaction[];
+
+  const filteredTransactions = selectedCategory && transactions
     ? transactions.filter(transaction => transaction.category === selectedCategory)
     : [];
 

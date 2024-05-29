@@ -98,14 +98,14 @@ const SortableTransactionTable: React.FC<SortableTransactionTableProps> = ({ ite
           {sortedTransactions.map((transaction) => (
             <TableRow key={transaction.date_str + transaction.name_description}>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.date_str}</TableCell>
-              <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.name_description}</TableCell>
+              <TableCell sx={{ ...typography.body2, textAlign: 'left', minWidth: 180 }}>{transaction.name_description}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.account}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.counterparty}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.category}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.debit_credit}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'right' }}>{formatCurrency(transaction.amount)}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.transaction_type}</TableCell>
-              <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.notifications}</TableCell>
+              <TableCell sx={{ ...typography.body2, textAlign: 'left', minWidth: 500 }}>{transaction.notifications}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -43,11 +43,59 @@ class UserManager {
 
     try {
       const result = await client.query(query, params);
-      return result.rows.map(row => new JointAccount(row.id, row.date_str, row.name_description, row.account, row.counterparty, row.category, row.debit_credit, row.amount, row.transaction_type, row.notifications));
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async getCategorySums(startDate?: string, endDate?: string): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+
+    let query = `
+      SELECT 
+        ja.category,
+        SUM(
+            CASE 
+                WHEN ja.debit_credit = 'Debit' THEN -ja.amount 
+                WHEN ja.debit_credit = 'Credit' THEN ja.amount 
+                ELSE 0 
+            END
+        ) AS total_amount,
+        c.color
+      FROM 
+        public.joint_account ja
+      JOIN
+        public.categories c ON ja.category = c.category_name
+      WHERE 
+        1=1
+    `;
+
+    if (startDate) {
+      query += " AND ja.date_str >= $1";
+      params.push(startDate);
+    }
+
+    if (endDate) {
+      query += " AND ja.date_str <= $2";
+      params.push(endDate);
+    }
+
+    query += `
+      GROUP BY 
+        ja.category, c.color
+      LIMIT 1000;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
     } finally {
       client.release();
     }
   }
 }
+
 
 export default new UserManager();

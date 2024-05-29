@@ -2,16 +2,11 @@ import React, { useState } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody, useTheme } from '@mui/material';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import '@/styles.css' 
-
-interface Item {
-  name: string;
-  amount: number;
-  color: string;
-}
+import { CategorySums } from '@/components/SpendingBreakdown';
 
 interface SortableSpendingTableProps {
   title: string;
-  items: Item[];
+  items: CategorySums[];
   totalAmount: number;
   onRowClick: (category: string) => void;
 }
@@ -63,10 +58,10 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
 
   const sortedItems = [...items].sort((a, b) => {
     if (orderBy === 'amount') {
-      return order === 'asc' ? a.amount - b.amount : b.amount - a.amount;
+      return order === 'asc' ? a.total_amount - b.total_amount : b.total_amount - a.total_amount;
     } else {
-      const aPercentage = (a.amount / totalAmount) * 100;
-      const bPercentage = (b.amount / totalAmount) * 100;
+      const aPercentage = (a.total_amount / totalAmount) * 100;
+      const bPercentage = (b.total_amount / totalAmount) * 100;
       return order === 'asc' ? aPercentage - bPercentage : bPercentage - aPercentage;
     }
   });
@@ -108,26 +103,26 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
           {sortedItems.map((item) => (
             <div className="ripple-container" onClick={handleRippleEffect}>
               <TableRow
-                key={item.name}
-                onClick={() => handleRowClick(item.name)}
+                key={item.category}
+                onClick={() => handleRowClick(item.category)}
                 sx={{
                   cursor: 'pointer',
                   transition: 'background-color 0.1s ease-in-out',
-                  backgroundColor: selectedRow === item.name ? palette.grey[100] : 'inherit',
+                  backgroundColor: selectedRow === item.category ? palette.grey[100] : 'inherit',
                   '&:hover': {
                     backgroundColor: palette.action.hover,
                   },
                 }}
               >
-                <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 120, textAlign: 'left', fontWeight: selectedRow === item.name ? "bold" : 'inherit', }}>{item.name}</TableCell>
-                <TableCell sx={{ width: '50%', minWidth: 100, textAlign: 'center', fontWeight: selectedRow === item.name ? "bold" : 'inherit', }}>
+                <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 120, textAlign: 'left', fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>{item.category}</TableCell>
+                <TableCell sx={{ width: '50%', minWidth: 100, textAlign: 'center', fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>
                   <MultiColorProgress
-                    segments={[{ value: (item.amount / totalAmount) * 100, color: item.color }]}
+                    segments={[{ value: (item.total_amount / totalAmount) * 100, color: item.color }]}
                     height={8}
                   />
                 </TableCell>
-                <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 110, textAlign: 'right', fontWeight: selectedRow === item.name ? "bold" : 'inherit' }}>{formatCurrency(item.amount)}</TableCell>
-                <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 80, textAlign: 'right', fontWeight: selectedRow === item.name ? "bold" : 'inherit' }}>{formatPercentage((item.amount / totalAmount) * 100)}</TableCell>
+                <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 110, textAlign: 'right', fontWeight: selectedRow === item.category ? "bold" : 'inherit' }}>{formatCurrency(item.total_amount)}</TableCell>
+                <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 80, textAlign: 'right', fontWeight: selectedRow === item.category ? "bold" : 'inherit' }}>{formatPercentage((item.total_amount / totalAmount) * 100)}</TableCell>
               </TableRow>
             </div>
           ))}
