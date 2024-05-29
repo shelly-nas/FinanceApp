@@ -17,14 +17,8 @@ try {
   app.use('/api', jointAccountController);
 	// app.use(helmet());
 	app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
-	// app.use(morgan("common"));
-	// app.use(cors({
-	// 	origin: 'http://localhost:5173', // Allow only this origin
-	// 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-	// 	credentials: true, // Allow cookies to be sent
-	// }));
+	app.use(morgan("common"));
 	
-    
   app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
   });

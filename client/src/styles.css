@@ -10,3 +10,25 @@
 .fade.show {
   opacity: 1;
 }
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ripple-container .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(115, 115, 115, 0.3);
+  transform: scale(0);
+  animation: ripple 0.8s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}

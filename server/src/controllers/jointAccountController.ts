@@ -21,7 +21,7 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  const entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: string, debit_credit: string, amount: number, transaction_type: string, notifications: string}[] = [];
+  const entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: null, debit_credit: string, amount: number, transaction_type: string, notifications: string}[] = [];
 
   fs.createReadStream(filePath)
     .pipe(csvParser())
@@ -31,7 +31,7 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         name_description: data['Name / Description'],
         account: data.Account,
         counterparty: data.Counterparty || null,
-        category: data.Code,
+        category: null,
         debit_credit: data['Debit/credit'],
         amount: parseFloat(data['Amount (EUR)']),
         transaction_type: data['Transaction type'],
@@ -40,7 +40,7 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
     })
     .on('end', async () => {
       try {
-        await jointAccountManager.addMultipleEntries(entries);
+        await jointAccountManager.addMultipleTransactions(entries);
         res.status(200).send('Entries imported successfully');
       } catch (error) {
         res.status(500).send(`Error importing entries: ${error}`);
@@ -54,9 +54,11 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
 });
 
 router.get('/transactions', async (req: Request, res: Response) => {
+  const { startDate, endDate } = req.query;
+  
   try {
-    const users = await userManager.getUsers();
-    res.status(200).json(users);
+    const transactions = await userManager.getTransactions(startDate as string, endDate as string);
+    res.status(200).json(transactions);
   } catch (error) {
     res.status(500).json({ error });
   }

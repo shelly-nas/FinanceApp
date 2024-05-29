@@ -5,6 +5,8 @@ import AccountsOverview from "@/components/AccountOverview";
 import PeriodSummary from "@/components/PeriodSummary";
 import SpendingBreakdown from "@/components/SpendingBreakdown";
 import TransactionDetails from "@/components/TransactionDetails";
+import { useGetTransactionsQuery } from "@/api";
+import { useDateRange, formatDate } from '@/components/DateRangeContext';
 
 const sampleCategories = [
   {
@@ -292,6 +294,12 @@ const Dashboard: React.FC = () => {
   const { palette } = useTheme();
   const spacing: number = 1.5;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { firstDay, lastDay } = useDateRange();
+
+  // const { data: transactions, error, isLoading } = useGetTransactionsQuery({
+  //   startDate: formatDate(firstDay),
+  //   endDate: formatDate(lastDay),
+  // });
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(prevCategory => prevCategory === category ? null : category);

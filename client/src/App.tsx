@@ -1,41 +1,37 @@
+// App.tsx
+import React, { useMemo } from 'react';
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Header from '@/scenes/header';
+import Dashboard from '@/scenes/dashboard';
+import DateRange from '@/scenes/dateRange';
 import { createTheme } from '@mui/material/styles';
 import { themeSettings } from './theme';
-import { ThemeProvider, CssBaseline, Box } from '@mui/material';
-import { useMemo } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Header from "@/scenes/header";
-import Dashboard from "@/scenes/dashboard";
-import DateFilter from '@/scenes/dateFilter';
+import { DateRangeProvider } from '@/components/DateRangeContext';
 
-function App() {
+const App: React.FC = () => {
   const theme = useMemo(() => createTheme(themeSettings), []);
-  
+
   return (
     <div className='app'>
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              padding: '1rem 2rem 4rem 2rem',
-            }}
-          >
-            <Box maxWidth="1400px" width="100%">
+          <DateRangeProvider>
+            <Box maxWidth="1400px" textAlign="center" padding="1rem 2rem 4rem 2rem">
               <Header />
-              <DateFilter />
+              <DateRange />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/Review Transactions" element={<div>Review Transactions Page</div>} />
                 <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} />
               </Routes>
             </Box>
-          </Box>
+          </DateRangeProvider>
         </ThemeProvider>
       </BrowserRouter>
     </div>
   );
-}
+};
 
 export default App;

@@ -1,35 +1,17 @@
-import { useState } from "react"
-import { Divider, Typography, useTheme } from "@mui/material"
-import FlexBetween from "@/components/FlexBetween"
+// DateFilter.tsx
+import React from 'react';
+import { Divider, Typography, useTheme } from '@mui/material';
+import FlexBetween from '@/components/FlexBetween';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ArrowButton from '@/components/ArrowButton';
 import DateRangeBox from '@/components/DateRangeBox';
+import { useDateRange } from '@/components/DateRangeContext';
 
-type Props = {};
-
-const DateFilter: React.FC<Props> = () => {
+const DateRange: React.FC = () => {
   const { palette } = useTheme();
-  const [currentDate, setCurrentDate] = useState(new Date('2024-02-01'));
-
-  const getFirstAndLastDayOfMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    return { firstDay, lastDay };
-  };
-
-  const incrementMonth = () => {
-    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
-  };
-
-  const decrementMonth = () => {
-    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
-  };
-
-  const { firstDay, lastDay } = getFirstAndLastDayOfMonth(currentDate);
+  const { firstDay, lastDay, incrementMonth, decrementMonth } = useDateRange();
 
   return (
     <FlexBetween mb="0.25rem" p="0.5rem 0rem">
@@ -56,4 +38,4 @@ const DateFilter: React.FC<Props> = () => {
   );
 };
 
-export default DateFilter;
+export default DateRange;
