@@ -3,28 +3,52 @@ import { Typography, Divider, Box, List, ListItem, ListItemText, Collapse, useTh
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import DashboardBox from '@/components/DashboardBox';
+import { formatDate, useDateRange } from '@/components/DateRangeContext';
+import { useGetIncomeExpensesSumQuery } from '@/api';
 
-interface IncomeItem {
+interface ExchangeType {
   name: string;
   amount: number;
-  info?: string;
 }
 
-interface ExpenseItem {
-  name: string;
-  amount: number;
-  info?: string;
+interface IncomeExpenseItem {
+  category_type: string;
+  income: number;
+  expenses: number;
 }
 
-interface PeriodSummaryProps {
-  incomeItems: IncomeItem[];
-  expenseItems: ExpenseItem[];
+interface Props {}
+
+function splitIncomeExpense(items: unknown[]): { incomeItems: ExchangeType[] , expenseItems: ExchangeType[]} {
+  const incomeExpenseItems: IncomeExpenseItem[] = items as IncomeExpenseItem[] || [];
+
+  const incomeItems: ExchangeType[] = [];
+  const expenseItems: ExchangeType[] = [];
+
+  incomeExpenseItems.forEach(item => {
+    if (item.income > 0) {
+      incomeItems.push({ name: item.category_type, amount: parseInt(item.income) });
+    }
+    if (item.expenses > 0) {
+      expenseItems.push({ name: item.category_type, amount: parseInt(item.expenses) });
+    }
+  });
+
+  return { incomeItems, expenseItems };
 }
 
-const PeriodSummary: React.FC<PeriodSummaryProps> = ({ incomeItems, expenseItems }) => {
+const PeriodSummary: React.FC<Props> = () => {
   const { palette } = useTheme();
   const [openIncome, setOpenIncome] = useState(true);
   const [openExpenses, setOpenExpenses] = useState(true);
+  const { firstDay, lastDay } = useDateRange();
+  
+  const { data: results, error, isLoading } = useGetIncomeExpensesSumQuery({
+    startDate: formatDate(firstDay),
+    endDate: formatDate(lastDay),
+  });
+
+  const result = splitIncomeExpense(results) || {};
 
   const handleIncomeToggle = () => {
     setOpenIncome(!openIncome);
@@ -34,10 +58,15 @@ const PeriodSummary: React.FC<PeriodSummaryProps> = ({ incomeItems, expenseItems
     setOpenExpenses(!openExpenses);
   };
 
-  const totalIncome = incomeItems.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses = expenseItems.reduce((sum, item) => sum + item.amount, 0);
+  const totalIncome = result.incomeItems.reduce((sum, item) => sum + item.amount, 0);
+  const totalExpenses =result.expenseItems.reduce((sum, item) => sum + item.amount, 0);
   const netIncome = totalIncome - totalExpenses;
-  const currentSavingsRate = (netIncome / totalIncome) * 100;
+  const currentSavingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0;
+
+  console.log("totalIncome: ", totalIncome);
+  console.log("totalExpenses: ", totalExpenses);
+  console.log("netIncome: ", netIncome);
+  console.log("currentSavingsRate: ", currentSavingsRate);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
@@ -64,7 +93,7 @@ const PeriodSummary: React.FC<PeriodSummaryProps> = ({ incomeItems, expenseItems
         </ListItemButton>
         <Collapse in={openIncome} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {incomeItems.map((item) => (
+            {result.incomeItems.map((item) => (
               <ListItem key={item.name} sx={{ pl: 3, py: 0 }}>
                 <ListItemText 
                   primary={"└ "+item.name} 
@@ -95,7 +124,7 @@ const PeriodSummary: React.FC<PeriodSummaryProps> = ({ incomeItems, expenseItems
         </ListItemButton>
         <Collapse in={openExpenses} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {expenseItems.map((item) => (
+            {result.expenseItems.map((item) => (
               <ListItem key={item.name} sx={{ pl: 3, py: 0 }}>
                 <ListItemText 
                   primary={"└ "+item.name} 

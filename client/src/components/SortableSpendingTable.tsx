@@ -72,7 +72,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
         <TableHead>
           <TableRow>
           <div>
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '20%', minWidth: 120, textAlign: 'left' }}>{title}</TableCell>
+            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '20%', minWidth: 170, textAlign: 'left' }}>{title}</TableCell>
             <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '50%', minWidth: 100, textAlign: 'center' }} />
             <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '15%', minWidth: 110, textAlign: 'center' }}>
               <TableSortLabel
@@ -114,7 +114,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
                   },
                 }}
               >
-                <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 120, textAlign: 'left', fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>{item.category}</TableCell>
+                <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 170, textAlign: 'left', fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>{item.category}</TableCell>
                 <TableCell sx={{ width: '50%', minWidth: 100, textAlign: 'center', fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>
                   <MultiColorProgress
                     segments={[{ value: (item.total_amount / totalAmount) * 100, color: item.color }]}

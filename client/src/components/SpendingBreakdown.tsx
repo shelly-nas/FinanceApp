@@ -42,7 +42,7 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
     endDate: formatDate(lastDay),
   });
   
-  const result = categorizeItems(results);
+  const result = categorizeItems(results) || {};
 
   const totalIncome = result.income.reduce((sum, item) => sum + item.total_amount, 0);
   const totalExpenses = result.expenses.reduce((sum, item) => sum + item.total_amount, 0);

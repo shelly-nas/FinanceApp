@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums"], // Add all tag types here
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum"],
   endpoints: (build) => ({
     getTransactions: build.query<any, { startDate: string; endDate: string }>({
       query: ({ startDate, endDate }) => ({
@@ -19,6 +19,13 @@ export const api = createApi({
       }),
       providesTags: ["categorySums"],
     }),
+    getIncomeExpensesSum: build.query<any, { startDate: string; endDate: string }>({
+      query: ({ startDate, endDate }) => ({
+        url: `api/income-expenses-sum`,
+        params: { startDate, endDate },
+      }),
+      providesTags: ["incomeExpensesSum"],
+    }),
     // You can add more endpoints here following the same pattern
     // ...
   }),
@@ -27,4 +34,5 @@ export const api = createApi({
 export const { 
   useGetTransactionsQuery,
   useGetCategorySumsQuery,
+  useGetIncomeExpensesSumQuery,
 } = api;

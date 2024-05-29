@@ -95,6 +95,62 @@ class UserManager {
       client.release();
     }
   }
+
+  public async getIncomeExpensesSum(startDate?: string, endDate?: string): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+
+    let query = `
+      WITH categorized_transactions AS (
+        SELECT
+            ja.category,
+            ja.debit_credit,
+            CASE
+                WHEN ja.debit_credit = 'Debit' THEN -ja.amount
+                ELSE ja.amount
+            END AS adjusted_amount,
+            c.category_type
+        FROM
+            public.joint_account ja
+        JOIN
+            public.categories c
+        ON
+            ja.category = c.category_name
+        WHERE
+            c.category_type IN ('Vast', 'Variabel')
+    `;
+
+    if (startDate) {
+      query += " AND ja.date_str >= $1";
+      params.push(startDate);
+    }
+
+    if (endDate) {
+      query += " AND ja.date_str <= $2";
+      params.push(endDate);
+    }
+
+    query += `
+      )
+      SELECT
+          category_type,
+          SUM(CASE WHEN category LIKE '%Inkomen%' THEN adjusted_amount ELSE 0 END) AS income,
+          SUM(CASE WHEN category NOT LIKE '%Inkomen%' THEN -adjusted_amount ELSE 0 END) AS expenses
+      FROM
+          categorized_transactions
+      GROUP BY
+          category_type
+      ORDER BY
+          category_type
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 

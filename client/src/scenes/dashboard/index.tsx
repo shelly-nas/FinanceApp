@@ -40,23 +40,6 @@ const expenseItems = [
   { name: "Other Expenses", amount: 319.90, info: "Unexpected costs and miscellaneous" }
 ];
 
-const income = [
-  { name: "Variable Income", amount: 100.00, color: "#0ebfa0" },
-  { name: "Static Income", amount: 2000.00, color: "#13d1ae" }
-];
-
-const expenses = [
-  { name: 'Home, Auto', amount: 1013.99, color: "#80deea" }, // Bright teal
-  { name: 'Food', amount: 144.40, color: '#ffcc80' }, // Bright orange
-  { name: 'Restaurants', amount: 87.21, color: '#4db6ac' }, // Bright cyan
-  { name: 'Groceries', amount: 36.63, color: '#f06292' }, // Bright pink
-  { name: 'Food Delivery', amount: 16.88, color: '#ba68c8' }, // Bright violet
-  { name: 'Coffee Shops', amount: 3.68, color: '#ffd54f' }, // Bright amber
-  { name: 'Shopping', amount: 138.36, color: '#ff8a80' }, // Bright red
-  { name: 'Alcohol, Bars', amount: 11.64, color: '#ce93d8' }, // Bright purple
-  { name: 'Ridesharing', amount: 6.51, color: '#ffab91' } // Bright peach
-];
-
 const Dashboard: React.FC = () => {
   const { palette } = useTheme();
   const spacing: number = 1.5;
