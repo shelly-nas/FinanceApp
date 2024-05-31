@@ -3,7 +3,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import jointAccountController from '@/controllers/jointAccountController';
 import cors from 'cors';
-import helmet from 'helmet';
 import morgan from 'morgan';
 
 const app = express();
@@ -15,8 +14,6 @@ try {
   app.use(bodyParser.json());
   // app.use(bodyParser.urlencoded({ extended: false }));
   app.use('/api', jointAccountController);
-	// app.use(helmet());
-	app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 	app.use(morgan("common"));
 	
   app.listen(port, () => {
