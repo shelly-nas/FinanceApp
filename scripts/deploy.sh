@@ -49,7 +49,7 @@ After=network.target
 Type=simple
 User=pi
 ExecStart=$EXEC_START
-WorkingDirectory=$WORKSPACE
+WorkingDirectory=$WORKSPACE/$CONFIG
 Restart=on-failure
 
 [Install]
