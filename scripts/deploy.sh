@@ -28,10 +28,10 @@ sudo rm $SERVICE_PATH
 # Determine ExecStart based on the configuration
 case $CONFIG in
     client)
-        EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/npx vite"
+        EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/node node_modules/vite/bin/vite.js"
         ;;
     server)
-        EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/npx nodemon dist/index.js"
+        EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/node dist/index.js"
         ;;
     *)
         echo "Invalid config. Allowed values are: client, server, or plus."
