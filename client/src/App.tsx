@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useMemo } from 'react';
 import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -13,12 +12,12 @@ const App: React.FC = () => {
   const theme = useMemo(() => createTheme(themeSettings), []);
 
   return (
-    <div className='app'>
+    <div className='app' style={{ display: 'flex', justifyContent: 'center' }}>
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <DateRangeProvider>
-            <Box maxWidth="1400px" textAlign="center" padding="1rem 2rem 4rem 2rem">
+            <Box maxWidth="1400px" padding="1rem 2rem 4rem 2rem" style={{ width: '100%' }}>
               <Header />
               <DateRange />
               <Routes>
