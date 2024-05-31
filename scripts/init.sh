@@ -42,12 +42,12 @@ SERVER_ENV_FILE=".env"
 
 # Write the environment variables to the .env file in server directory
 {
-    echo "DB_USER=${DBUSER}"
-    echo "DB_PASSWORD=${DBPASSWORD}"
+    echo "DB_USER=${DB_USER}"
+    echo "DB_PASSWORD=${DB_PASSWORD}"
     echo "DB_HOST=${HOST}"
-    echo "DB_PORT=${DBPORT}"
-    echo "DB_NAME=${DBNAME}"
-    echo "TABLE_NAME=${TABLENAME}"
+    echo "DB_PORT=${DB_PORT}"
+    echo "DB_NAME=${DB_NAME}"
+    echo "TABLE_NAME=${TABLE_NAME}"
     echo "SERVER_PORT=${PORT}"
 } > $SERVER_ENV_FILE
 
