@@ -47,7 +47,6 @@ SERVER_ENV_FILE=".env"
     echo "DB_HOST=${HOST}"
     echo "DB_PORT=${DB_PORT}"
     echo "DB_NAME=${DB_NAME}"
-    echo "TABLE_NAME=${TABLE_NAME}"
     echo "SERVER_PORT=${PORT}"
 } > $SERVER_ENV_FILE
 

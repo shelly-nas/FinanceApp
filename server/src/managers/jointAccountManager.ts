@@ -1,7 +1,8 @@
 import dbContext from '@/context/dbContext';
 import JointAccount from '@/models/jointAccountModel';
 
-const table = process.env.TABLE_NAME;
+const category_table = "categories"
+const account_table = "joint_account";
 
 class UserManager {
   public async addMultipleTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string, amount: number, transaction_type: string, notifications: string }[]) {
@@ -11,7 +12,7 @@ class UserManager {
 
       for (const entry of entries) {
         await client.query(
-          `INSERT INTO ${table} (date_str, name_description, account, counterparty, debit_credit, amount, transaction_type, notifications)
+          `INSERT INTO ${account_table} (date_str, name_description, account, counterparty, debit_credit, amount, transaction_type, notifications)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
           [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.transaction_type, entry.notifications]
         );
@@ -28,7 +29,7 @@ class UserManager {
 
   public async getTransactions(startDate?: string, endDate?: string): Promise<JointAccount[]> {
     const client = await dbContext.connect();
-    let query = `SELECT * FROM ${table} WHERE 1=1`;
+    let query = `SELECT * FROM ${account_table} WHERE 1=1`;
     const params: any[] = [];
 
     if (startDate) {
@@ -65,9 +66,9 @@ class UserManager {
         ) AS total_amount,
         c.color
       FROM 
-        public.joint_account ja
+        public.${account_table} ja
       JOIN
-        public.categories c ON ja.category = c.category_name
+        public.${category_table} c ON ja.category = c.category_name
       WHERE 
         1=1
     `;
@@ -111,9 +112,9 @@ class UserManager {
             END AS adjusted_amount,
             c.category_type
         FROM
-            public.joint_account ja
+            public.${account_table} ja
         JOIN
-            public.categories c
+            public.${category_table} c
         ON
             ja.category = c.category_name
         WHERE
