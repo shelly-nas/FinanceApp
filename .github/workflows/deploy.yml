@@ -1,0 +1,40 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup:
+    runs-on: raspberry-pi
+    steps:
+      # Add steps that stops the services running
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.11.1"
+
+      - name: Install dependencies and compile
+        env:
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
+          TABLE_NAME: ${{ secrets.TABLE_NAME }}
+        run: bash ./scripts/init.sh
+        
+  deploy:
+    needs: setup
+    runs-on: raspberry-pi
+    strategy:
+      matrix:
+        config_name: [client, server] # List all your configurations here
+    steps:
+      - name: Deploy with Specific Config
+        run: bash ./scripts/deploy.sh ${{ matrix.config_name }} "${{ github.workspace }}"
