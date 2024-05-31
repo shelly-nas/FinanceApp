@@ -63,11 +63,6 @@ const PeriodSummary: React.FC<Props> = () => {
   const netIncome = totalIncome - totalExpenses;
   const currentSavingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0;
 
-  console.log("totalIncome: ", totalIncome);
-  console.log("totalExpenses: ", totalExpenses);
-  console.log("netIncome: ", netIncome);
-  console.log("currentSavingsRate: ", currentSavingsRate);
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
   };
