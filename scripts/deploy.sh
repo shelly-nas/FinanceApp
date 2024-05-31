@@ -31,7 +31,7 @@ case $CONFIG in
         EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/npx vite"
         ;;
     server)
-        EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/node dist/index.js"
+        EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/npx nodemon dist/index.js"
         ;;
     *)
         echo "Invalid config. Allowed values are: client, server, or plus."
@@ -42,7 +42,7 @@ esac
 # Create the systemd service configuration
 echo "[Unit]
 Description=Finance App ($CONFIG)
-Documentation=https://github.com/GRJX/FinanceWebApp
+Documentation=https://github.com/GRJX/FinanceApp
 After=network.target
 
 [Service]
