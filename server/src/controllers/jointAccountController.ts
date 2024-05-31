@@ -33,7 +33,7 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         counterparty: data.Counterparty || null,
         category: null,
         debit_credit: data['Debit/credit'],
-        amount: parseFloat(data['Amount (EUR)']),
+        amount: parseFloat(data['Amount (EUR)'].replace(',', '.')), // Convert to 0.00 value
         transaction_type: data['Transaction type'],
         notifications: data.Notifications,
       });
