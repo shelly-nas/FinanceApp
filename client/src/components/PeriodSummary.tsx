@@ -27,10 +27,10 @@ function splitIncomeExpense(items: unknown[]): { incomeItems: ExchangeType[] , e
 
   incomeExpenseItems.forEach(item => {
     if (item.income > 0) {
-      incomeItems.push({ name: item.category_type, amount: parseInt(item.income) });
+      incomeItems.push({ name: item.category_type, amount: item.income });
     }
     if (item.expenses > 0) {
-      expenseItems.push({ name: item.category_type, amount: parseInt(item.expenses) });
+      expenseItems.push({ name: item.category_type, amount: item.expenses });
     }
   });
 
@@ -58,8 +58,8 @@ const PeriodSummary: React.FC<Props> = () => {
     setOpenExpenses(!openExpenses);
   };
 
-  const totalIncome = result.incomeItems.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses =result.expenseItems.reduce((sum, item) => sum + item.amount, 0);
+  const totalIncome = result.incomeItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+  const totalExpenses = result.expenseItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
   const netIncome = totalIncome - totalExpenses;
   const currentSavingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0;
 
