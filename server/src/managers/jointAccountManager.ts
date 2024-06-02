@@ -56,15 +56,15 @@ class UserManager {
 
     let query = `
       SELECT 
-        ja.category,
+        ja.category::text,
         SUM(
             CASE 
-                WHEN ja.debit_credit = 'Debit' THEN -ja.amount 
-                WHEN ja.debit_credit = 'Credit' THEN ja.amount 
+                WHEN ja.debit_credit = 'Debit' THEN -ja.amount::numeric 
+                WHEN ja.debit_credit = 'Credit' THEN ja.amount::numeric
                 ELSE 0 
             END
         ) AS total_amount,
-        c.color
+        c.color::text
       FROM 
         public.${account_table} ja
       JOIN
@@ -133,10 +133,10 @@ class UserManager {
 
     query += `
       )
-      SELECT
-          category_type,
-          SUM(CASE WHEN category LIKE '%Inkomen%' THEN adjusted_amount ELSE 0 END) AS income,
-          SUM(CASE WHEN category NOT LIKE '%Inkomen%' THEN -adjusted_amount ELSE 0 END) AS expenses
+      SELECT 
+          category_type::text,
+          SUM(CASE WHEN category LIKE '%Inkomen%' THEN adjusted_amount::numeric ELSE 0::numeric END) AS income,
+          SUM(CASE WHEN category NOT LIKE '%Inkomen%' THEN -adjusted_amount::numeric ELSE 0::numeric END) AS expenses
       FROM
           categorized_transactions
       GROUP BY
