@@ -3,7 +3,6 @@ import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Header from '@/scenes/header';
 import Dashboard from '@/scenes/dashboard';
-import DateRange from '@/scenes/dateRange';
 import { createTheme } from '@mui/material/styles';
 import { themeSettings } from '@/theme';
 import { DateRangeProvider } from '@/scenes/dateRange/DateRangeContext';
@@ -20,7 +19,6 @@ const App: React.FC = () => {
           <DateRangeProvider>
             <Box maxWidth="1400px" padding="1rem 2rem 4rem 2rem" style={{ width: '100%' }}>
               <Header />
-              <DateRange />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/review-transactions" element={<ReviewTransactions />} />

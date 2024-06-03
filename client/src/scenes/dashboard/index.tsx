@@ -6,6 +6,7 @@ import PeriodSummary from "@/scenes/dashboard/PeriodSummary";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
 import UploadButton from "@/scenes/dashboard/UploadButton";
+import DateRange from '@/scenes/dateRange';
 
 const sampleCategories = [
   {
@@ -40,6 +41,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box>
+      <DateRange />
       <Grid container justifyContent="space-between" columnSpacing={spacing}>
         {/* Left Grid */}
         <Grid item xs={12} md={4}>

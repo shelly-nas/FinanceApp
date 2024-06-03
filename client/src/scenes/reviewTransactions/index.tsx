@@ -1,12 +1,12 @@
 // src/pages/ReviewTransactions.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TextField, TableSortLabel, IconButton
+  TextField, TableSortLabel, IconButton, CircularProgress, Typography
 } from '@mui/material';
-import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+import { useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
 
 interface Transaction {
   id: number;
@@ -21,28 +21,62 @@ interface Transaction {
   notifications: string;
 }
 
-const initialData: Transaction[] = [
-  { id: 1, date_str: '2021-01-01', name_description: 'Sample', account: 'Account1', counterparty: 'Counterparty1', category: 'Category1', debit_credit: 'Debit', amount: 100, transaction_type: 'Type1', notifications: 'None' },
-  // Add more rows as needed
-];
+const emptyRow: Transaction = {
+  id: 0,
+  date_str: '',
+  name_description: '',
+  account: '',
+  counterparty: '',
+  category: '',
+  debit_credit: '',
+  amount: 0,
+  transaction_type: '',
+  notifications: '',
+};
 
 const ReviewTransactions: React.FC = () => {
-  const [data, setData] = useState(initialData);
-  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const { data: results, error, isLoading } = useGetEmptyCategoryTransactionsQuery();
+  const [updateTransaction] = useUpdateTransactionMutation();
+  const [reviewTransactions, setData] = useState<Transaction[]>([]);
+  const [editIdx, setEditIdx] = useState<{ rowIdx: number, colKey: keyof Transaction } | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction, direction: 'asc' | 'desc' } | null>(null);
+  const [editValues, setEditValues] = useState<Partial<Transaction>>({});
 
-  const handleEditClick = (idx: number) => {
-    setEditIdx(idx);
+  useEffect(() => {
+    if (results) {
+      setData(results.length > 0 ? results : [emptyRow]);
+    }
+  }, [results]);
+
+  const handleDoubleClick = (rowIdx: number, colKey: keyof Transaction) => {
+    setEditIdx({ rowIdx, colKey });
+    setEditValues({ [colKey]: reviewTransactions[rowIdx][colKey] });
   };
 
-  const handleSaveClick = () => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, colKey: keyof Transaction) => {
+    setEditValues((prev) => ({
+      ...prev,
+      [colKey]: e.target.value,
+    }));
+  };
+
+  const handleSave = async (rowIdx: number) => {
+    if (!editIdx) return;
+
+    const updatedData = [...reviewTransactions];
+    const updatedRow = {
+      ...updatedData[rowIdx],
+      ...editValues,
+    };
+    updatedData[rowIdx] = updatedRow;
+    setData(updatedData);
     setEditIdx(null);
-  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof Transaction, idx: number) => {
-    const newData = [...data];
-    newData[idx][key] = e.target.value;
-    setData(newData);
+    try {
+      await updateTransaction({ id: updatedRow.id, ...editValues });
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+    }
   };
 
   const handleSort = (key: keyof Transaction) => {
@@ -51,7 +85,7 @@ const ReviewTransactions: React.FC = () => {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
-    const sortedData = [...data].sort((a, b) => {
+    const sortedData = [...reviewTransactions].sort((a, b) => {
       if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
       if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
       return 0;
@@ -59,12 +93,20 @@ const ReviewTransactions: React.FC = () => {
     setData(sortedData);
   };
 
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography variant="body2" color="error">Error loading transactions</Typography>;
+  }
+
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
-            {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'transaction_type', 'notifications'].map((key) => (
+            {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
               <TableCell key={key}>
                 <TableSortLabel
                   active={sortConfig?.key === key}
@@ -79,14 +121,18 @@ const ReviewTransactions: React.FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row, idx) => (
+          {reviewTransactions.map((row, rowIdx) => (
             <TableRow key={row.id}>
               {Object.keys(row).map((key) => (
-                <TableCell key={key}>
-                  {editIdx === idx ? (
+                <TableCell
+                  key={key}
+                  onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
+                >
+                  {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
                     <TextField
-                      value={row[key as keyof Transaction]}
-                      onChange={(e) => handleChange(e, key as keyof Transaction, idx)}
+                      value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
+                      onChange={(e) => handleChange(e, key as keyof Transaction)}
+                      autoFocus
                     />
                   ) : (
                     row[key as keyof Transaction]
@@ -94,12 +140,12 @@ const ReviewTransactions: React.FC = () => {
                 </TableCell>
               ))}
               <TableCell>
-                {editIdx === idx ? (
-                  <IconButton onClick={handleSaveClick}>
+                {editIdx?.rowIdx === rowIdx ? (
+                  <IconButton onClick={() => handleSave(rowIdx)}>
                     <SaveIcon />
                   </IconButton>
                 ) : (
-                  <IconButton onClick={() => handleEditClick(idx)}>
+                  <IconButton onClick={() => handleDoubleClick(rowIdx, 'id')}>
                     <EditIcon />
                   </IconButton>
                 )}

@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import DashboardBox from '@/components/DashboardBox';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { usePostUploadTransactionsMutation } from '@/api';
 
 const UploadButton: React.FC = () => {
   const { palette } = useTheme();
@@ -16,17 +17,28 @@ const UploadButton: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [bank, setBank] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [postUploadTransactions] = usePostUploadTransactionsMutation();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'text/csv') {
       setLoading(true);
-      // Simulate file upload process
-      setTimeout(() => {
+      setError(null);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await postUploadTransactions({ formData, bankType: bank });
+      
+      if (response.error?.originalStatus == 200) {
         setLoading(false);
         navigate('/review-transactions');
-      }, 2000);
+      } else {
+        setLoading(false);
+        setError(response.error?.data || 'Error uploading file');
+      }
     } else {
       alert('Please upload a valid CSV file.');
     }
@@ -36,7 +48,11 @@ const UploadButton: React.FC = () => {
     setBank(event.target.value as string);
   };
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => {
+    setOpen(true);
+    setError(null); // Reset error state
+  };
+
   const handleClose = () => setOpen(false);
 
   return (
@@ -59,7 +75,7 @@ const UploadButton: React.FC = () => {
       <Modal open={open} onClose={handleClose}>
         <DashboardBox sx={{ ...style, width: 250 }}>
           <Typography variant="h3">Upload Bank Transactions</Typography>
-          <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1.5, mb: 2 }} />
+          <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1.5, mb: 1.5 }} />
           <FormControl fullWidth sx={{ mt: 1.5 }}>
             <InputLabel id="bank-select-label">Bank</InputLabel>
             <Select
@@ -70,8 +86,10 @@ const UploadButton: React.FC = () => {
               onChange={handleBankChange}
               sx={{ textAlign: 'left' }} // Ensures the text is left-aligned
             >
-              <MenuItem value="Rabobank">Rabobank</MenuItem>
               <MenuItem value="ING">ING</MenuItem>
+              <MenuItem value="ING_CC">ING Credit Card</MenuItem>
+              <MenuItem value="Rabobank">Rabobank</MenuItem> 
+              <MenuItem value="Rabobank_CC">Rabobank Credit Card</MenuItem>
             </Select>
           </FormControl>
           <div style={{ marginTop: 5, opacity: bank ? 1 : 0.5 }}>
@@ -104,10 +122,28 @@ const UploadButton: React.FC = () => {
             </label>
           </div>
           {loading && (
-        <DashboardBox sx={{ ...style }}>
-          <CircularProgress sx={{ color: palette.secondary[400]}} />
-        </DashboardBox>
-      )}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                zIndex: 9999,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <CircularProgress sx={{ color: palette.secondary[400] }} />
+            </Box>
+          )}
+          {error && (
+            <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
         </DashboardBox>
       </Modal>
     </DashboardBox>
