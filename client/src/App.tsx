@@ -5,8 +5,9 @@ import Header from '@/scenes/header';
 import Dashboard from '@/scenes/dashboard';
 import DateRange from '@/scenes/dateRange';
 import { createTheme } from '@mui/material/styles';
-import { themeSettings } from './theme';
-import { DateRangeProvider } from '@/components/DateRangeContext';
+import { themeSettings } from '@/theme';
+import { DateRangeProvider } from '@/scenes/dateRange/DateRangeContext';
+import ReviewTransactions from '@/scenes/reviewTransactions';
 
 const App: React.FC = () => {
   const theme = useMemo(() => createTheme(themeSettings), []);
@@ -22,8 +23,8 @@ const App: React.FC = () => {
               <DateRange />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/Review Transactions" element={<div>Review Transactions Page</div>} />
-                <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} />
+                <Route path="/review-transactions" element={<ReviewTransactions />} />
+                {/* <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} /> */}
               </Routes>
             </Box>
           </DateRangeProvider>

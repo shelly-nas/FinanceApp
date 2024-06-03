@@ -3,7 +3,7 @@ import { Typography, Divider, useTheme, Box } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import SortableTransactionTable from './SortableTransactionTable';
 import '@/styles.css'; // Import your CSS styles for transitions
-import { formatDate, useDateRange } from '@/components/DateRangeContext';
+import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 import { useGetTransactionsQuery } from '@/api';
 
 interface Transaction {

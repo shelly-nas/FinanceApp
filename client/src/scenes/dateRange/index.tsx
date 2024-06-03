@@ -6,8 +6,8 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ArrowButton from '@/components/ArrowButton';
-import DateRangeBox from '@/components/DateRangeBox';
-import { useDateRange } from '@/components/DateRangeContext';
+import DateRangeBox from '@/scenes/dateRange/DateRangeBox';
+import { useDateRange } from '@/scenes/dateRange/DateRangeContext';
 
 const DateRange: React.FC = () => {
   const { palette } = useTheme();

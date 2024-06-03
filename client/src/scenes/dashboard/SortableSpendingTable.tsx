@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody, useTheme } from '@mui/material';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import '@/styles.css' 
-import { CategorySums } from '@/components/SpendingBreakdown';
+import { CategorySums } from '@/scenes/dashboard/SpendingBreakdown';
 
 interface SortableSpendingTableProps {
   title: string;

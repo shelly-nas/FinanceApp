@@ -1,8 +1,8 @@
 import dbContext from '@/context/dbContext';
-import JointAccount from '@/models/jointAccountModel';
+import Transactions from '@/models/jointAccountModel';
 
 const category_table = "categories"
-const account_table = "joint_account";
+const account_table = "transactions";
 
 class UserManager {
   public async addMultipleTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string, amount: number, transaction_type: string, notifications: string }[]) {
@@ -27,7 +27,7 @@ class UserManager {
     }
   }
 
-  public async getTransactions(startDate?: string, endDate?: string): Promise<JointAccount[]> {
+  public async getTransactions(startDate?: string, endDate?: string): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM ${account_table} WHERE 1=1`;
     const params: any[] = [];

@@ -3,7 +3,7 @@ import { Typography, Divider, Box, List, ListItem, ListItemText, Collapse, useTh
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import DashboardBox from '@/components/DashboardBox';
-import { formatDate, useDateRange } from '@/components/DateRangeContext';
+import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 import { useGetIncomeExpensesSumQuery } from '@/api';
 
 interface ExchangeType {

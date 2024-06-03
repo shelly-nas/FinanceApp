@@ -14,6 +14,91 @@ const reformatDate = (dateStr: string) => { // Function to reformat date from YY
   return `${year}-${month}-${day}`;
 };
 
+const bankMappings = {
+  ING: {
+    'Date': 'date_str',
+    'Name / Description': 'name_description',
+    'Account': 'account',
+    'Counterparty': 'counterparty',
+    // 'Code': 'category',
+    'Debit/credit': 'debit_credit',
+    'Amount (EUR)': 'amount',
+    'Transaction type': 'transaction_type',
+    'Notifications': 'notifications'
+  },
+  Rabobank: {
+    'IBAN/BBAN': 'account',
+    // 'munt': 'currency',
+    // 'bic': 'bic',
+    // 'volgnur': 'sequence_number',
+    'Datum': 'date_str',
+    // 'rentedatum': 'rent_date',
+    'Bedrag': 'amount',
+    // 'saldo na trn': 'balance_after_transaction',
+    'Tegerekening IBAN/BBAN': 'counterparty',
+    // 'Naam tegenpartij': 'counterparty_name',
+    // 'naam uiteindelijke partij': 'ultimate_party_name',
+    // 'naam initiërende partij': 'initiating_party_name',
+    // 'bic tegenpartij': 'counterparty_bic',
+    // 'code': 'category',
+    // 'batch id': 'batch_id',
+    // 'tranactiereferentie': 'transaction_reference',
+    // 'machtigingskenmerk': 'authorization_reference',
+    // 'incassant id': 'creditor_identifier',
+    // 'betalingskenmerk': 'payment_reference',
+    'Omschrijving-1': 'notifications',
+    // 'Omschrijving-2': 'description_2',
+    // 'Omschrijving-3': 'description_3',
+    // 'Reden retour': 'return_reason',
+    // 'Oorspr bedrag': 'original_amount',
+    // 'Oorspr munt': 'original_currency',
+    // 'Koers': 'exchange_rate'
+  }
+};
+
+// function detectBank(headers) {
+//   if (headers.includes('date') && headers.includes('name/description')) {
+//     return 'Rabobank';
+//   } else if (headers.includes('datum') && headers.includes('munt')) {
+//     return 'ING';
+//   }
+//   return null;
+// }
+
+// function mapCsvData(bank, data) {
+//   const mapping = bankMappings[bank];
+//   return data.map(row => {
+//     const mappedRow = {};
+//     for (const [csvKey, dbKey] of Object.entries(mapping)) {
+//       mappedRow[dbKey] = row[csvKey] || null;
+//     }
+//     return mappedRow;
+//   });
+// }
+
+// router.post('/upload', upload.single('file'), (req, res) => {
+//   const { bank } = req.body;
+//   const filePath = req.file.path;
+//   const results = [];
+
+//   fs.createReadStream(filePath)
+//     .pipe(csv())
+//     .on('headers', headers => {
+//       const detectedBank = detectBank(headers);
+//       if (detectedBank !== bank) {
+//         return res.status(400).json({ error: 'Bank type mismatch' });
+//       }
+//       req.bank = detectedBank;
+//     })
+//     .on('data', data => results.push(data))
+//     .on('end', () => {
+//       const bank = req.bank;
+//       const mappedData = mapCsvData(bank, results);
+//       // Save mappedData to the database here
+//       res.json({ message: 'File processed successfully', data: mappedData });
+//     });
+// });
+
 router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response) => {
   const filePath = req.file?.path;
 
