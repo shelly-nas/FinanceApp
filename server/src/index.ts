@@ -1,7 +1,7 @@
 import 'module-alias/register'; // Resolve relative references with '@'
 import express from 'express';
 import bodyParser from 'body-parser';
-import jointAccountController from '@/controllers/jointAccountController';
+import financeController from '@/controllers/financeController';
 import cors from 'cors';
 import morgan from 'morgan';
 
@@ -13,7 +13,7 @@ try {
 	// app.use(express.json());
   app.use(bodyParser.json());
   // app.use(bodyParser.urlencoded({ extended: false }));
-  app.use('/api', jointAccountController);
+  app.use('/api', financeController);
 	app.use(morgan("common"));
 	
   app.listen(port, () => {

@@ -1,23 +1,29 @@
 import dbContext from '@/context/dbContext';
-import JointAccount from '@/models/jointAccountModel';
+import Transactions from '@/models/financeModel';
 
 const category_table = "categories"
-const account_table = "joint_account";
+const transaction_table = "transactions";
 
-class UserManager {
-  public async addMultipleTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string, amount: number, transaction_type: string, notifications: string }[]) {
+class FinanceManager {
+  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]) {
     const client = await dbContext.connect();
     try {
       await client.query('BEGIN');
-
+  
       for (const entry of entries) {
-        await client.query(
-          `INSERT INTO ${account_table} (date_str, name_description, account, counterparty, debit_credit, amount, transaction_type, notifications)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.transaction_type, entry.notifications]
+        // Set debit_credit based on the amount if it's null
+        if (entry.debit_credit === undefined) {
+          entry.debit_credit = entry.amount < 0 ? 'Debit' : 'Credit';
+        }
+        // Convert amount to absolute value
+        entry.amount = Math.abs(entry.amount);
+
+        await client.query(`INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
         );
       }
-
+  
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
@@ -27,9 +33,9 @@ class UserManager {
     }
   }
 
-  public async getTransactions(startDate?: string, endDate?: string): Promise<JointAccount[]> {
+  public async getTransactions(startDate?: string, endDate?: string): Promise<Transactions[]> {
     const client = await dbContext.connect();
-    let query = `SELECT * FROM ${account_table} WHERE 1=1`;
+    let query = `SELECT * FROM ${transaction_table} WHERE 1=1`;
     const params: any[] = [];
 
     if (startDate) {
@@ -66,7 +72,7 @@ class UserManager {
         ) AS total_amount,
         c.color::text
       FROM 
-        public.${account_table} ja
+        public.${transaction_table} ja
       JOIN
         public.${category_table} c ON ja.category = c.category_name
       WHERE 
@@ -112,7 +118,7 @@ class UserManager {
             END AS adjusted_amount,
             c.category_type
         FROM
-            public.${account_table} ja
+            public.${transaction_table} ja
         JOIN
             public.${category_table} c
         ON
@@ -152,7 +158,49 @@ class UserManager {
       client.release();
     }
   }
+
+  public async getEmptyCategoryTransactions(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    let query = `
+      SELECT *
+      FROM ${transaction_table}
+      WHERE category IS NULL;
+    
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async updateTransaction(id: string, updates: { [key: string]: any }): Promise<any> {
+    const client = await dbContext.connect();
+  
+    // Constructing the set clause of the update query dynamically
+    const setClause = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(', ');
+  
+    const values = Object.values(updates);
+  
+    let query = `
+      UPDATE ${transaction_table}
+      SET ${setClause}
+      WHERE id = $${values.length + 1}
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [...values, id]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
 }
 
-
-export default new UserManager();
+export default new FinanceManager();

@@ -1,4 +1,4 @@
-class JointAccount {
+class Transactions {
   id?: number;
   date_str: string;
   name_description: string;
@@ -35,4 +35,4 @@ class JointAccount {
   }
 }
 
-export default JointAccount;
+export default Transactions;

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Box, Typography, Divider, LinearProgress, useTheme, TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Divider, useTheme } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import SortableSpendingTable from './SortableSpendingTable';
-import { formatDate, useDateRange } from '@/components/DateRangeContext';
+import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 import { useGetCategorySumsQuery } from '@/api';
 
 export interface CategorySums {
