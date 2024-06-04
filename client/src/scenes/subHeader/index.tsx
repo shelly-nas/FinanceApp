@@ -12,7 +12,6 @@ const ActionButtons: React.FC = () => {
   const handleDoneClick = () => {
     refetch();
     navigate('/');
-    
   };
 
   return (

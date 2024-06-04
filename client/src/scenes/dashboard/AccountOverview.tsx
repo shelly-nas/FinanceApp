@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Divider, Box, List, ListItem, ListItemText, Collapse, ListSubheader, useTheme, ListItemButton } from '@mui/material';
+import { Typography, Divider, Box, List, ListItem, ListItemText, Collapse, useTheme, ListItemButton } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import DashboardBox from '@/components/DashboardBox';
@@ -21,6 +21,11 @@ interface AccountsOverviewProps {
 const AccountsOverview: React.FC<AccountsOverviewProps> = ({ categories }) => {
   const { palette } = useTheme();
   const [open, setOpen] = useState<Record<string, boolean>>({});
+
+  // const { data: results, error, isLoading } = useGetIncomeExpensesSumQuery({
+  //   startDate: formatDate(firstDay),
+  //   endDate: formatDate(lastDay),
+  // });
 
   const handleToggle = (category: string) => {
     setOpen((prev) => ({ ...prev, [category]: !prev[category] }));

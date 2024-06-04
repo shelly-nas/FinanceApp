@@ -7,6 +7,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import { useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
+import ActionButtons from '../subHeader';
 
 interface Transaction {
   id: number;
@@ -102,59 +103,62 @@ const ReviewTransactions: React.FC = () => {
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
-              <TableCell key={key}>
-                <TableSortLabel
-                  active={sortConfig?.key === key}
-                  direction={sortConfig?.key === key ? sortConfig.direction : 'asc'}
-                  onClick={() => handleSort(key as keyof Transaction)}
-                >
-                  {key.replace(/_/g, ' ')}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-            <TableCell>Edit</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {reviewTransactions.map((row, rowIdx) => (
-            <TableRow key={row.id}>
-              {Object.keys(row).map((key) => (
-                <TableCell
-                  key={key}
-                  onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
-                >
-                  {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
-                    <TextField
-                      value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
-                      onChange={(e) => handleChange(e, key as keyof Transaction)}
-                      autoFocus
-                    />
-                  ) : (
-                    row[key as keyof Transaction]
-                  )}
+    <div>
+      <ActionButtons />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
+                <TableCell key={key}>
+                  <TableSortLabel
+                    active={sortConfig?.key === key}
+                    direction={sortConfig?.key === key ? sortConfig.direction : 'asc'}
+                    onClick={() => handleSort(key as keyof Transaction)}
+                  >
+                    {key.replace(/_/g, ' ')}
+                  </TableSortLabel>
                 </TableCell>
               ))}
-              <TableCell>
-                {editIdx?.rowIdx === rowIdx ? (
-                  <IconButton onClick={() => handleSave(rowIdx)}>
-                    <SaveIcon />
-                  </IconButton>
-                ) : (
-                  <IconButton onClick={() => handleDoubleClick(rowIdx, 'id')}>
-                    <EditIcon />
-                  </IconButton>
-                )}
-              </TableCell>
+              <TableCell>Edit</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {reviewTransactions.map((row, rowIdx) => (
+              <TableRow key={row.id}>
+                {Object.keys(row).map((key) => (
+                  <TableCell
+                    key={key}
+                    onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
+                  >
+                    {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
+                      <TextField
+                        value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
+                        onChange={(e) => handleChange(e, key as keyof Transaction)}
+                        autoFocus
+                      />
+                    ) : (
+                      row[key as keyof Transaction]
+                    )}
+                  </TableCell>
+                ))}
+                <TableCell>
+                  {editIdx?.rowIdx === rowIdx ? (
+                    <IconButton onClick={() => handleSave(rowIdx)}>
+                      <SaveIcon />
+                    </IconButton>
+                  ) : (
+                    <IconButton onClick={() => handleDoubleClick(rowIdx, 'id')}>
+                      <EditIcon />
+                    </IconButton>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   );
 };
 

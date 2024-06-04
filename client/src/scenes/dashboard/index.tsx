@@ -7,6 +7,8 @@ import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
 import UploadButton from "@/scenes/dashboard/UploadButton";
 import DateRange from '@/scenes/dateRange';
+import ReviewButton from "@/scenes/dashboard/ReviewTransaction";
+
 
 const sampleCategories = [
   {
@@ -58,6 +60,7 @@ const Dashboard: React.FC = () => {
         {/* Review Section */}
         <Grid item xs={12} md={2}>
           <UploadButton />
+          <ReviewButton />
           <DashboardBox sx={{ mb: spacing }}>
             <Typography variant="h3">Review Transactions</Typography>
             {/* Add content here */}
