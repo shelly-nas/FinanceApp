@@ -15,20 +15,14 @@ class FinanceManager {
       await client.query('BEGIN');
   
       for (const entry of entries) {
-        try {
-          const result = await client.query(
-            `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
-          );
-  
-          const insertedId = result.rows[0].id;
-          createdIds.push(insertedId);
-          console.log('Inserted entry ID:', insertedId);
-        } catch (insertError) {
-          console.error('Error inserting entry:', entry, insertError);
-          throw insertError;
-        }
+        const result = await client.query(
+          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
+          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
+        );
+
+        const insertedId = result.rows[0].id;
+        createdIds.push(insertedId);
       }
   
       await client.query('COMMIT');

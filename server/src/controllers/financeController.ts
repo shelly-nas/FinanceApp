@@ -77,10 +77,10 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
       // }
 
       entries.push(entry);
-      console.log('Processed entry:', entry);
     })
     .on('end', async () => {
       try {
+        // Predict the category using the ML model
         for (const entry of entries) {
           if (entry['name_description']) {
             const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
@@ -89,8 +89,8 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
             }
           }
         }
+
         const createdIds = await FinanceManager.addTransactions(entries);
-        console.log('Created IDs:', createdIds);
         res.status(200).json({ message: 'Entries imported successfully', createdIds });
       } catch (error) {
         console.error('Error importing entries:', error);

@@ -20,8 +20,6 @@ async function predictCategory(name_description: string, account: string, notifi
 	const probabilityThreshold = parseFloat(process.env.ML_PROBABILITY_THRESHOLD || '0.25');
 	const classifications = classifier.getClassifications(combinedText);
 
-	console.log("classifications: ", classifications);
-
 	if (classifications.length > 0 && classifications[0].value >= probabilityThreshold) {
 		return classifications[0].label;
 	}
