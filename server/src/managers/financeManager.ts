@@ -3,6 +3,8 @@ import Transactions from '@/models/financeModel';
 
 const category_table = "categories"
 const transaction_table = "transactions";
+const account_table = "accounts";
+const investment_table = "investments";
 
 class FinanceManager {
   public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]) {
@@ -166,7 +168,6 @@ class FinanceManager {
       SELECT *
       FROM ${transaction_table}
       WHERE category IS NULL;
-    
     `;
 
     try {
@@ -201,6 +202,49 @@ class FinanceManager {
       client.release();
     }
   }
+
+  public async getAccountOverview(): Promise<any> {
+    const client = await dbContext.connect();
+
+    let query = `
+      SELECT 
+        ${account_table}.account_type, 
+        ${account_table}.account_name, 
+      COALESCE(
+        CASE
+          WHEN ${account_table}.account_type IN ('Checking Account', 'Savings Account') THEN (
+            SELECT ${account_table}.balance_when_created + COALESCE(SUM(
+              CASE 
+                WHEN ${transaction_table}.debit_credit = 'Debit' THEN -${transaction_table}.amount
+                WHEN ${transaction_table}.debit_credit = 'Credit' THEN ${transaction_table}.amount
+                ELSE 0
+              END
+            ), 0)
+            FROM ${transaction_table}
+            WHERE ${transaction_table}.account = ${account_table}.details
+          )
+          WHEN ${account_table}.account_type = 'Investments' THEN (
+            SELECT ${investment_table}.balance
+            FROM ${investment_table}
+            WHERE ${investment_table}.account = ${account_table}.details
+            ORDER BY ${investment_table}.date_str DESC
+            LIMIT 1
+          )
+          ELSE ${account_table}.balance_when_created
+        END,
+        ${account_table}.balance_when_created
+      ) AS current_balance
+    FROM ${account_table};
+    `;
+    
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
 }
 
 export default new FinanceManager();

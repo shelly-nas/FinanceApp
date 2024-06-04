@@ -5,32 +5,9 @@ import AccountsOverview from "@/scenes/dashboard/AccountOverview";
 import PeriodSummary from "@/scenes/dashboard/PeriodSummary";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
-import UploadButton from "@/scenes/dashboard/UploadButton";
 import DateRange from '@/scenes/dateRange';
 import ReviewButton from "@/scenes/dashboard/ReviewTransaction";
-
-
-const sampleCategories = [
-  {
-    name: "Cash",
-    items: [
-      { name: "Penny's Checking", balance: 21371.92 }
-    ]
-  },
-  {
-    name: "Investment",
-    items: [
-      { name: "Fidelity Individual Brokerage", balance: 41211.80 }
-    ]
-  },
-  {
-    name: "Credit",
-    items: [
-      { name: "Lenny's Amex Card", balance: 202.32 },
-      { name: "Penny's Visa Card", balance: 450.84 }
-    ]
-  }
-];
+import TransactionsButton from "@/scenes/dashboard/AddTransactions";
 
 const Dashboard: React.FC = () => {
   const { palette } = useTheme();
@@ -47,7 +24,7 @@ const Dashboard: React.FC = () => {
       <Grid container justifyContent="space-between" columnSpacing={spacing}>
         {/* Left Grid */}
         <Grid item xs={12} md={4}>
-          <AccountsOverview categories={sampleCategories} />
+          <AccountsOverview />
           <PeriodSummary />
         </Grid>
 
@@ -59,12 +36,8 @@ const Dashboard: React.FC = () => {
 
         {/* Review Section */}
         <Grid item xs={12} md={2}>
-          <UploadButton />
+          <TransactionsButton />
           <ReviewButton />
-          <DashboardBox sx={{ mb: spacing }}>
-            <Typography variant="h3">Review Transactions</Typography>
-            {/* Add content here */}
-          </DashboardBox>
           <DashboardBox sx={{ mb: spacing }}>
             <Typography variant="h3">Review Recurring Items</Typography>
             {/* Add content here */}

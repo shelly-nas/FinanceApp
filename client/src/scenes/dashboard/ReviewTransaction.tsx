@@ -1,15 +1,11 @@
 // src/components/UploadButton.tsx
-import React, { useState } from 'react';
-import {
-  Button, CircularProgress, Modal, Typography, Select, MenuItem, FormControl, InputLabel,
-  Divider, Box
-} from '@mui/material';
-import { UploadFile } from '@mui/icons-material';
+import React from 'react';
+import { Button, Typography, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import DashboardBox from '@/components/DashboardBox';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { useGetEmptyCategoryTransactionsQuery, usePostUploadTransactionsMutation } from '@/api';
+import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 
 const ReviewButton: React.FC = () => {
   const { palette } = useTheme();

@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction"],
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview"],
   endpoints: (build) => ({
     getTransactions: build.query<any, { startDate: string; endDate: string }>({
       query: ({ startDate, endDate }) => ({
@@ -50,6 +50,12 @@ export const api = createApi({
       }),
       invalidatesTags: ["transaction"],
     }),
+    getAccountOverview: build.query<any, void>({
+      query: () => ({
+        url: `api/account-overview`,
+      }),
+      providesTags: ["accountOverview"],
+    }),
     // You can add more endpoints here following the same pattern
     // ...
   }),
@@ -62,4 +68,5 @@ export const {
   usePostUploadTransactionsMutation,
   useGetEmptyCategoryTransactionsQuery,
   useUpdateTransactionMutation,
+  useGetAccountOverviewQuery,
 } = api;

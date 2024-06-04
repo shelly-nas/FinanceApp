@@ -127,4 +127,13 @@ router.patch('/update-transaction/:id', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/account-overview', async (req: Request, res: Response) => {
+  try {
+    const updatedTransaction = await FinanceManager.getAccountOverview();
+    res.status(200).json(updatedTransaction);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
 export default router;

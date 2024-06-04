@@ -116,8 +116,8 @@ export const tokens = {
       },
       debit: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 10,
-        color: tokens.grey[700],
+        fontSize: 12,
+        color: "#E35335",
       },
     },
   };

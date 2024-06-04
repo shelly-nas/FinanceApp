@@ -67,7 +67,7 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
       </Box>
       <MultiColorProgress
         segments={result.income.map(item => ({
-          value: (item.total_amount / totalIncome) * 100,
+          value: (item.total_amount / (totalIncome > totalExpenses ? totalIncome : totalExpenses)) * 100,
           color: item.color,
           name: item.category,
         }))}
@@ -85,7 +85,7 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
       </Box>
       <MultiColorProgress
         segments={result.expenses.map(item => ({
-          value: (item.total_amount / totalIncome) * 100,
+          value: (item.total_amount / (totalIncome > totalExpenses ? totalIncome : totalExpenses)) * 100,
           color: item.color,
           name: item.category,
         }))}
