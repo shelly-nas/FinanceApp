@@ -31,7 +31,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
       formData.append('file', file);
 
       const response = await postUploadTransactions({ formData, bankType: bank });
-      console.log(response);
+      
       if (response.data.message == "Entries imported successfully") {
         setLoading(false);
         onUploadSuccess();

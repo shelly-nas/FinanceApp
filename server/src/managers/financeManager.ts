@@ -28,7 +28,6 @@ class FinanceManager {
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Transaction rolled back due to error:', error);
       throw error;
     } finally {
       client.release();

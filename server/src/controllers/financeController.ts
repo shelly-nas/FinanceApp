@@ -81,14 +81,12 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         const createdIds = await FinanceManager.addTransactions(entries);
         res.status(200).json({ message: 'Entries imported successfully', createdIds });
       } catch (error) {
-        console.error('Error importing entries:', error);
         res.status(500).send(`Error importing entries: ${error}`);
       } finally {
         fs.unlinkSync(filePath);
       }
     })
     .on('error', (error) => {
-      console.error('Error reading file:', error);
       res.status(500).send(`Error reading file: ${error}`);
     });
 });
