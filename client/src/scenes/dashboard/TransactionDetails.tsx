@@ -22,7 +22,7 @@ interface TransactionDetailsProps {
   selectedCategory: string | null;
 }
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({selectedCategory }) => {
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory }) => {
   const { palette } = useTheme();
   const { firstDay, lastDay } = useDateRange();
   

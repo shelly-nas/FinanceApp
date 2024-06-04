@@ -1,25 +1,25 @@
-// src/components/UploadButton.tsx
 import React, { useState } from 'react';
-import {
-  Button, CircularProgress, Modal, Typography, Select, MenuItem, FormControl, InputLabel,
-  Divider, Box
-} from '@mui/material';
+import { Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel, Divider, Box, Modal } from '@mui/material';
 import { UploadFile } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import DashboardBox from '@/components/DashboardBox';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { usePostUploadTransactionsMutation } from '@/api';
+import { useUploadTransactionsMutation } from '@/api';
+import DashboardBox from './DashboardBox';
+import { useNavigate } from 'react-router-dom';
 
-const UploadButton: React.FC = () => {
+interface UploadButtonProps {
+  onUploadSuccess: () => void;
+}
+
+const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
   const { palette } = useTheme();
-  const spacing: number = 1.5;
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [bank, setBank] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const [postUploadTransactions] = usePostUploadTransactionsMutation();
+  
+  const [postUploadTransactions] = useUploadTransactionsMutation();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -31,10 +31,11 @@ const UploadButton: React.FC = () => {
       formData.append('file', file);
 
       const response = await postUploadTransactions({ formData, bankType: bank });
-      
-      if (response.error?.originalStatus == 200) {
+      console.log(response);
+      if (response.data.message == "Entries imported successfully") {
         setLoading(false);
-        navigate('/review-transactions');
+        onUploadSuccess();
+        navigate('/review-transactions', { state: { transactionIds: JSON.stringify(response.data.createdIds) } });
       } else {
         setLoading(false);
         setError(response.error?.data || 'Error uploading file');
@@ -56,7 +57,7 @@ const UploadButton: React.FC = () => {
   const handleClose = () => setOpen(false);
 
   return (
-    <DashboardBox sx={{ mb: spacing, position: 'relative' }}>
+    <>
       <Button
         sx={{
           width: '100%',
@@ -69,8 +70,6 @@ const UploadButton: React.FC = () => {
       >
         <CloudUploadIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
       </Button>
-      <Divider color={palette.cosmetics.colorSecondary} sx={{ mb: 1 }} />
-      <Typography variant="h3">Add Transactions</Typography>
 
       <Modal open={open} onClose={handleClose}>
         <DashboardBox sx={{ ...style, width: 250 }}>
@@ -146,7 +145,7 @@ const UploadButton: React.FC = () => {
           )}
         </DashboardBox>
       </Modal>
-    </DashboardBox>
+    </>
   );
 };
 

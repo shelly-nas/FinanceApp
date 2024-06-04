@@ -11,6 +11,11 @@
   opacity: 1;
 }
 
+.blur-text
+{
+  filter: blur(3px);
+}
+
 .ripple-container {
   position: relative;
   overflow: hidden;

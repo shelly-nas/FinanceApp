@@ -1,16 +1,30 @@
 // api.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+interface TransactionsQueryParams {
+  startDate?: string;
+  endDate?: string;
+  ids?: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction"],
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview"],
   endpoints: (build) => ({
-    getTransactions: build.query<any, { startDate: string; endDate: string }>({
-      query: ({ startDate, endDate }) => ({
-        url: `api/transactions`,
-        params: { startDate, endDate },
-      }),
+    getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
+      query: ({ startDate, endDate, ids }) => {
+        // Constructing query parameters only for those that are not undefined
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.set('startDate', startDate);
+        if (endDate) queryParams.set('endDate', endDate);
+        if (ids) queryParams.set('ids', ids);
+
+        return {
+          url: `api/transactions`,
+          params: queryParams,
+        };
+      },
       providesTags: ["transactions"],
     }),
     getCategorySums: build.query<any, { startDate: string; endDate: string }>({
@@ -27,7 +41,7 @@ export const api = createApi({
       }),
       providesTags: ["incomeExpensesSum"],
     }),
-    postUploadTransactions: build.mutation<any, { formData: FormData, bankType: string }>({
+    uploadTransactions: build.mutation<any, { formData: FormData, bankType: string }>({
       query: ({ formData, bankType }) => ({
         url: `api/upload-transactions`,
         method: 'POST',
@@ -50,6 +64,12 @@ export const api = createApi({
       }),
       invalidatesTags: ["transaction"],
     }),
+    getAccountOverview: build.query<any, void>({
+      query: () => ({
+        url: `api/account-overview`,
+      }),
+      providesTags: ["accountOverview"],
+    }),
     // You can add more endpoints here following the same pattern
     // ...
   }),
@@ -59,7 +79,8 @@ export const {
   useGetTransactionsQuery,
   useGetCategorySumsQuery,
   useGetIncomeExpensesSumQuery,
-  usePostUploadTransactionsMutation,
+  useUploadTransactionsMutation,
   useGetEmptyCategoryTransactionsQuery,
   useUpdateTransactionMutation,
+  useGetAccountOverviewQuery,
 } = api;

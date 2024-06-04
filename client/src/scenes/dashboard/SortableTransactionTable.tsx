@@ -87,9 +87,6 @@ const SortableTransactionTable: React.FC<SortableTransactionTableProps> = ({ ite
               </TableSortLabel>
             </TableCell>
             <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }}>
-              Transaction Type
-            </TableCell>
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }}>
               Notifications
             </TableCell>
           </TableRow>
@@ -104,7 +101,6 @@ const SortableTransactionTable: React.FC<SortableTransactionTableProps> = ({ ite
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.category}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.debit_credit}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'right' }}>{formatCurrency(transaction.amount)}</TableCell>
-              <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.transaction_type}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left', minWidth: 500 }}>{transaction.notifications}</TableCell>
             </TableRow>
           ))}

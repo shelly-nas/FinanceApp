@@ -3,58 +3,71 @@ import Transactions from '@/models/financeModel';
 
 const category_table = "categories"
 const transaction_table = "transactions";
+const account_table = "accounts";
+const investment_table = "investments";
 
 class FinanceManager {
-  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]) {
+  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
     const client = await dbContext.connect();
+    const createdIds: number[] = [];
+  
     try {
       await client.query('BEGIN');
   
       for (const entry of entries) {
-        // Set debit_credit based on the amount if it's null
-        if (entry.debit_credit === undefined) {
-          entry.debit_credit = entry.amount < 0 ? 'Debit' : 'Credit';
-        }
-        // Convert amount to absolute value
-        entry.amount = Math.abs(entry.amount);
-
-        await client.query(`INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        const result = await client.query(
+          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
+          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
           [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
         );
+
+        const insertedId = result.rows[0].id;
+        createdIds.push(insertedId);
       }
   
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
+      console.error('Transaction rolled back due to error:', error);
       throw error;
     } finally {
       client.release();
     }
+  
+    return createdIds;
   }
-
-  public async getTransactions(startDate?: string, endDate?: string): Promise<Transactions[]> {
+  
+  public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM ${transaction_table} WHERE 1=1`;
     const params: any[] = [];
-
+    let paramIndex = 1;
+  
     if (startDate) {
-      query += " AND date_str >= $1";
+      query += ` AND date_str >= $${paramIndex}`;
       params.push(startDate);
+      paramIndex++;
     }
-
+  
     if (endDate) {
-      query += " AND date_str <= $2";
+      query += ` AND date_str <= $${paramIndex}`;
       params.push(endDate);
+      paramIndex++;
     }
-
+  
+    if (ids && ids.length > 0) {
+      const placeholders = ids.map((_, index) => `$${paramIndex + index}`).join(', ');
+      query += ` AND id IN (${placeholders})`;
+      params.push(...ids);
+    }
+  
     try {
       const result = await client.query(query, params);
       return result.rows;
     } finally {
       client.release();
     }
-  }
+  }  
 
   public async getCategorySums(startDate?: string, endDate?: string): Promise<any[]> {
     const client = await dbContext.connect();
@@ -166,7 +179,6 @@ class FinanceManager {
       SELECT *
       FROM ${transaction_table}
       WHERE category IS NULL;
-    
     `;
 
     try {
@@ -201,6 +213,49 @@ class FinanceManager {
       client.release();
     }
   }
+
+  public async getAccountOverview(): Promise<any> {
+    const client = await dbContext.connect();
+
+    let query = `
+      SELECT 
+        ${account_table}.account_type, 
+        ${account_table}.account_name, 
+      COALESCE(
+        CASE
+          WHEN ${account_table}.account_type IN ('Checking Account', 'Savings Account') THEN (
+            SELECT ${account_table}.balance_when_created + COALESCE(SUM(
+              CASE 
+                WHEN ${transaction_table}.debit_credit = 'Debit' THEN -${transaction_table}.amount
+                WHEN ${transaction_table}.debit_credit = 'Credit' THEN ${transaction_table}.amount
+                ELSE 0
+              END
+            ), 0)
+            FROM ${transaction_table}
+            WHERE ${transaction_table}.account = ${account_table}.details
+          )
+          WHEN ${account_table}.account_type = 'Investments' THEN (
+            SELECT ${investment_table}.balance
+            FROM ${investment_table}
+            WHERE ${investment_table}.account = ${account_table}.details
+            ORDER BY ${investment_table}.date_str DESC
+            LIMIT 1
+          )
+          ELSE ${account_table}.balance_when_created
+        END,
+        ${account_table}.balance_when_created
+      ) AS current_balance
+    FROM ${account_table};
+    `;
+    
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
 }
 
 export default new FinanceManager();

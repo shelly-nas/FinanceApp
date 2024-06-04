@@ -1,12 +1,14 @@
-// src/pages/ReviewTransactions.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TextField, TableSortLabel, IconButton, CircularProgress, Typography
+  TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import { useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
+import { useLocation } from 'react-router-dom';
+import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
+import ActionButtons from '../subHeader';
+import DashboardBox from '@/components/DashboardBox';
 
 interface Transaction {
   id: number;
@@ -21,21 +23,18 @@ interface Transaction {
   notifications: string;
 }
 
-const emptyRow: Transaction = {
-  id: 0,
-  date_str: '',
-  name_description: '',
-  account: '',
-  counterparty: '',
-  category: '',
-  debit_credit: '',
-  amount: 0,
-  transaction_type: '',
-  notifications: '',
-};
-
 const ReviewTransactions: React.FC = () => {
-  const { data: results, error, isLoading } = useGetEmptyCategoryTransactionsQuery();
+  const location = useLocation();
+  const transactionIds = location.state?.transactionIds || null;
+
+  const { data: uploadedResults, error: uploadError, isLoading: isLoadingUpload } = useGetTransactionsQuery({ ids: transactionIds }, {
+    skip: !transactionIds
+  });
+
+  const { data: emptyCategoryResults, error: emptyCategoryError, isLoading: isLoadingEmptyCategory } = useGetEmptyCategoryTransactionsQuery(undefined, {
+    skip: transactionIds !== null
+  });
+
   const [updateTransaction] = useUpdateTransactionMutation();
   const [reviewTransactions, setData] = useState<Transaction[]>([]);
   const [editIdx, setEditIdx] = useState<{ rowIdx: number, colKey: keyof Transaction } | null>(null);
@@ -43,10 +42,12 @@ const ReviewTransactions: React.FC = () => {
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
 
   useEffect(() => {
-    if (results) {
-      setData(results.length > 0 ? results : [emptyRow]);
+    if (transactionIds && uploadedResults) {
+      setData(uploadedResults.length > 0 ? uploadedResults : []);
+    } else if (emptyCategoryResults) {
+      setData(emptyCategoryResults.length > 0 ? emptyCategoryResults : []);
     }
-  }, [results]);
+  }, [uploadedResults, emptyCategoryResults]);
 
   const handleDoubleClick = (rowIdx: number, colKey: keyof Transaction) => {
     setEditIdx({ rowIdx, colKey });
@@ -93,68 +94,81 @@ const ReviewTransactions: React.FC = () => {
     setData(sortedData);
   };
 
-  if (isLoading) {
+  if (isLoadingUpload || isLoadingEmptyCategory) {
     return <CircularProgress />;
   }
 
-  if (error) {
+  if (uploadError || emptyCategoryError) {
     return <Typography variant="body2" color="error">Error loading transactions</Typography>;
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
-              <TableCell key={key}>
-                <TableSortLabel
-                  active={sortConfig?.key === key}
-                  direction={sortConfig?.key === key ? sortConfig.direction : 'asc'}
-                  onClick={() => handleSort(key as keyof Transaction)}
-                >
-                  {key.replace(/_/g, ' ')}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-            <TableCell>Edit</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {reviewTransactions.map((row, rowIdx) => (
-            <TableRow key={row.id}>
-              {Object.keys(row).map((key) => (
-                <TableCell
-                  key={key}
-                  onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
-                >
-                  {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
-                    <TextField
-                      value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
-                      onChange={(e) => handleChange(e, key as keyof Transaction)}
-                      autoFocus
-                    />
-                  ) : (
-                    row[key as keyof Transaction]
-                  )}
-                </TableCell>
+    <div>
+      <ActionButtons />
+      {reviewTransactions.length === 0 ? (
+        <DashboardBox>
+          <Box className={`fade hide`} sx={{ p: 2 }}>
+            <Typography variant="body1">
+            No transactions need to be reviewed, all transactions have a category assigned.
+            </Typography>
+          </Box>
+        </DashboardBox>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
+                  <TableCell key={key}>
+                    <TableSortLabel
+                      active={sortConfig?.key === key}
+                      direction={sortConfig?.key === key ? sortConfig.direction : 'asc'}
+                      onClick={() => handleSort(key as keyof Transaction)}
+                    >
+                      {key.replace(/_/g, ' ')}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
+                <TableCell>Edit</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {reviewTransactions.map((row, rowIdx) => (
+                <TableRow key={row.id}>
+                  {Object.keys(row).map((key) => (
+                    <TableCell
+                      key={key}
+                      onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
+                    >
+                      {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
+                        <TextField
+                          value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
+                          onChange={(e) => handleChange(e, key as keyof Transaction)}
+                          autoFocus
+                        />
+                      ) : (
+                        row[key as keyof Transaction]
+                      )}
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    {editIdx?.rowIdx === rowIdx ? (
+                      <IconButton onClick={() => handleSave(rowIdx)}>
+                        <SaveIcon />
+                      </IconButton>
+                    ) : (
+                      <IconButton onClick={() => handleDoubleClick(rowIdx, 'id')}>
+                        <EditIcon />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
               ))}
-              <TableCell>
-                {editIdx?.rowIdx === rowIdx ? (
-                  <IconButton onClick={() => handleSave(rowIdx)}>
-                    <SaveIcon />
-                  </IconButton>
-                ) : (
-                  <IconButton onClick={() => handleDoubleClick(rowIdx, 'id')}>
-                    <EditIcon />
-                  </IconButton>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </div>
   );
 };
 

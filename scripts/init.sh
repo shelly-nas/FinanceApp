@@ -48,6 +48,7 @@ SERVER_ENV_FILE=".env"
     echo "DB_PORT=${DB_PORT}"
     echo "DB_NAME=${DB_NAME}"
     echo "SERVER_PORT=${PORT}"
+    echo "ML_PROBABILITY_THRESHOLD=0.25"
 } > $SERVER_ENV_FILE
 
 echo "## Server .env file generated successfully!"

@@ -143,7 +143,7 @@ const PeriodSummary: React.FC<Props> = () => {
         <Typography variant="body1" fontWeight="bold">
           Net Income
         </Typography>
-        <Typography variant="credit" fontWeight="bold">
+        <Typography variant={netIncome < 0 ? "debit" : "credit"} fontWeight="bold">
           {formatCurrency(netIncome)}
         </Typography>
       </Box>
@@ -151,7 +151,7 @@ const PeriodSummary: React.FC<Props> = () => {
         <Typography variant="body1" fontWeight="bold">
           Current Savings Rate
         </Typography>
-        <Typography variant="credit" fontWeight="bold">
+        <Typography variant={currentSavingsRate < 0 ? "debit" : "credit"} fontWeight="bold">
           {formatPercentage(currentSavingsRate)}
         </Typography>
       </Box>
