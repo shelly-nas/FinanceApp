@@ -38,10 +38,9 @@ const Dashboard: React.FC = () => {
         <Grid item xs={12} md={2}>
           <TransactionsButton />
           <ReviewButton />
-          <DashboardBox sx={{ mb: spacing }}>
+          {/* <DashboardBox sx={{ mb: spacing }}>
             <Typography variant="h3">Review Recurring Items</Typography>
-            {/* Add content here */}
-          </DashboardBox>
+          </DashboardBox> */}
         </Grid>
       </Grid>
     </Box>
