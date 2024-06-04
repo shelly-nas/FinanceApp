@@ -24,12 +24,12 @@ interface Transaction {
 }
 
 const ReviewTransactions: React.FC = () => {
-  const { data: results, error, isLoading } = useGetEmptyCategoryTransactionsQuery();
   const [updateTransaction] = useUpdateTransactionMutation();
   const [reviewTransactions, setData] = useState<Transaction[]>([]);
   const [editIdx, setEditIdx] = useState<{ rowIdx: number, colKey: keyof Transaction } | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction, direction: 'asc' | 'desc' } | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
+  const { data: results, error, isLoading } = useGetEmptyCategoryTransactionsQuery();
 
   useEffect(() => {
     if (results) {

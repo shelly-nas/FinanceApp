@@ -4,6 +4,7 @@ import { bankMappings } from '@/models/bankTransactionModel'
 import multer from 'multer';
 import fs from 'fs';
 import csvParser from 'csv-parser';
+import { predictCategory } from '@/machineLearningModels/categoryModel';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // Temporary storage for uploaded files
@@ -13,8 +14,6 @@ const reformatDate = (dateStr: string) => { // Function to reformat date from YY
   const day = dateStr.substring(6, 8);
   return `${year}-${month}-${day}`;
 };
-
-type BankType = 'ING' | 'ING_CC' | 'Rabobank' | 'Rabobank_CC';
 
 router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response) => {
   const { bankType } = req.query;
@@ -37,6 +36,7 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
     .on('data', (data) => {
       const entry: any = {};
 
+      // Map the of the csv headers to the database keys
       for (const [csvKey, dbKey] of Object.entries(mapping)) {
         entry[dbKey] = data[csvKey] || null;
       }
@@ -51,24 +51,56 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         entry['amount'] = parseFloat(entry['amount'].replace(',', '.'));
       }
 
+      // Set debit_credit based on the amount if it's null
+      if (entry['debit_credit'] === undefined) {
+        entry['debit_credit'] = entry['amount'] < 0 ? 'Debit' : 'Credit';
+      }
+
+      // Convert amount to absolute value
+      entry['amount'] = Math.abs(entry['amount']);
+
       // Replace multiple whitespaces in name_description with a single whitespace
       if (entry['name_description']) {
         entry['name_description'] = entry['name_description'].replace(/\s+/g, ' ');
       }
 
+      // // Predict the category using the ML model
+      // if (entry['name_description']) {
+      //   try {
+      //     const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
+      //     if (predictedCategory) {
+      //       entry['category'] = predictedCategory;
+      //     }
+      //   } catch (error) {
+      //     console.error('Error predicting category:', error);
+      //   }
+      // }
+
       entries.push(entry);
+      console.log('Processed entry:', entry);
     })
     .on('end', async () => {
       try {
-        await FinanceManager.addTransactions(entries);
-        res.status(200).send('Entries imported successfully');
+        for (const entry of entries) {
+          if (entry['name_description']) {
+            const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
+            if (predictedCategory) {
+              entry['category'] = predictedCategory;
+            }
+          }
+        }
+        const createdIds = await FinanceManager.addTransactions(entries);
+        console.log('Created IDs:', createdIds);
+        res.status(200).json({ message: 'Entries imported successfully', createdIds });
       } catch (error) {
+        console.error('Error importing entries:', error);
         res.status(500).send(`Error importing entries: ${error}`);
       } finally {
-        fs.unlinkSync(filePath); // Remove the file after processing
+        fs.unlinkSync(filePath);
       }
     })
     .on('error', (error) => {
+      console.error('Error reading file:', error);
       res.status(500).send(`Error reading file: ${error}`);
     });
 });

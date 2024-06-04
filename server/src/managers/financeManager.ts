@@ -7,34 +7,42 @@ const account_table = "accounts";
 const investment_table = "investments";
 
 class FinanceManager {
-  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]) {
+  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
     const client = await dbContext.connect();
+    const createdIds: number[] = [];
+  
     try {
       await client.query('BEGIN');
   
       for (const entry of entries) {
-        // Set debit_credit based on the amount if it's null
-        if (entry.debit_credit === undefined) {
-          entry.debit_credit = entry.amount < 0 ? 'Debit' : 'Credit';
+        try {
+          const result = await client.query(
+            `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
+          );
+  
+          const insertedId = result.rows[0].id;
+          createdIds.push(insertedId);
+          console.log('Inserted entry ID:', insertedId);
+        } catch (insertError) {
+          console.error('Error inserting entry:', entry, insertError);
+          throw insertError;
         }
-        // Convert amount to absolute value
-        entry.amount = Math.abs(entry.amount);
-
-        await client.query(`INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
-        );
       }
   
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
+      console.error('Transaction rolled back due to error:', error);
       throw error;
     } finally {
       client.release();
     }
+  
+    return createdIds;
   }
-
+  
   public async getTransactions(startDate?: string, endDate?: string): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM ${transaction_table} WHERE 1=1`;
