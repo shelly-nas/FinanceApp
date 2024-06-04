@@ -37,28 +37,37 @@ class FinanceManager {
     return createdIds;
   }
   
-  public async getTransactions(startDate?: string, endDate?: string): Promise<Transactions[]> {
+  public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM ${transaction_table} WHERE 1=1`;
     const params: any[] = [];
-
+    let paramIndex = 1;
+  
     if (startDate) {
-      query += " AND date_str >= $1";
+      query += ` AND date_str >= $${paramIndex}`;
       params.push(startDate);
+      paramIndex++;
     }
-
+  
     if (endDate) {
-      query += " AND date_str <= $2";
+      query += ` AND date_str <= $${paramIndex}`;
       params.push(endDate);
+      paramIndex++;
     }
-
+  
+    if (ids && ids.length > 0) {
+      const placeholders = ids.map((_, index) => `$${paramIndex + index}`).join(', ');
+      query += ` AND id IN (${placeholders})`;
+      params.push(...ids);
+    }
+  
     try {
       const result = await client.query(query, params);
       return result.rows;
     } finally {
       client.release();
     }
-  }
+  }  
 
   public async getCategorySums(startDate?: string, endDate?: string): Promise<any[]> {
     const client = await dbContext.connect();

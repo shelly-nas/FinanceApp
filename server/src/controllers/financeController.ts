@@ -64,18 +64,6 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         entry['name_description'] = entry['name_description'].replace(/\s+/g, ' ');
       }
 
-      // // Predict the category using the ML model
-      // if (entry['name_description']) {
-      //   try {
-      //     const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
-      //     if (predictedCategory) {
-      //       entry['category'] = predictedCategory;
-      //     }
-      //   } catch (error) {
-      //     console.error('Error predicting category:', error);
-      //   }
-      // }
-
       entries.push(entry);
     })
     .on('end', async () => {
@@ -106,15 +94,25 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
 });
 
 router.get('/transactions', async (req: Request, res: Response) => {
-  const { startDate, endDate } = req.query;
-  
+  const { startDate, endDate, ids } = req.query;
+  let idList: number[] = [];
+
+  if (ids) {
+    try {
+      idList = JSON.parse(ids as string);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid IDs format' });
+    }
+  }
+
   try {
-    const transactions = await FinanceManager.getTransactions(startDate as string, endDate as string);
+    const transactions = await FinanceManager.getTransactions(startDate as string, endDate as string, idList);
     res.status(200).json(transactions);
   } catch (error) {
     res.status(500).json({ error });
   }
 });
+
 
 router.get('/category-sums', async (req: Request, res: Response) => {
   const { startDate, endDate } = req.query;

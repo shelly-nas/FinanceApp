@@ -1,4 +1,3 @@
-// src/pages/ReviewTransactions.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
@@ -6,7 +5,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import { useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
+import { useLocation } from 'react-router-dom';
+import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
 import ActionButtons from '../subHeader';
 import DashboardBox from '@/components/DashboardBox';
 
@@ -24,18 +24,30 @@ interface Transaction {
 }
 
 const ReviewTransactions: React.FC = () => {
+  const location = useLocation();
+  const transactionIds = location.state?.transactionIds || null;
+
+  const { data: uploadedResults, error: uploadError, isLoading: isLoadingUpload } = useGetTransactionsQuery({ ids: transactionIds }, {
+    skip: !transactionIds
+  });
+
+  const { data: emptyCategoryResults, error: emptyCategoryError, isLoading: isLoadingEmptyCategory } = useGetEmptyCategoryTransactionsQuery(undefined, {
+    skip: transactionIds !== null
+  });
+
   const [updateTransaction] = useUpdateTransactionMutation();
   const [reviewTransactions, setData] = useState<Transaction[]>([]);
   const [editIdx, setEditIdx] = useState<{ rowIdx: number, colKey: keyof Transaction } | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction, direction: 'asc' | 'desc' } | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
-  const { data: results, error, isLoading } = useGetEmptyCategoryTransactionsQuery();
 
   useEffect(() => {
-    if (results) {
-      setData(results.length > 0 ? results : []);
+    if (transactionIds && uploadedResults) {
+      setData(uploadedResults.length > 0 ? uploadedResults : []);
+    } else if (emptyCategoryResults) {
+      setData(emptyCategoryResults.length > 0 ? emptyCategoryResults : []);
     }
-  }, [results]);
+  }, [uploadedResults, emptyCategoryResults]);
 
   const handleDoubleClick = (rowIdx: number, colKey: keyof Transaction) => {
     setEditIdx({ rowIdx, colKey });
@@ -82,11 +94,11 @@ const ReviewTransactions: React.FC = () => {
     setData(sortedData);
   };
 
-  if (isLoading) {
+  if (isLoadingUpload || isLoadingEmptyCategory) {
     return <CircularProgress />;
   }
 
-  if (error) {
+  if (uploadError || emptyCategoryError) {
     return <Typography variant="body2" color="error">Error loading transactions</Typography>;
   }
 

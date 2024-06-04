@@ -5,16 +5,17 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import DashboardBox from '@/components/DashboardBox';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 
-const ReviewButton: React.FC = () => {
+interface Props {}
+
+const ReviewButton: React.FC<Props> = () => {
   const { palette } = useTheme();
   const spacing: number = 1.5;
   const navigate = useNavigate();
-  const { data: results, error, isLoading, refetch } = useGetEmptyCategoryTransactionsQuery();
+  // const { data: results, error, isLoading, refetch } = useGetEmptyCategoryTransactionsQuery();
 
   const handleClick = () => {
-    refetch();
+    // refetch();
     navigate('/review-transactions');
   };
 

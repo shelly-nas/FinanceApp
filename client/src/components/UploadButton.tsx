@@ -1,11 +1,11 @@
-// src/components/UploadButton.tsx
 import React, { useState } from 'react';
 import { Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel, Divider, Box, Modal } from '@mui/material';
 import { UploadFile } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { usePostUploadTransactionsMutation } from '@/api';
+import { useUploadTransactionsMutation } from '@/api';
 import DashboardBox from './DashboardBox';
+import { useNavigate } from 'react-router-dom';
 
 interface UploadButtonProps {
   onUploadSuccess: () => void;
@@ -13,12 +13,13 @@ interface UploadButtonProps {
 
 const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
   const { palette } = useTheme();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [bank, setBank] = useState('');
   const [error, setError] = useState<string | null>(null);
   
-  const [postUploadTransactions] = usePostUploadTransactionsMutation();
+  const [postUploadTransactions] = useUploadTransactionsMutation();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -30,10 +31,11 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
       formData.append('file', file);
 
       const response = await postUploadTransactions({ formData, bankType: bank });
-      
-      if (response.error?.originalStatus == 200) {
+      console.log(response);
+      if (response.data.message == "Entries imported successfully") {
         setLoading(false);
         onUploadSuccess();
+        navigate('/review-transactions', { state: { transactionIds: JSON.stringify(response.data.createdIds) } });
       } else {
         setLoading(false);
         setError(response.error?.data || 'Error uploading file');
