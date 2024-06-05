@@ -10,7 +10,7 @@ interface TransactionsQueryParams {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview"],
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList"],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -70,6 +70,12 @@ export const api = createApi({
       }),
       providesTags: ["accountOverview"],
     }),
+    getCategoryList: build.query<any, void>({
+      query: () => ({
+        url: `api/category-list`,
+      }),
+      providesTags: ["categoryList"],
+    }),
     // You can add more endpoints here following the same pattern
     // ...
   }),
@@ -83,4 +89,5 @@ export const {
   useGetEmptyCategoryTransactionsQuery,
   useUpdateTransactionMutation,
   useGetAccountOverviewQuery,
+  useGetCategoryListQuery,
 } = api;

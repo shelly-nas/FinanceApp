@@ -40,7 +40,7 @@ class FinanceManager {
   
   public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
     const client = await dbContext.connect();
-    let query = `SELECT * FROM ${transaction_table} WHERE 1=1`;
+    let query = `SELECT * FROM public.${transaction_table} WHERE 1=1`;
     const params: any[] = [];
     let paramIndex = 1;
   
@@ -178,7 +178,7 @@ class FinanceManager {
 
     let query = `
       SELECT *
-      FROM ${transaction_table}
+      FROM public.${transaction_table}
       WHERE category IS NULL;
     `;
 
@@ -201,7 +201,7 @@ class FinanceManager {
     const values = Object.values(updates);
   
     let query = `
-      UPDATE ${transaction_table}
+      UPDATE public.${transaction_table}
       SET ${setClause}
       WHERE id = $${values.length + 1}
       RETURNING *;
@@ -232,12 +232,12 @@ class FinanceManager {
                 ELSE 0
               END
             ), 0)
-            FROM ${transaction_table}
+            FROM public.${transaction_table}
             WHERE ${transaction_table}.account = ${account_table}.details
           )
           WHEN ${account_table}.account_type = 'Investments' THEN (
             SELECT ${investment_table}.balance
-            FROM ${investment_table}
+            FROM public.${investment_table}
             WHERE ${investment_table}.account = ${account_table}.details
             ORDER BY ${investment_table}.date_str DESC
             LIMIT 1
@@ -246,7 +246,7 @@ class FinanceManager {
         END,
         ${account_table}.balance_when_created
       ) AS current_balance
-    FROM ${account_table};
+    FROM public.${account_table};
     `;
     
     try {
@@ -257,6 +257,22 @@ class FinanceManager {
     }
   }
 
+  public async getCategoryList(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    let query = `
+      SELECT category_name
+      FROM public.${category_table}
+      ORDER BY category_name ASC;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 export default new FinanceManager();

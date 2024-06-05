@@ -73,11 +73,12 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
           if (entry['name_description']) {
             const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
             if (predictedCategory) {
+              console.log("predictedCategory: ", predictedCategory);
               entry['category'] = predictedCategory;
             }
           }
         }
-
+        
         const createdIds = await FinanceManager.addTransactions(entries);
         res.status(200).json({ message: 'Entries imported successfully', createdIds });
       } catch (error) {
@@ -158,6 +159,15 @@ router.patch('/update-transaction/:id', async (req: Request, res: Response) => {
 router.get('/account-overview', async (req: Request, res: Response) => {
   try {
     const updatedTransaction = await FinanceManager.getAccountOverview();
+    res.status(200).json(updatedTransaction);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+router.get('/category-list', async (req: Request, res: Response) => {
+  try {
+    const updatedTransaction = await FinanceManager.getCategoryList();
     res.status(200).json(updatedTransaction);
   } catch (error) {
     res.status(500).json({ error });

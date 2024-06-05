@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box
+  TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box, Select, MenuItem
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import { useLocation } from 'react-router-dom';
-import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation } from '@/api';
+import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation, useGetCategoryListQuery } from '@/api';
 import ActionButtons from '../subHeader';
 import DashboardBox from '@/components/DashboardBox';
 
@@ -35,6 +35,8 @@ const ReviewTransactions: React.FC = () => {
     skip: transactionIds !== null
   });
 
+  const { data: categoryList, error: categoryError, isLoading: isLoadingCategory } = useGetCategoryListQuery();
+
   const [updateTransaction] = useUpdateTransactionMutation();
   const [reviewTransactions, setData] = useState<Transaction[]>([]);
   const [editIdx, setEditIdx] = useState<{ rowIdx: number, colKey: keyof Transaction } | null>(null);
@@ -54,10 +56,10 @@ const ReviewTransactions: React.FC = () => {
     setEditValues({ [colKey]: reviewTransactions[rowIdx][colKey] });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, colKey: keyof Transaction) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { value: unknown }>, colKey: keyof Transaction) => {
     setEditValues((prev) => ({
       ...prev,
-      [colKey]: e.target.value,
+      [colKey]: e.target.value as string,
     }));
   };
 
@@ -109,7 +111,7 @@ const ReviewTransactions: React.FC = () => {
         <DashboardBox>
           <Box className={`fade hide`} sx={{ p: 2 }}>
             <Typography variant="body1">
-            No transactions need to be reviewed, all transactions have a category assigned.
+              No transactions need to be reviewed, all transactions have a category assigned.
             </Typography>
           </Box>
         </DashboardBox>
@@ -141,11 +143,25 @@ const ReviewTransactions: React.FC = () => {
                       onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
                     >
                       {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
-                        <TextField
-                          value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
-                          onChange={(e) => handleChange(e, key as keyof Transaction)}
-                          autoFocus
-                        />
+                        key === 'category' ? (
+                          <Select
+                            value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
+                            onChange={(e) => handleChange(e, key as keyof Transaction)}
+                            autoFocus
+                          >
+                            {categoryList.map(option => (
+                              <MenuItem key={option.category_name} value={option.category_name}>
+                                {option.category_name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        ) : (
+                          <TextField
+                            value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
+                            onChange={(e) => handleChange(e, key as keyof Transaction)}
+                            autoFocus
+                          />
+                        )
                       ) : (
                         row[key as keyof Transaction]
                       )}

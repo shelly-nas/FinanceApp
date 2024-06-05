@@ -38,11 +38,7 @@ async function predictCategory(name_description: string, account: string, notifi
 	const probabilityThreshold = parseFloat(process.env.ML_PROBABILITY_THRESHOLD || '0.03');
 	const classifications = classifier.getClassifications(preprocessedText);
 
-	console.log(`Classifications for "${preprocessedText}":`, classifications);
-	console.log("classifications[0].value: ", classifications[0].value)
-
 	if (classifications.length > 0 && classifications[0].value >= probabilityThreshold) {
-		console.log("classifications[0].label: ", classifications[0].label);
 		return classifications[0].label;
 	}
 
