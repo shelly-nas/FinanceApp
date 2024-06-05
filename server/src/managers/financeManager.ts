@@ -7,18 +7,20 @@ const account_table = "accounts";
 const investment_table = "investments";
 
 class FinanceManager {
-  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
+  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
     const client = await dbContext.connect();
     const createdIds: number[] = [];
+
   
     try {
       await client.query('BEGIN');
   
       for (const entry of entries) {
+        entry.category = entry.category === 'null' ? null : entry.category;
         const result = await client.query(
-          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
-          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
+          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, category, debit_credit, amount, notifications)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.category, entry.debit_credit, entry.amount, entry.notifications]
         );
 
         const insertedId = result.rows[0].id;
@@ -28,7 +30,6 @@ class FinanceManager {
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Transaction rolled back due to error:', error);
       throw error;
     } finally {
       client.release();
@@ -39,7 +40,7 @@ class FinanceManager {
   
   public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
     const client = await dbContext.connect();
-    let query = `SELECT * FROM ${transaction_table} WHERE 1=1`;
+    let query = `SELECT * FROM public.${transaction_table} WHERE 1=1`;
     const params: any[] = [];
     let paramIndex = 1;
   
@@ -177,7 +178,7 @@ class FinanceManager {
 
     let query = `
       SELECT *
-      FROM ${transaction_table}
+      FROM public.${transaction_table}
       WHERE category IS NULL;
     `;
 
@@ -200,7 +201,7 @@ class FinanceManager {
     const values = Object.values(updates);
   
     let query = `
-      UPDATE ${transaction_table}
+      UPDATE public.${transaction_table}
       SET ${setClause}
       WHERE id = $${values.length + 1}
       RETURNING *;
@@ -231,12 +232,12 @@ class FinanceManager {
                 ELSE 0
               END
             ), 0)
-            FROM ${transaction_table}
+            FROM public.${transaction_table}
             WHERE ${transaction_table}.account = ${account_table}.details
           )
           WHEN ${account_table}.account_type = 'Investments' THEN (
             SELECT ${investment_table}.balance
-            FROM ${investment_table}
+            FROM public.${investment_table}
             WHERE ${investment_table}.account = ${account_table}.details
             ORDER BY ${investment_table}.date_str DESC
             LIMIT 1
@@ -245,7 +246,7 @@ class FinanceManager {
         END,
         ${account_table}.balance_when_created
       ) AS current_balance
-    FROM ${account_table};
+    FROM public.${account_table};
     `;
     
     try {
@@ -256,6 +257,22 @@ class FinanceManager {
     }
   }
 
+  public async getCategoryList(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    let query = `
+      SELECT category_name
+      FROM public.${category_table}
+      ORDER BY category_name ASC;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 export default new FinanceManager();
