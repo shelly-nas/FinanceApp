@@ -24,26 +24,32 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'text/csv') {
-      setLoading(true);
-      setError(null);
+        setLoading(true);
+        setError(null);
 
-      const formData = new FormData();
-      formData.append('file', file);
+        const formData = new FormData();
+        formData.append('file', file);
 
-      const response = await postUploadTransactions({ formData, bankType: bank });
-      
-      if (response.data.message == "Entries imported successfully") {
-        setLoading(false);
-        onUploadSuccess();
-        navigate('/review-transactions', { state: { transactionIds: JSON.stringify(response.data.createdIds) } });
-      } else {
-        setLoading(false);
-        setError(response.error?.data || 'Error uploading file');
-      }
+        try {
+            const response = await postUploadTransactions({ formData, bankType: bank });
+
+            if (response.data.message == "Entries imported successfully") {
+                setLoading(false);
+                onUploadSuccess();
+                navigate('/review-transactions', { state: { transactionIds: JSON.stringify(response.data.createdIds) } });
+            } else {
+                setLoading(false);
+                setError(response.error?.data || 'Error uploading file');
+            }
+        } catch (error) {
+            setLoading(false);
+            setError('Unexpected error occurred while uploading the file.');
+        }
     } else {
-      alert('Please upload a valid CSV file.');
+        alert('Unexpected error occurred while processing file, please refresh and try again.');
     }
-  };
+};
+
 
   const handleBankChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setBank(event.target.value as string);
