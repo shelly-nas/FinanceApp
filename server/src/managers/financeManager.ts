@@ -7,18 +7,20 @@ const account_table = "accounts";
 const investment_table = "investments";
 
 class FinanceManager {
-  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
+  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
     const client = await dbContext.connect();
     const createdIds: number[] = [];
+
   
     try {
       await client.query('BEGIN');
   
       for (const entry of entries) {
+        entry.category = entry.category === 'null' ? null : entry.category;
         const result = await client.query(
-          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, debit_credit, amount, notifications)
-          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.debit_credit, entry.amount, entry.notifications]
+          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, category, debit_credit, amount, notifications)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.category, entry.debit_credit, entry.amount, entry.notifications]
         );
 
         const insertedId = result.rows[0].id;
