@@ -173,7 +173,7 @@ const ReviewTransactions: React.FC = () => {
                         <SaveIcon />
                       </IconButton>
                     ) : (
-                      <IconButton onClick={() => handleDoubleClick(rowIdx, 'id')}>
+                      <IconButton onClick={() => handleDoubleClick(rowIdx, 'category')}>
                         <EditIcon />
                       </IconButton>
                     )}
