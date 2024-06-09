@@ -97,7 +97,7 @@ const UploadInvestButton: React.FC = () => {
       </Button>
 
       <Modal open={open} onClose={handleClose}>
-        <DashboardBox sx={{ ...style, width: 400 }}>
+        <DashboardBox sx={{ ...style, width: 300 }}>
           <Typography variant="h3">Add Investment</Typography>
 
           <TextField
