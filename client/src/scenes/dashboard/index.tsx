@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { Grid, Box, Typography, useTheme } from "@mui/material";
-import DashboardBox from "@/components/DashboardBox";
+import { Grid, Box, useTheme } from "@mui/material";
 import AccountsOverview from "@/scenes/dashboard/AccountOverview";
 import PeriodSummary from "@/scenes/dashboard/PeriodSummary";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
 import DateRange from '@/scenes/dateRange';
 import ReviewButton from "@/scenes/dashboard/ReviewTransaction";
-import TransactionsButton from "@/scenes/dashboard/AddTransactions";
+import AddTransactionsButton from "@/scenes/dashboard/AddTransactions";
+import AddInvestmentsButton from "@/scenes/dashboard/AddInvestments";
 
 const Dashboard: React.FC = () => {
   const { palette } = useTheme();
@@ -36,11 +36,9 @@ const Dashboard: React.FC = () => {
 
         {/* Review Section */}
         <Grid item xs={12} md={2}>
-          <TransactionsButton />
+          <AddTransactionsButton />
           <ReviewButton />
-          {/* <DashboardBox sx={{ mb: spacing }}>
-            <Typography variant="h3">Review Recurring Items</Typography>
-          </DashboardBox> */}
+          <AddInvestmentsButton />
         </Grid>
       </Grid>
     </Box>

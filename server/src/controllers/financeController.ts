@@ -5,6 +5,7 @@ import multer from 'multer';
 import fs from 'fs';
 import csvParser from 'csv-parser';
 import { predictCategory } from '@/machineLearningModels/categoryModel';
+import bodyParser from 'body-parser';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // Temporary storage for uploaded files
@@ -173,5 +174,34 @@ router.get('/category-list', async (req: Request, res: Response) => {
     res.status(500).json({ error });
   }
 });
+
+router.get('/investment-accounts', async (req: Request, res: Response) => {
+  try {
+    const updatedTransaction = await FinanceManager.getInvestmentAccounts();
+    res.status(200).json(updatedTransaction);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+router.use('/upload-investments', bodyParser.json(), (req, res, next) => {
+  if (req.is('application/json') && req.body && Object.keys(req.body).length > 0) {
+    next();
+  } else {
+    res.status(400).json({ error: 'Invalid request: Content-Type must be application/json and body must not be empty' });
+  }
+});
+
+router.post('/upload-investments', async (req: Request, res: Response) => {
+  const investments = req.body;
+
+  try {  
+    const createdIds = await FinanceManager.addInvestments(investments);
+    res.status(200).json({ message: 'Entries imported successfully', createdIds });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
 
 export default router;

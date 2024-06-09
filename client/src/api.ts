@@ -1,5 +1,6 @@
 // api.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { Investment } from "@/components/UploadInvestButton";
 
 interface TransactionsQueryParams {
   startDate?: string;
@@ -10,7 +11,7 @@ interface TransactionsQueryParams {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList"],
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments"],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -76,6 +77,23 @@ export const api = createApi({
       }),
       providesTags: ["categoryList"],
     }),
+    getInvestmentAccounts: build.query<any, void>({
+      query: () => ({
+        url: `api/investment-accounts`,
+      }),
+      providesTags: ["investmentAccounts"],
+    }),
+    uploadInvestments: build.mutation<any, Investment[]>({
+      query: (investments) => ({
+        url: 'api/upload-investments',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: investments,
+      }),
+      invalidatesTags: ['uploadInvestments'],
+    }),
     // You can add more endpoints here following the same pattern
     // ...
   }),
@@ -90,4 +108,6 @@ export const {
   useUpdateTransactionMutation,
   useGetAccountOverviewQuery,
   useGetCategoryListQuery,
+  useGetInvestmentAccountsQuery,
+  useUploadInvestmentsMutation,
 } = api;

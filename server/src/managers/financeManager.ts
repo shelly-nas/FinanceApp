@@ -11,7 +11,6 @@ class FinanceManager {
     const client = await dbContext.connect();
     const createdIds: number[] = [];
 
-  
     try {
       await client.query('BEGIN');
   
@@ -272,6 +271,52 @@ class FinanceManager {
     } finally {
       client.release();
     }
+  }
+
+  public async getInvestmentAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    let query = `
+      SELECT account_name, details 
+      FROM public.${account_table}
+      WHERE account_type = 'Investments';
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async addInvestments(entries: { date_str: string, name_description: string, account: string, balance: number }[]): Promise<number[]> {
+    const client = await dbContext.connect();
+    const createdIds: number[] = [];
+    
+    try {
+      await client.query('BEGIN');
+
+      for (const entry of entries) {
+        const result = await client.query(
+          `INSERT INTO public.${investment_table} (date_str, name_description, account, balance)
+          VALUES ($1, $2, $3, $4) RETURNING id`,
+          [entry.date_str, entry.name_description, entry.account, entry.balance]
+        );
+
+        const insertedId = result.rows[0].id;
+        createdIds.push(insertedId);
+      }
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+
+    return createdIds;
   }
 }
 

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel, Divider, Box, Modal } from '@mui/material';
-import { UploadFile } from '@mui/icons-material';
+import { Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel, Box, Modal } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useUploadTransactionsMutation } from '@/api';
-import DashboardBox from './DashboardBox';
+import DashboardBox from '@/components/DashboardBox';
 import { useNavigate } from 'react-router-dom';
 
 interface UploadButtonProps {
@@ -78,9 +77,8 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
       </Button>
 
       <Modal open={open} onClose={handleClose}>
-        <DashboardBox sx={{ ...style, width: 250 }}>
+        <DashboardBox sx={{ ...style, width: 300 }}>
           <Typography variant="h3">Upload Bank Transactions</Typography>
-          <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1.5, mb: 1.5 }} />
           <FormControl fullWidth sx={{ mt: 1.5 }}>
             <InputLabel id="bank-select-label">Bank</InputLabel>
             <Select
@@ -109,21 +107,20 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
             <label htmlFor="upload-file">
               <Button
                 sx={{
-                  mt: 1,
-                  width: 100,
-                  height: 115,
-                  border: '2px dashed',
-                  borderColor: palette.grey[300],
+                  mt: 2,
+                  width: '100%',
+                  backgroundColor: palette.secondary.main,
+                  color: '#fff',
                   '&:hover': {
-                    backgroundColor: palette.action.hover
-                  },
-                  color: palette.secondary[500]
+                    backgroundColor: palette.secondary.dark
+                  }
                 }}
                 component="span" // Make the button act as a span for the file input
                 disabled={!bank}
               >
-                <UploadFile sx={{ fontSize: 40, color: palette.secondary[400] }} />
+                Select file & submit
               </Button>
+              
             </label>
           </div>
           {loading && (
