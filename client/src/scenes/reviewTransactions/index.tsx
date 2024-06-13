@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box, Select, MenuItem
+  TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box, Select, MenuItem,
+  useTheme
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -24,6 +25,7 @@ interface Transaction {
 }
 
 const ReviewTransactions: React.FC = () => {
+  const { palette, typography } = useTheme();
   const location = useLocation();
   const transactionIds = location.state?.transactionIds || null;
 
@@ -117,11 +119,11 @@ const ReviewTransactions: React.FC = () => {
         </DashboardBox>
       ) : (
         <TableContainer component={Paper}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow>
                 {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
-                  <TableCell key={key}>
+                  <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }} key={key}>
                     <TableSortLabel
                       active={sortConfig?.key === key}
                       direction={sortConfig?.key === key ? sortConfig.direction : 'asc'}
@@ -131,7 +133,7 @@ const ReviewTransactions: React.FC = () => {
                     </TableSortLabel>
                   </TableCell>
                 ))}
-                <TableCell>Edit</TableCell>
+                <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }} >edit</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
