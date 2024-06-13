@@ -23,19 +23,19 @@ const Dashboard: React.FC = () => {
       <DateRange />
       <Grid container justifyContent="space-between" columnSpacing={spacing}>
         {/* Left Grid */}
-        <Grid item xs={12} md={4}>
+        <Grid item md={3}>
           <AccountsOverview />
           <PeriodSummary />
         </Grid>
 
         {/* Spending Breakdown */}
-        <Grid item xs={12} md={6}>
+        <Grid item md={7}>
           <SpendingBreakdown onCategorySelect={handleCategorySelect} />
           <TransactionDetails selectedCategory={selectedCategory}/>
         </Grid>
 
         {/* Review Section */}
-        <Grid item xs={12} md={2}>
+        <Grid item md={2}>
           <AddTransactionsButton />
           <ReviewButton />
           <AddInvestmentsButton />
