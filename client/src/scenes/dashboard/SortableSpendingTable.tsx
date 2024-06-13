@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody, useTheme } from '@mui/material';
 import MultiColorProgress from '@/components/MultiColorProgress';
-import '@/styles.css' 
+import '@/styles.css';
 import { CategorySums } from '@/scenes/dashboard/SpendingBreakdown';
 
 interface SortableSpendingTableProps {
@@ -9,13 +9,13 @@ interface SortableSpendingTableProps {
   items: CategorySums[];
   totalAmount: number;
   onRowClick: (category: string) => void;
+  selectedCategory: string | null;
 }
 
-const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, items, totalAmount, onRowClick }) => {
+const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, items, totalAmount, onRowClick, selectedCategory }) => {
   const { palette, typography } = useTheme();
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [orderBy, setOrderBy] = useState<'amount' | 'percentage'>('amount');
-  const [selectedRow, setSelectedRow] = useState<string | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
@@ -29,11 +29,6 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
-  };
-
-  const handleRowClick = (category: string) => {
-    setSelectedRow(selectedRow === category ? null : category);
-    onRowClick(category);
   };
 
   const handleRippleEffect = (e: React.MouseEvent) => {
@@ -70,59 +65,56 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
     <TableContainer sx={{ mt: 1.5 }}>
       <Table size="small">
         <TableHead>
-          <TableRow>
           <div>
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '20%', minWidth: 170, textAlign: 'left' }}>{title}</TableCell>
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '50%', minWidth: 100, textAlign: 'center' }} />
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '15%', minWidth: 110, textAlign: 'center' }}>
-              <TableSortLabel
-                style={{flexDirection: 'row-reverse'}}
-                active={orderBy === 'amount'}
-                direction={orderBy === 'amount' ? order : 'asc'}
-                onClick={() => handleSort('amount')}
-                // hideSortIcon
-              >
-                TOTAL
-              </TableSortLabel>
-            </TableCell>
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '15%', minWidth: 80, textAlign: 'center' }}>
-              <TableSortLabel
-                style={{flexDirection: 'row-reverse'}}
-                active={orderBy === 'percentage'}
-                direction={orderBy === 'percentage' ? order : 'asc'}
-                onClick={() => handleSort('percentage')}
-                // hideSortIcon
-              >
-                % OF TOTAL
-              </TableSortLabel>
-            </TableCell>
-            </div>
-          </TableRow>
+            <TableRow>
+              <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '23%', minWidth: 170, textAlign: 'left' }}>{title}</TableCell>
+              <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '47%', minWidth: 100, textAlign: 'center' }} />
+              <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '10%', minWidth: 110, textAlign: 'center' }}>
+                <TableSortLabel
+                  style={{ flexDirection: 'row-reverse' }}
+                  active={orderBy === 'amount'}
+                  direction={orderBy === 'amount' ? order : 'asc'}
+                  onClick={() => handleSort('amount')}
+                >
+                  TOTAL
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ ...typography.body1, fontWeight: 'bold', width: '10%', minWidth: 80, textAlign: 'center' }}>
+                <TableSortLabel
+                  style={{ flexDirection: 'row-reverse' }}
+                  active={orderBy === 'percentage'}
+                  direction={orderBy === 'percentage' ? order : 'asc'}
+                  onClick={() => handleSort('percentage')}
+                >
+                  % OF TOTAL
+                </TableSortLabel>
+              </TableCell>
+            </TableRow>
+          </div>
         </TableHead>
         <TableBody>
           {sortedItems.map((item) => (
-            <div className="ripple-container" onClick={handleRippleEffect}>
+            <div className="ripple-container" onClick={handleRippleEffect} key={item.category}>
               <TableRow
-                key={item.category}
-                onClick={() => handleRowClick(item.category)}
+                onClick={() => onRowClick(item.category)}
                 sx={{
                   cursor: 'pointer',
                   transition: 'background-color 0.1s ease-in-out',
-                  backgroundColor: selectedRow === item.category ? palette.grey[100] : 'inherit',
+                  backgroundColor: selectedCategory === item.category ? palette.grey[100] : 'inherit',
                   '&:hover': {
                     backgroundColor: palette.action.hover,
                   },
                 }}
               >
-                <TableCell sx={{ ...typography.body2, width: '20%', minWidth: 170, textAlign: 'left', fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>{item.category}</TableCell>
-                <TableCell sx={{ width: '50%', minWidth: 100, fontWeight: selectedRow === item.category ? "bold" : 'inherit', }}>
+                <TableCell sx={{ ...typography.body2, width: '23%', minWidth: 170, textAlign: 'left', fontWeight: selectedCategory === item.category ? 'bold' : 'inherit' }}>{item.category}</TableCell>
+                <TableCell sx={{ width: '47%', minWidth: 100, fontWeight: selectedCategory === item.category ? 'bold' : 'inherit' }}>
                   <MultiColorProgress
                     segments={[{ value: (item.total_amount / totalAmount) * 100, color: item.color }]}
                     height={8}
                   />
                 </TableCell>
-                <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 110, textAlign: 'right', fontWeight: selectedRow === item.category ? "bold" : 'inherit' }}>{formatCurrency(item.total_amount)}</TableCell>
-                <TableCell sx={{ ...typography.body2, width: '15%', minWidth: 80, textAlign: 'right', fontWeight: selectedRow === item.category ? "bold" : 'inherit' }}>{formatPercentage((item.total_amount / totalAmount) * 100)}</TableCell>
+                <TableCell sx={{ ...typography.body2, width: '10%', minWidth: 110, textAlign: 'right', fontWeight: selectedCategory === item.category ? 'bold' : 'inherit' }}>{formatCurrency(item.total_amount)}</TableCell>
+                <TableCell sx={{ ...typography.body2, width: '10%', minWidth: 80, textAlign: 'right', fontWeight: selectedCategory === item.category ? 'bold' : 'inherit' }}>{formatPercentage((item.total_amount / totalAmount) * 100)}</TableCell>
               </TableRow>
             </div>
           ))}

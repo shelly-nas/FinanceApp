@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Divider, useTheme } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import MultiColorProgress from '@/components/MultiColorProgress';
@@ -41,7 +41,10 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
     startDate: formatDate(firstDay),
     endDate: formatDate(lastDay),
   });
-  
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTable, setSelectedTable] = useState<'income' | 'expenses' | null>(null);
+
   const result = categorizeItems(results) || {};
 
   const totalIncome = result.income.reduce((sum, item) => sum + item.total_amount, 0);
@@ -49,6 +52,12 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+  };
+
+  const handleRowClick = (category: string, table: 'income' | 'expenses') => {
+    setSelectedCategory(selectedCategory === category ? null : category);
+    setSelectedTable(table);
+    onCategorySelect(category);
   };
 
   return (
@@ -95,10 +104,22 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
       <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 2, mb: 1 }} />
 
       {/* INCOME TABLE */}
-      <SortableSpendingTable title="INCOME" items={result.income} totalAmount={totalIncome} onRowClick={onCategorySelect} />
+      <SortableSpendingTable
+        title="INCOME"
+        items={result.income}
+        totalAmount={totalIncome}
+        onRowClick={(category) => handleRowClick(category, 'income')}
+        selectedCategory={selectedTable === 'income' ? selectedCategory : null}
+      />
 
       {/* EXPENSES TABLE */}
-      <SortableSpendingTable title="EXPENSES" items={result.expenses} totalAmount={totalExpenses} onRowClick={onCategorySelect} />
+      <SortableSpendingTable
+        title="EXPENSES"
+        items={result.expenses}
+        totalAmount={totalExpenses}
+        onRowClick={(category) => handleRowClick(category, 'expenses')}
+        selectedCategory={selectedTable === 'expenses' ? selectedCategory : null}
+      />
     </DashboardBox>
   );
 };

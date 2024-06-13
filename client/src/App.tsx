@@ -17,7 +17,7 @@ const App: React.FC = () => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <DateRangeProvider>
-            <Box maxWidth="1500px" padding="1rem 2rem 4rem 2rem" style={{ width: '100%' }}>
+            <Box maxWidth="1700px" padding="1rem 2rem 4rem 2rem" style={{ width: '100%' }}>
               <Header />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
