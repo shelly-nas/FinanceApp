@@ -1,12 +1,15 @@
 import React from 'react';
-import { Typography, Divider, useTheme, Box } from '@mui/material';
+import { Typography, Divider, useTheme, Box, Button } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
+import EditIcon from '@mui/icons-material/Edit';
 import SortableTransactionTable from './SortableTransactionTable';
 import '@/styles.css'; // Import your CSS styles for transitions
 import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 import { useGetTransactionsQuery } from '@/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Transaction {
+  id: number
   date_str: string;
   name_description: string;
   account: string;
@@ -23,8 +26,9 @@ interface TransactionDetailsProps {
 }
 
 const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory }) => {
-  const { palette } = useTheme();
+  const { palette, typography } = useTheme();
   const { firstDay, lastDay } = useDateRange();
+  const navigate = useNavigate();
   
   const { data: results, error, isLoading } = useGetTransactionsQuery({
     startDate: formatDate(firstDay),
@@ -37,9 +41,48 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
     ? transactions.filter(transaction => transaction.category === selectedCategory)
     : [];
 
+  const handleEditTransactions = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const ids: number[] = filteredTransactions.map(item => item.id);;
+    navigate('/review-transactions', { state: { transactionIds: JSON.stringify(ids) } });
+  };
+
   return (
     <DashboardBox sx={{ mb: 1.5 }} className="content-box">
-      <Typography variant="h3">Transaction Details</Typography>
+      <Box sx={{         
+        display: 'flex',
+        alignItems: 'center',
+        position: 'relative',             
+      }}>
+        <Box sx={{
+          textAlign: 'center',
+          width: '100%',
+        }}>
+          <Typography variant="h3">
+          Transaction Details
+          </Typography>
+        </Box>
+        <Button sx={{ 
+          m: 0.1, 
+          p: 0.1, 
+          minWidth: 0, 
+          position: 'absolute', 
+          right: 0, // Align to the right inside the relative parent
+          top: '50%', // Center vertically with respect to the parent box
+          transform: 'translateY(-50%)', // Adjust the button's center to the middle
+          '&:hover': {
+            backgroundColor: palette.action.hover, // Hover background color, change as needed
+          },
+        }} 
+        onClick={handleEditTransactions}
+        >
+          {selectedCategory ? (
+            <EditIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
+          ) : (
+            <div/>
+          )}
+        </Button>
+      </Box>
+      {/* <Typography variant="h3">Transaction Details</Typography> */}
       <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1, mb: 1 }} />
 
       <Box>
