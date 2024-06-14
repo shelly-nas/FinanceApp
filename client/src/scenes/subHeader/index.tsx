@@ -3,9 +3,11 @@ import { Button, Box } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useNavigate } from 'react-router-dom';
 import { useGetEmptyCategoryTransactionsQuery } from '@/api';
+import { useTheme } from '@emotion/react';
 
 
 const ActionButtons: React.FC = () => {
+  const { palette } = useTheme();
   const navigate = useNavigate();
   const { data: results, error, isLoading, refetch } = useGetEmptyCategoryTransactionsQuery();
 
@@ -26,12 +28,16 @@ const ActionButtons: React.FC = () => {
         mb: 1.5,
       }}
     >
+      
       <Button
         variant="contained"
-        color="secondary"
         endIcon={<CheckIcon />}
         sx={{
-          textTransform: 'none',
+          backgroundColor: palette.secondary.main,
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: palette.secondary.dark
+          }
         }}
         onClick={handleDoneClick}
       >

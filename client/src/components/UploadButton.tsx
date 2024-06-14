@@ -106,6 +106,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
             />
             <label htmlFor="upload-file">
               <Button
+                variant="contained"
                 sx={{
                   mt: 2,
                   width: '100%',

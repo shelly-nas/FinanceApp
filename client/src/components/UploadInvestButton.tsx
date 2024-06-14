@@ -150,6 +150,7 @@ const UploadInvestButton: React.FC = () => {
           />
 
           <Button
+            variant="contained"
             sx={{
               mt: 2,
               width: '100%',
@@ -214,6 +215,7 @@ const UploadInvestButton: React.FC = () => {
           </TableContainer>
 
           <Button
+            variant="contained"
             sx={{
               mt: 2,
               width: '100%',
