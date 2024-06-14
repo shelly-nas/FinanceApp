@@ -211,5 +211,17 @@ router.post('/upload-investments', async (req: Request, res: Response) => {
   }
 });
 
+router.delete('/remove-transaction/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    await FinanceManager.deleteTransaction(id);
+    res.status(200).json({ message: 'Transaction deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+
 
 export default router;

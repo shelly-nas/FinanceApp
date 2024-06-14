@@ -4,12 +4,13 @@ import {
   TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box, Select, MenuItem,
   useTheme
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import { useLocation } from 'react-router-dom';
-import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation, useGetCategoryListQuery } from '@/api';
+import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation, useGetCategoryListQuery, useDeleteTransactionMutation } from '@/api';
 import ActionButtons from '../subHeader';
 import DashboardBox from '@/components/DashboardBox';
+import DeletePopup from '@/components/DeletePopup';
 
 interface Transaction {
   id: number;
@@ -40,10 +41,13 @@ const ReviewTransactions: React.FC = () => {
   const { data: categoryList, error: categoryError, isLoading: isLoadingCategory } = useGetCategoryListQuery();
 
   const [updateTransaction] = useUpdateTransactionMutation();
+  const [deleteTransaction] = useDeleteTransactionMutation();
   const [reviewTransactions, setData] = useState<Transaction[]>([]);
   const [editIdx, setEditIdx] = useState<{ rowIdx: number, colKey: keyof Transaction } | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction, direction: 'asc' | 'desc' } | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     if (transactionIds && uploadedResults) {
@@ -81,6 +85,24 @@ const ReviewTransactions: React.FC = () => {
       await updateTransaction({ id: updatedRow.id, ...editValues });
     } catch (error) {
       console.error('Error updating transaction:', error);
+    }
+  };
+
+  const handleDeleteConfirmation = (id: number) => {
+    setDeleteId(id);
+    setOpenDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (deleteId === null) return;
+
+    try {
+      await deleteTransaction(deleteId).unwrap();
+      setOpenDialog(false);
+      setDeleteId(null);
+      window.location.reload(); // Reload the page
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
     }
   };
 
@@ -143,6 +165,15 @@ const ReviewTransactions: React.FC = () => {
                     <TableCell
                       key={key}
                       onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
+                      sx={{
+                        position: 'relative',
+                        '&:hover': {
+                          backgroundColor: palette.secondary[100],
+                          borderRadius: 2,
+                        },
+                        padding: 0,
+                        paddingLeft: 1.5,
+                      }}
                     >
                       {editIdx?.rowIdx === rowIdx && editIdx.colKey === key ? (
                         key === 'category' ? (
@@ -150,9 +181,24 @@ const ReviewTransactions: React.FC = () => {
                             value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
                             onChange={(e) => handleChange(e, key as keyof Transaction)}
                             autoFocus
+                            sx={{
+                              width: '100%',
+                              marginRight: 1.5, 
+                              backgroundColor: '#fff', 
+                              marginLeft: -0.75,
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'initial',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: palette.secondary.light,
+                              },
+                            }}
                           >
                             {categoryList.map(option => (
-                              <MenuItem key={option.category_name} value={option.category_name}>
+                              <MenuItem 
+                                key={option.category_name} 
+                                value={option.category_name}
+                              >
                                 {option.category_name}
                               </MenuItem>
                             ))}
@@ -162,6 +208,15 @@ const ReviewTransactions: React.FC = () => {
                             value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
                             onChange={(e) => handleChange(e, key as keyof Transaction)}
                             autoFocus
+                            sx={{ 
+                              width: '100%',
+                              marginRight: 1.5, 
+                              backgroundColor: '#fff', 
+                              marginLeft: -0.75,
+                              '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: palette.secondary.light,
+                              },
+                            }}
                           />
                         )
                       ) : (
@@ -175,8 +230,8 @@ const ReviewTransactions: React.FC = () => {
                         <SaveIcon />
                       </IconButton>
                     ) : (
-                      <IconButton onClick={() => handleDoubleClick(rowIdx, 'category')}>
-                        <EditIcon />
+                      <IconButton onClick={() => handleDeleteConfirmation(row.id)}>
+                        <DeleteIcon />
                       </IconButton>
                     )}
                   </TableCell>
@@ -186,6 +241,12 @@ const ReviewTransactions: React.FC = () => {
           </Table>
         </TableContainer>
       )}
+      <DeletePopup
+        open={openDialog}
+        handleClose={() => setOpenDialog(false)}
+        handleDelete={handleDelete}
+        deleteId={deleteId}
+      />
     </div>
   );
 };

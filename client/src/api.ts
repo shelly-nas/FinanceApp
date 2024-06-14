@@ -11,7 +11,7 @@ interface TransactionsQueryParams {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments"],
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments", "deleteTransactions"],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -94,8 +94,13 @@ export const api = createApi({
       }),
       invalidatesTags: ['uploadInvestments'],
     }),
-    // You can add more endpoints here following the same pattern
-    // ...
+    deleteTransaction: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/remove-transaction/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["deleteTransactions"],
+    }),
   }),
 });
 
@@ -110,4 +115,5 @@ export const {
   useGetCategoryListQuery,
   useGetInvestmentAccountsQuery,
   useUploadInvestmentsMutation,
+  useDeleteTransactionMutation,
 } = api;

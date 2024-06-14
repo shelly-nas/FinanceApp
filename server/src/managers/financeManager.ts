@@ -318,6 +318,22 @@ class FinanceManager {
 
     return createdIds;
   }
+
+  public async deleteTransaction(id: string): Promise<any> {
+    const client = await dbContext.connect();
+    const query = `
+      DELETE FROM public.${transaction_table}
+      WHERE id = $1
+      RETURNING *;
+    `;
+    try {
+        const result = await client.query(query, [id]);
+        return result.rows[0];
+    } finally {
+        client.release();
+    }
+}
+
 }
 
 export default new FinanceManager();
