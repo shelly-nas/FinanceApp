@@ -1,21 +1,21 @@
 export const bankMappings = {
-	ING: {
-		'Date': 'date_str',
-		'Name / Description': 'name_description',
-		'Account': 'account',
-		'Counterparty': 'counterparty',
-		'Debit/credit': 'debit_credit',
-		'Amount (EUR)': 'amount',
-		'Notifications': 'notifications'
+	ING_NL: {
+		'Datum': 'date_str',
+		'Naam / Omschrijving': 'name_description',
+		'Rekening': 'account',
+		'Tegenrekening': 'counterparty',
+		'Af Bij': 'debit_credit',
+		'Bedrag (EUR)': 'amount',
+		'Mededelingen': 'notifications'
 	},
-	ING_CC: {
-		'Date': 'date_str',
-		'Name / Description': 'name_description',
-		'Account': 'account',
-		'Counterparty': 'counterparty',
-		'Debit/credit': 'debit_credit',
-		'Amount (EUR)': 'amount',
-		'Notifications': 'notifications'
+	ING_SAVINGS_NL: {
+		'Datum': 'date_str',
+		'Omschrijving': 'name_description',
+		'Rekening naam': 'account',
+		'Tegenrekening': 'counterparty',
+		'Af Bij': 'debit_credit',
+		'Bedrag': 'amount',
+		'Mededelingen': 'notifications'
 	},
 	Rabobank: {
 		'Datum': 'date_str',

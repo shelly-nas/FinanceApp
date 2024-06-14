@@ -47,7 +47,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
     } else {
         alert('Unexpected error occurred while processing file, please refresh and try again.');
     }
-};
+  };
 
 
   const handleBankChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -89,8 +89,8 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
               onChange={handleBankChange}
               sx={{ textAlign: 'left' }} // Ensures the text is left-aligned
             >
-              <MenuItem value="ING">ING</MenuItem>
-              <MenuItem value="ING_CC">ING Credit Card</MenuItem>
+              <MenuItem value="ING_NL">ING (NL)</MenuItem>
+              <MenuItem value="ING_SAVINGS_NL">ING Savings (NL)</MenuItem>
               <MenuItem value="Rabobank">Rabobank</MenuItem> 
               <MenuItem value="Rabobank_CC">Rabobank Credit Card</MenuItem>
             </Select>

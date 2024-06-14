@@ -52,6 +52,15 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         entry['amount'] = parseFloat(entry['amount'].replace(',', '.'));
       }
 
+      // Set debit_credit NL to ENG
+      if (entry['debit_credit'] !== undefined) {
+        if (entry['debit_credit'] == 'Af') {
+          entry['debit_credit'] = 'Debit';
+        } else if (entry['debit_credit'] == 'Bij') {
+            entry['debit_credit'] = 'Credit';
+        }
+      }
+
       // Set debit_credit based on the amount if it's null
       if (entry['debit_credit'] === undefined) {
         entry['debit_credit'] = entry['amount'] < 0 ? 'Debit' : 'Credit';
@@ -74,7 +83,6 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
           if (entry['name_description']) {
             const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
             if (predictedCategory) {
-              console.log("predictedCategory: ", predictedCategory);
               entry['category'] = predictedCategory;
             }
           }
