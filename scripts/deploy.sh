@@ -3,6 +3,15 @@
 # Usage: ./deploy.sh <config> <workspace>
 # Example: ./deploy.sh client /home/pi/repos 
 
+# Function to handle errors
+error_handler() {
+    echo "Error occurred in script at line: ${1}."
+    exit 1
+}
+
+# Trap any script errors (non-zero exit codes) and call the error_handler function
+trap 'error_handler $LINENO' ERR
+
 # Validate arguments
 if [ "$#" -ne 2 ]; then
     echo "Usage: $0 <config> <workspace>

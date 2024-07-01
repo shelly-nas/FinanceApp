@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Function to handle errors
+error_handler() {
+    echo "Error occurred in script at line: ${1}."
+    exit 1
+}
+
+# Trap any script errors (non-zero exit codes) and call the error_handler function
+trap 'error_handler $LINENO' ERR
+
 # Save the current working directory
 WORKDIR=$(pwd)
 
@@ -31,7 +40,7 @@ npm install
 
 # Compile TypeScript
 echo "## Compiling TypeScript..."
-npm run build
+npm run buildt
 
 # Remove the .env file if it exists
 sudo rm -f .env
