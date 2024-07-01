@@ -40,7 +40,7 @@ npm install
 
 # Compile TypeScript
 echo "## Compiling TypeScript..."
-npm run buildt
+npm run build
 
 # Remove the .env file if it exists
 sudo rm -f .env
