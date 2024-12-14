@@ -43,7 +43,7 @@ case $CONFIG in
         EXEC_START="/home/pi/.nvm/versions/node/v20.11.1/bin/node dist/index.js"
         ;;
     *)
-        echo "Invalid config. Allowed values are: client, server, or plus."
+        echo "Invalid config. Allowed values are: client or server"
         exit 1
         ;;
 esac

@@ -1,0 +1,35 @@
+services:
+  client: # Frontend service
+    build:
+      context: ./client  # Path to the frontend code
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"  # Map Nginx port
+    depends_on:
+      - server
+
+  server: # Backend service
+    build:
+      context: ./server  # Path to the backend code
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # Map backend API port
+    environment:
+      - DATABASE_URL=postgres://financier:m0n3y@db:5432/finance
+    depends_on:
+      - db
+
+  db: # PostgreSQL database
+    image: postgres:latest
+    ports:
+      - "5432:5432"  # Map database port
+    environment:
+      POSTGRES_USER: financier
+      POSTGRES_PASSWORD: m0n3y
+      POSTGRES_DB: finance
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+    driver: local

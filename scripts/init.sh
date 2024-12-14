@@ -46,10 +46,8 @@ npm run build
 sudo rm -f .env
 echo "## Existing server .env file removed."
 
-# Define the path to the .env file in server directory
+# Create new .env file in server directory
 SERVER_ENV_FILE=".env"
-
-# Write the environment variables to the .env file in server directory
 {
     echo "DB_USER=${DB_USER}"
     echo "DB_PASSWORD=${DB_PASSWORD}"

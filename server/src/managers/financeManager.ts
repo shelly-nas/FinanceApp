@@ -123,21 +123,29 @@ class FinanceManager {
     let query = `
       WITH categorized_transactions AS (
         SELECT
-            ja.category,
-            ja.debit_credit,
+          ja.category,
+          SUM(
             CASE
-                WHEN ja.debit_credit = 'Debit' THEN -ja.amount
-                ELSE ja.amount
-            END AS adjusted_amount,
-            c.category_type
+              WHEN ja.debit_credit = 'Debit' THEN -ja.amount
+              ELSE ja.amount
+            END
+            ) AS total_adjusted_amount,
+            CASE 
+              WHEN c.income_outcome = 'Uitgaven' AND SUM(
+                CASE
+                  WHEN ja.debit_credit = 'Debit' THEN -ja.amount
+                  ELSE ja.amount
+                END
+              ) > 0 THEN 'Variabel'
+            ELSE c.category_type
+            END AS category_type,
+            c.income_outcome
         FROM
-            public.${transaction_table} ja
+          public.transactions ja
         JOIN
-            public.${category_table} c
-        ON
-            ja.category = c.category_name
+          public.categories c ON ja.category = c.category_name
         WHERE
-            c.category_type IN ('Vast', 'Variabel')
+          c.category_type IN ('Vast', 'Variabel')
     `;
 
     if (startDate) {
@@ -151,17 +159,18 @@ class FinanceManager {
     }
 
     query += `
+        GROUP BY ja.category, c.income_outcome, c.category_type  
       )
       SELECT 
-          category_type::text,
-          SUM(CASE WHEN category LIKE '%Inkomen%' THEN adjusted_amount::numeric ELSE 0::numeric END) AS income,
-          SUM(CASE WHEN category NOT LIKE '%Inkomen%' THEN -adjusted_amount::numeric ELSE 0::numeric END) AS expenses
+        category_type::text,
+        SUM(CASE WHEN total_adjusted_amount > 0 THEN total_adjusted_amount::numeric ELSE 0::numeric END) AS income,
+        SUM(CASE WHEN total_adjusted_amount < 0 THEN -total_adjusted_amount::numeric ELSE 0::numeric END) AS expenses
       FROM
-          categorized_transactions
+        categorized_transactions
       GROUP BY
-          category_type
+        category_type
       ORDER BY
-          category_type
+        category_type
     `;
 
     try {
