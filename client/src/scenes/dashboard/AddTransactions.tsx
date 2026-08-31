@@ -10,7 +10,7 @@ const AddTransactionsButton: React.FC = () => {
   const { palette } = useTheme();
   const spacing: number = 1.5;
   const navigate = useNavigate();
-  const { data: results, error, isLoading, refetch } = useGetEmptyCategoryTransactionsQuery();
+  const { refetch } = useGetEmptyCategoryTransactionsQuery();
 
   const handleUploadSuccess = () => {
     refetch();

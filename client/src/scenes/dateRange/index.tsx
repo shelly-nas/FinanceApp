@@ -21,14 +21,14 @@ const DateRange: React.FC = () => {
           <ArrowButton onClick={decrementMonth}>
             <ArrowLeftIcon sx={{fontSize: 20}} />
           </ArrowButton>
-          <Divider color={palette.cosmetics.color} orientation="vertical" flexItem />
+          <Divider color={palette.cosmetics.colorPrimary} orientation="vertical" flexItem />
           <FlexBetween gap="0.75rem" paddingLeft="10px" paddingRight="10px">
             <CalendarMonthIcon sx={{fontSize: 16}} />
             <Typography variant="h2">
               {`${firstDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} TO ${lastDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
             </Typography>
           </FlexBetween>
-          <Divider color={palette.cosmetics.color} orientation="vertical" flexItem/>
+          <Divider color={palette.cosmetics.colorPrimary} orientation="vertical" flexItem/>
           <ArrowButton onClick={incrementMonth}>
             <ArrowRightIcon sx={{fontSize: 20}} />
           </ArrowButton>

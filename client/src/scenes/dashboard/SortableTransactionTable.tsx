@@ -18,7 +18,7 @@ interface SortableTransactionTableProps {
 }
 
 const SortableTransactionTable: React.FC<SortableTransactionTableProps> = ({ items }) => {
-  const { palette, typography } = useTheme();
+  const { typography } = useTheme();
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [orderBy, setOrderBy] = useState<keyof Transaction>('date_str');
 

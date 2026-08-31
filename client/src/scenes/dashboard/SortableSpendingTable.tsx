@@ -109,7 +109,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({ title, it
                 <TableCell sx={{ ...typography.body2, width: '23%', minWidth: 170, textAlign: 'left', fontWeight: selectedCategory === item.category ? 'bold' : 'inherit' }}>{item.category}</TableCell>
                 <TableCell sx={{ width: '47%', minWidth: 100, fontWeight: selectedCategory === item.category ? 'bold' : 'inherit' }}>
                   <MultiColorProgress
-                    segments={[{ value: (item.total_amount / totalAmount) * 100, color: item.color }]}
+                    segments={[{ value: (item.total_amount / totalAmount) * 100, color: item.color, name: item.category }]}
                     height={8}
                   />
                 </TableCell>

@@ -1,34 +1,47 @@
 services:
-  client: # Frontend service
+  client: # Frontend service (nginx serving the built Vite app)
     build:
-      context: ./client  # Path to the frontend code
+      context: ./client
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"  # Map Nginx port
+      - "5173:80"  # Browse the app at http://localhost:5173
     depends_on:
       - server
 
   server: # Backend service
     build:
-      context: ./server  # Path to the backend code
+      context: ./server
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"  # Map backend API port
+      - "3000:3000"  # API only - there is no page at http://localhost:3000/
     environment:
-      - DATABASE_URL=postgres://financier:m0n3y@db:5432/finance
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: financier
+      DB_PASSWORD: m0n3y
+      DB_NAME: finance
+      SERVER_PORT: 3000
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db: # PostgreSQL database
-    image: postgres:latest
+    image: postgres:16-alpine  # Pinned: `latest` breaks an existing data volume on a major upgrade
     ports:
-      - "5432:5432"  # Map database port
+      - "5432:5432"
     environment:
       POSTGRES_USER: financier
       POSTGRES_PASSWORD: m0n3y
       POSTGRES_DB: finance
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./database/initProd.sql:/docker-entrypoint-initdb.d/01-init-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financier -d finance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   db_data:

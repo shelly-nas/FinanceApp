@@ -8,10 +8,30 @@ interface TransactionsQueryParams {
   ids?: string;
 }
 
+export interface Tag {
+  id: number;
+  tag_name: string;
+  color?: string | null;
+  budget?: number | null;
+  is_closed?: boolean;
+  notes?: string | null;
+  transaction_count?: number;
+}
+
+export interface TagSummary extends Tag {
+  total_spent: string;
+  total_received: string;
+  transaction_count: number;
+  first_transaction: string | null;
+  last_transaction: string | null;
+  by_category: { category: string | null; total_amount: string }[];
+  by_month: { month: string; total_amount: string }[];
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments", "deleteTransactions"],
+  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments", "deleteTransactions", "tags", "tagSummary", "transactionTags"],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -101,6 +121,56 @@ export const api = createApi({
       }),
       invalidatesTags: ["deleteTransactions"],
     }),
+    getTags: build.query<Tag[], { includeClosed?: boolean } | void>({
+      query: (args) => ({
+        url: `api/tags`,
+        params: args && args.includeClosed === false ? { includeClosed: 'false' } : undefined,
+      }),
+      providesTags: ["tags"],
+    }),
+    createTag: build.mutation<Tag, { tag_name: string; color?: string | null; budget?: number | null; notes?: string | null }>({
+      query: (tag) => ({
+        url: `api/tags`,
+        method: 'POST',
+        body: tag,
+      }),
+      invalidatesTags: ["tags"],
+    }),
+    updateTag: build.mutation<Tag, { id: number; updates: Partial<Tag> }>({
+      query: ({ id, updates }) => ({
+        url: `api/tags/${id}`,
+        method: 'PATCH',
+        body: updates,
+      }),
+      invalidatesTags: ["tags", "tagSummary"],
+    }),
+    deleteTag: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/tags/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["tags", "transactionTags"],
+    }),
+    getTagSummary: build.query<TagSummary, number>({
+      query: (id) => ({
+        url: `api/tags/${id}/summary`,
+      }),
+      providesTags: ["tagSummary"],
+    }),
+    getTransactionTags: build.query<Tag[], number>({
+      query: (id) => ({
+        url: `api/transactions/${id}/tags`,
+      }),
+      providesTags: ["transactionTags"],
+    }),
+    setTransactionTags: build.mutation<Tag[], { id: number; tagIds: number[] }>({
+      query: ({ id, tagIds }) => ({
+        url: `api/transactions/${id}/tags`,
+        method: 'PUT',
+        body: { tagIds },
+      }),
+      invalidatesTags: ["transactionTags", "tags", "tagSummary"],
+    }),
   }),
 });
 
@@ -116,4 +186,11 @@ export const {
   useGetInvestmentAccountsQuery,
   useUploadInvestmentsMutation,
   useDeleteTransactionMutation,
+  useGetTagsQuery,
+  useCreateTagMutation,
+  useUpdateTagMutation,
+  useDeleteTagMutation,
+  useGetTagSummaryQuery,
+  useGetTransactionTagsQuery,
+  useSetTransactionTagsMutation,
 } = api;

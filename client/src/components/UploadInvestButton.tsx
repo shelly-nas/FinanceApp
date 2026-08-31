@@ -24,7 +24,7 @@ const UploadInvestButton: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [popupActiveDate, setPopupActiveDate] = useState<string | null>(null);
+  const [, setPopupActiveDate] = useState<string | null>(null);
 
   const { data: results } = useGetInvestmentAccountsQuery();
   const accounts = results || [];
@@ -118,7 +118,7 @@ const UploadInvestButton: React.FC = () => {
               value={account}
               onChange={(e: SelectChangeEvent) => setAccount(e.target.value as string)}
               label="Account"
-              align="left"
+              sx={{ textAlign: 'left' }}
             >
               {accounts.map((acc: any) => (
                 <MenuItem key={acc.details} value={acc.details}>

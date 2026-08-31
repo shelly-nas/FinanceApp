@@ -30,7 +30,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
   const { firstDay, lastDay } = useDateRange();
   const navigate = useNavigate();
   
-  const { data: results, error, isLoading } = useGetTransactionsQuery({
+  const { data: results } = useGetTransactionsQuery({
     startDate: formatDate(firstDay),
     endDate: formatDate(lastDay),
   });
@@ -41,7 +41,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
     ? transactions.filter(transaction => transaction.category === selectedCategory)
     : [];
 
-  const handleEditTransactions = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditTransactions = async () => {
     const ids: number[] = filteredTransactions.map(item => item.id);;
     navigate('/review-transactions', { state: { transactionIds: JSON.stringify(ids) } });
   };

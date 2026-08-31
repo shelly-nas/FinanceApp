@@ -43,7 +43,7 @@ const PeriodSummary: React.FC<Props> = () => {
   const [openExpenses, setOpenExpenses] = useState(true);
   const { firstDay, lastDay } = useDateRange();
   
-  const { data: results, error, isLoading } = useGetIncomeExpensesSumQuery({
+  const { data: results } = useGetIncomeExpensesSumQuery({
     startDate: formatDate(firstDay),
     endDate: formatDate(lastDay),
   });
@@ -58,8 +58,8 @@ const PeriodSummary: React.FC<Props> = () => {
     setOpenExpenses(!openExpenses);
   };
 
-  const totalIncome = result.incomeItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-  const totalExpenses = result.expenseItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+  const totalIncome = result.incomeItems.reduce((sum, item) => sum + Number(item.amount), 0);
+  const totalExpenses = result.expenseItems.reduce((sum, item) => sum + Number(item.amount), 0);
   const netIncome = totalIncome - totalExpenses;
   const currentSavingsRate = totalIncome > 0 ? (netIncome / totalIncome) * 100 : 0;
 

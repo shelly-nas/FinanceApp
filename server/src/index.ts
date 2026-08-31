@@ -6,13 +6,16 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 const app = express();
-const port = process.env.SERVER_PORT;
+const port = process.env.SERVER_PORT || 3000;
 
 try {
   app.use(cors());
 	// app.use(express.json());
   app.use(bodyParser.json());
   // app.use(bodyParser.urlencoded({ extended: false }));
+  app.get('/api/health', (_req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
   app.use('/api', financeController);
 	app.use(morgan("common"));
 	

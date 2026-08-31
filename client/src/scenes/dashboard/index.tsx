@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Grid, Box, useTheme } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import AccountsOverview from "@/scenes/dashboard/AccountOverview";
 import PeriodSummary from "@/scenes/dashboard/PeriodSummary";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
@@ -10,7 +10,6 @@ import AddTransactionsButton from "@/scenes/dashboard/AddTransactions";
 import AddInvestmentsButton from "@/scenes/dashboard/AddInvestments";
 
 const Dashboard: React.FC = () => {
-  const { palette } = useTheme();
   const spacing: number = 1.5;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 

@@ -5,6 +5,8 @@ const category_table = "categories"
 const transaction_table = "transactions";
 const account_table = "accounts";
 const investment_table = "investments";
+const tag_table = "tags";
+const transaction_tag_table = "transaction_tags";
 
 class FinanceManager {
   public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
@@ -200,13 +202,32 @@ class FinanceManager {
 
   public async updateTransaction(id: string, updates: { [key: string]: any }): Promise<any> {
     const client = await dbContext.connect();
-  
-    // Constructing the set clause of the update query dynamically
-    const setClause = Object.keys(updates)
-      .map((key, index) => `${key} = $${index + 1}`)
+
+    // Column names cannot be parameterised, so only allow known-safe ones
+    // through - anything else would be interpolated straight into the SQL.
+    const allowedColumns = new Set([
+      'date_str',
+      'name_description',
+      'account',
+      'counterparty',
+      'category',
+      'debit_credit',
+      'amount',
+      'notifications',
+    ]);
+
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries
+      .map(([key], index) => `${key} = $${index + 1}`)
       .join(', ');
-  
-    const values = Object.values(updates);
+
+    const values = entries.map(([, value]) => value);
   
     let query = `
       UPDATE public.${transaction_table}
@@ -342,6 +363,228 @@ class FinanceManager {
         client.release();
     }
 }
+
+
+  // ---------------------------------------------------------------------------
+  // Tags
+  //
+  // A tag groups spending for an event that spans months (a holiday booked in
+  // February and taken in September). Unlike a category it is optional, and a
+  // transaction may carry more than one.
+  // ---------------------------------------------------------------------------
+
+  public async getTags(includeClosed = true): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.id,
+        t.tag_name,
+        t.color,
+        t.budget,
+        t.is_closed,
+        t.notes,
+        COUNT(tt.transaction_id)::int AS transaction_count
+      FROM public.${tag_table} t
+      LEFT JOIN public.${transaction_tag_table} tt ON tt.tag_id = t.id
+      ${includeClosed ? '' : 'WHERE t.is_closed = FALSE'}
+      GROUP BY t.id
+      ORDER BY t.is_closed ASC, t.tag_name ASC;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async createTag(tag: { tag_name: string, color?: string | null, budget?: number | null, notes?: string | null }): Promise<any> {
+    const client = await dbContext.connect();
+
+    const query = `
+      INSERT INTO public.${tag_table} (tag_name, color, budget, notes)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [
+        tag.tag_name,
+        tag.color ?? null,
+        tag.budget ?? null,
+        tag.notes ?? null,
+      ]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  public async updateTag(id: string, updates: { [key: string]: any }): Promise<any> {
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['tag_name', 'color', 'budget', 'is_closed', 'notes']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    const query = `
+      UPDATE public.${tag_table}
+      SET ${setClause}
+      WHERE id = $${values.length + 1}
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [...values, id]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  public async deleteTag(id: string): Promise<any> {
+    const client = await dbContext.connect();
+
+    // transaction_tags rows cascade; the transactions themselves are untouched.
+    const query = `
+      DELETE FROM public.${tag_table}
+      WHERE id = $1
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [id]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  // Replace the full tag set for one transaction in a single transaction.
+  public async setTransactionTags(transactionId: string, tagIds: number[]): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        `DELETE FROM public.${transaction_tag_table} WHERE transaction_id = $1`,
+        [transactionId],
+      );
+
+      if (tagIds.length > 0) {
+        await client.query(
+          `INSERT INTO public.${transaction_tag_table} (transaction_id, tag_id)
+           SELECT $1, UNNEST($2::int[])
+           ON CONFLICT DO NOTHING`,
+          [transactionId, tagIds],
+        );
+      }
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+
+    return this.getTagsForTransaction(transactionId);
+  }
+
+  public async getTagsForTransaction(transactionId: string): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT t.id, t.tag_name, t.color
+      FROM public.${tag_table} t
+      JOIN public.${transaction_tag_table} tt ON tt.tag_id = t.id
+      WHERE tt.transaction_id = $1
+      ORDER BY t.tag_name ASC;
+    `;
+
+    try {
+      const result = await client.query(query, [transactionId]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  // Totals for one event across its whole lifetime, ignoring month boundaries.
+  public async getTagSummary(id: string): Promise<any> {
+    const client = await dbContext.connect();
+
+    const totalsQuery = `
+      SELECT
+        t.id,
+        t.tag_name,
+        t.color,
+        t.budget,
+        t.is_closed,
+        t.notes,
+        COALESCE(SUM(CASE WHEN tr.debit_credit = 'Debit' THEN tr.amount ELSE 0 END), 0) AS total_spent,
+        COALESCE(SUM(CASE WHEN tr.debit_credit = 'Credit' THEN tr.amount ELSE 0 END), 0) AS total_received,
+        COUNT(tr.id)::int AS transaction_count,
+        MIN(tr.date_str) AS first_transaction,
+        MAX(tr.date_str) AS last_transaction
+      FROM public.${tag_table} t
+      LEFT JOIN public.${transaction_tag_table} tt ON tt.tag_id = t.id
+      LEFT JOIN public.${transaction_table} tr ON tr.id = tt.transaction_id
+      WHERE t.id = $1
+      GROUP BY t.id;
+    `;
+
+    // Where the money went within the event, and how it spreads over months.
+    const byCategoryQuery = `
+      SELECT
+        tr.category,
+        COALESCE(SUM(CASE WHEN tr.debit_credit = 'Debit' THEN tr.amount ELSE -tr.amount END), 0) AS total_amount
+      FROM public.${transaction_tag_table} tt
+      JOIN public.${transaction_table} tr ON tr.id = tt.transaction_id
+      WHERE tt.tag_id = $1
+      GROUP BY tr.category
+      ORDER BY total_amount DESC;
+    `;
+
+    const byMonthQuery = `
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', tr.date_str), 'YYYY-MM') AS month,
+        COALESCE(SUM(CASE WHEN tr.debit_credit = 'Debit' THEN tr.amount ELSE -tr.amount END), 0) AS total_amount
+      FROM public.${transaction_tag_table} tt
+      JOIN public.${transaction_table} tr ON tr.id = tt.transaction_id
+      WHERE tt.tag_id = $1
+      GROUP BY 1
+      ORDER BY 1 ASC;
+    `;
+
+    try {
+      const [totals, byCategory, byMonth] = await Promise.all([
+        client.query(totalsQuery, [id]),
+        client.query(byCategoryQuery, [id]),
+        client.query(byMonthQuery, [id]),
+      ]);
+
+      if (totals.rows.length === 0) return null;
+
+      return {
+        ...totals.rows[0],
+        by_category: byCategory.rows,
+        by_month: byMonth.rows,
+      };
+    } finally {
+      client.release();
+    }
+  }
 
 }
 
