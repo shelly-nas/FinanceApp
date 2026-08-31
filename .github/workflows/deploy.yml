@@ -1,40 +1,48 @@
-name: Deploy to Raspberry Pi
+name: Finance App Build, Push & Deploy
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  setup:
-    runs-on: raspberry-pi
-    steps:
-      # Add steps that stops the services running
-      - name: Checkout code
-        uses: actions/checkout@v2
+  build-server:
+    name: Build and Push Server
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      image_tag: ${{ vars.REGISTRY_URL }}/finance-app-server:latest
+      context: ./server
+    secrets:
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "20.11.1"
+  build-client:
+    name: Build and Push Client
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      image_tag: ${{ vars.REGISTRY_URL }}/finance-app-client:latest
+      context: ./client
+    secrets:
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Install dependencies and compile
-        env:
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_USER: ${{ secrets.DB_USER }}
-          HOST: ${{ secrets.HOST }}
-          PORT: ${{ secrets.PORT }}
-          TABLE_NAME: ${{ secrets.TABLE_NAME }}
-        run: bash ./scripts/init.sh
-        
   deploy:
-    needs: setup
-    runs-on: raspberry-pi
-    strategy:
-      matrix:
-        config_name: [client, server] # List all your configurations here
-    steps:
-      - name: Deploy with Specific Config
-        run: bash ./scripts/deploy.sh ${{ matrix.config_name }} "${{ github.workspace }}"
+    name: Deploy from Registry
+    needs: [build-server, build-client]
+    if: ${{ success() }}
+    uses: shelly-nas/shared-workflows/.github/workflows/deploy.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      deploy_directory: /volume1/docker/finance-app
+      compose_file: docker-compose.prod.yml
+      image_tag: latest
+    secrets:
+      registry_username: ${{ vars.REGISTRY_USERNAME }}
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+      env_file_content: |
+        REGISTRY=${{ vars.REGISTRY_URL }}
+        POSTGRES_DB=${{ vars.POSTGRES_DB }}
+        POSTGRES_USER=${{ vars.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        TZ=${{ vars.TZ || 'Europe/Amsterdam' }}

@@ -4,7 +4,7 @@ import { bankMappings } from '@/models/bankTransactionModel'
 import multer from 'multer';
 import fs from 'fs';
 import csvParser from 'csv-parser';
-import { predictCategory } from '@/machineLearningModels/categoryModel';
+import { classifyWith, trainModel } from '@/machineLearningModels/categoryModel';
 import bodyParser from 'body-parser';
 
 const router = express.Router();
@@ -78,12 +78,29 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
     })
     .on('end', async () => {
       try {
-        // Predict the category using the ML model
-        for (const entry of entries) {
-          if (entry['name_description']) {
-            const predictedCategory = await predictCategory(entry['name_description'], entry['account'], entry['notifications']);
-            if (predictedCategory) {
-              entry['category'] = predictedCategory;
+        // Train the classifier once for the whole batch - training reads every
+        // stored transaction, so doing it per row is quadratic on large imports.
+        // With no prior transactions there is nothing to learn from, in which
+        // case every row simply stays uncategorised for manual review.
+        let classifier: Awaited<ReturnType<typeof trainModel>> | null = null;
+        try {
+          classifier = await trainModel();
+        } catch (trainingError) {
+          console.warn('Category prediction skipped, model could not be trained:', trainingError);
+        }
+
+        if (classifier) {
+          for (const entry of entries) {
+            if (entry['name_description']) {
+              const predictedCategory = await classifyWith(
+                classifier,
+                entry['name_description'],
+                entry['account'],
+                entry['notifications'],
+              );
+              if (predictedCategory) {
+                entry['category'] = predictedCategory;
+              }
             }
           }
         }
@@ -222,6 +239,109 @@ router.delete('/remove-transaction/:id', async (req: Request, res: Response) => 
   }
 });
 
+// --- Tags -------------------------------------------------------------------
+
+router.get('/tags', async (req: Request, res: Response) => {
+  // ?includeClosed=false hides finished events from pickers.
+  const includeClosed = req.query.includeClosed !== 'false';
+
+  try {
+    const tags = await FinanceManager.getTags(includeClosed);
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+router.post('/tags', async (req: Request, res: Response) => {
+  const { tag_name, color, budget, notes } = req.body;
+
+  if (!tag_name || typeof tag_name !== 'string' || !tag_name.trim()) {
+    return res.status(400).json({ error: 'tag_name is required' });
+  }
+
+  try {
+    const tag = await FinanceManager.createTag({ tag_name: tag_name.trim(), color, budget, notes });
+    res.status(201).json(tag);
+  } catch (error: any) {
+    // 23505 = unique_violation on tag_name
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'A tag with that name already exists' });
+    }
+    res.status(500).json({ error });
+  }
+});
+
+router.patch('/tags/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const tag = await FinanceManager.updateTag(id, req.body);
+    if (!tag) return res.status(404).json({ error: 'Tag not found' });
+    res.status(200).json(tag);
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'A tag with that name already exists' });
+    }
+    res.status(500).json({ error });
+  }
+});
+
+router.delete('/tags/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const tag = await FinanceManager.deleteTag(id);
+    if (!tag) return res.status(404).json({ error: 'Tag not found' });
+    res.status(200).json({ message: 'Tag deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+router.get('/tags/:id/summary', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const summary = await FinanceManager.getTagSummary(id);
+    if (!summary) return res.status(404).json({ error: 'Tag not found' });
+    res.status(200).json(summary);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+router.get('/transactions/:id/tags', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const tags = await FinanceManager.getTagsForTransaction(id);
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+// Replaces the transaction's tags with the supplied set.
+router.put('/transactions/:id/tags', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { tagIds } = req.body;
+
+  if (!Array.isArray(tagIds) || tagIds.some((t) => !Number.isInteger(t))) {
+    return res.status(400).json({ error: 'tagIds must be an array of integers' });
+  }
+
+  try {
+    const tags = await FinanceManager.setTransactionTags(id, tagIds);
+    res.status(200).json(tags);
+  } catch (error: any) {
+    // 23503 = foreign_key_violation (unknown transaction or tag)
+    if (error?.code === '23503') {
+      return res.status(400).json({ error: 'Unknown transaction or tag id' });
+    }
+    res.status(500).json({ error });
+  }
+});
 
 
 export default router;

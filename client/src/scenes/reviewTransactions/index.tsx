@@ -4,6 +4,7 @@ import {
   TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box, Select, MenuItem,
   useTheme
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import { useLocation } from 'react-router-dom';
@@ -11,6 +12,7 @@ import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdat
 import ActionButtons from '../subHeader';
 import DashboardBox from '@/components/DashboardBox';
 import DeletePopup from '@/components/DeletePopup';
+import TagPicker from '@/components/TagPicker';
 
 interface Transaction {
   id: number;
@@ -38,7 +40,7 @@ const ReviewTransactions: React.FC = () => {
     skip: transactionIds !== null
   });
 
-  const { data: categoryList, error: categoryError, isLoading: isLoadingCategory } = useGetCategoryListQuery();
+  const { data: categoryList } = useGetCategoryListQuery();
 
   const [updateTransaction] = useUpdateTransactionMutation();
   const [deleteTransaction] = useDeleteTransactionMutation();
@@ -62,7 +64,10 @@ const ReviewTransactions: React.FC = () => {
     setEditValues({ [colKey]: reviewTransactions[rowIdx][colKey] });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { value: unknown }>, colKey: keyof Transaction) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | number>,
+    colKey: keyof Transaction,
+  ) => {
     setEditValues((prev) => ({
       ...prev,
       [colKey]: e.target.value as string,
@@ -155,6 +160,7 @@ const ReviewTransactions: React.FC = () => {
                     </TableSortLabel>
                   </TableCell>
                 ))}
+                <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }}>tags</TableCell>
                 <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }} >edit</TableCell>
               </TableRow>
             </TableHead>
@@ -194,7 +200,7 @@ const ReviewTransactions: React.FC = () => {
                               },
                             }}
                           >
-                            {categoryList.map(option => (
+                            {(categoryList ?? []).map((option: { category_name: string }) => (
                               <MenuItem 
                                 key={option.category_name} 
                                 value={option.category_name}
@@ -224,6 +230,9 @@ const ReviewTransactions: React.FC = () => {
                       )}
                     </TableCell>
                   ))}
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <TagPicker transactionId={row.id} />
+                  </TableCell>
                   <TableCell>
                     {editIdx?.rowIdx === rowIdx ? (
                       <IconButton onClick={() => handleSave(rowIdx)}>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel, Box, Modal } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useUploadTransactionsMutation } from '@/api';
@@ -32,13 +33,18 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
         try {
             const response = await postUploadTransactions({ formData, bankType: bank });
 
-            if (response.data.message == "Entries imported successfully") {
+            if ('data' in response && response.data?.message === "Entries imported successfully") {
                 setLoading(false);
                 onUploadSuccess();
                 navigate('/review-transactions', { state: { transactionIds: JSON.stringify(response.data.createdIds) } });
             } else {
                 setLoading(false);
-                setError(response.error?.data || 'Error uploading file');
+                const failure = 'error' in response ? response.error : undefined;
+                const message =
+                    failure && 'data' in failure && typeof failure.data === 'string'
+                        ? failure.data
+                        : 'Error uploading file';
+                setError(message);
             }
         } catch (error) {
             setLoading(false);
@@ -50,8 +56,8 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
   };
 
 
-  const handleBankChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setBank(event.target.value as string);
+  const handleBankChange = (event: SelectChangeEvent<string>) => {
+    setBank(event.target.value);
   };
 
   const handleOpen = () => {

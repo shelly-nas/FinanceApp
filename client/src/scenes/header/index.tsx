@@ -1,11 +1,14 @@
-import { Typography, useTheme } from "@mui/material"
+import { Typography, useTheme, Button } from "@mui/material"
 import FlexBetween from "@/components/FlexBetween"
 import SavingsIcon from '@mui/icons-material/Savings';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import { Link, useLocation } from 'react-router-dom';
 
 type Props = {};
 
-const Header = (props: Props) => {
+const Header = (_props: Props) => {
   const{ palette } = useTheme();
+  const { pathname } = useLocation();
 
   return(
     <FlexBetween mb="0.25rem" p="0.5rem 0rem">
@@ -15,6 +18,18 @@ const Header = (props: Props) => {
         <Typography variant="h1">
           Finance Overview
         </Typography>
+      </FlexBetween>
+
+      {/* RIGHT SIDE */}
+      <FlexBetween gap="0.75rem">
+        <Button
+          component={Link}
+          to={pathname === '/events' ? '/' : '/events'}
+          startIcon={<LocalOfferIcon />}
+          sx={{ color: palette.grey[700] }}
+        >
+          {pathname === '/events' ? 'Dashboard' : 'Events'}
+        </Button>
       </FlexBetween>
     </FlexBetween>
   )

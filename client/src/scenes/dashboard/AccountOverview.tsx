@@ -30,7 +30,7 @@ const AccountsOverview: React.FC = () => {
   
   const visibilityStyle = visible ? "" : "blur-text";
 
-  const { data: results, error, isLoading } = useGetAccountOverviewQuery();
+  const { data: results } = useGetAccountOverviewQuery();
   const categories = results as unknown[] as AccountCategory[] || [];
   const groupedCategories = groupByAccountType(categories);
 

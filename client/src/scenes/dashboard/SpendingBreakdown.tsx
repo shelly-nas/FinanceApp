@@ -37,7 +37,7 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
   const { palette } = useTheme();
   const { firstDay, lastDay } = useDateRange();
 
-  const { data: results, error, isLoading } = useGetCategorySumsQuery({
+  const { data: results } = useGetCategorySumsQuery({
     startDate: formatDate(firstDay),
     endDate: formatDate(lastDay),
   });

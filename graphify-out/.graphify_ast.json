@@ -1,0 +1,3749 @@
+{
+  "nodes": [
+    {
+      "id": "server_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "server/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_index_app",
+      "label": "app",
+      "file_type": "code",
+      "source_file": "server/src/index.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "server_src_context_dbcontext_ts",
+      "label": "dbContext.ts",
+      "file_type": "code",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "context_dbcontext_dbcontext",
+      "label": "DbContext",
+      "file_type": "code",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "context_dbcontext_dbcontext_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "context_dbcontext_dbcontext_connect",
+      "label": ".connect()",
+      "file_type": "code",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "server_src_managers_financemanager_ts",
+      "label": "financeManager.ts",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "managers_financemanager_financemanager",
+      "label": "FinanceManager",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "managers_financemanager_financemanager_addtransactions",
+      "label": ".addTransactions()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "managers_financemanager_financemanager_gettransactions",
+      "label": ".getTransactions()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "managers_financemanager_financemanager_getcategorysums",
+      "label": ".getCategorySums()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L72"
+    },
+    {
+      "id": "managers_financemanager_financemanager_getincomeexpensessum",
+      "label": ".getIncomeExpensesSum()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L119"
+    },
+    {
+      "id": "managers_financemanager_financemanager_getemptycategorytransactions",
+      "label": ".getEmptyCategoryTransactions()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L184"
+    },
+    {
+      "id": "managers_financemanager_financemanager_updatetransaction",
+      "label": ".updateTransaction()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L201"
+    },
+    {
+      "id": "managers_financemanager_financemanager_getaccountoverview",
+      "label": ".getAccountOverview()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L226"
+    },
+    {
+      "id": "managers_financemanager_financemanager_getcategorylist",
+      "label": ".getCategoryList()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L268"
+    },
+    {
+      "id": "managers_financemanager_financemanager_getinvestmentaccounts",
+      "label": ".getInvestmentAccounts()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L285"
+    },
+    {
+      "id": "managers_financemanager_financemanager_addinvestments",
+      "label": ".addInvestments()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L302"
+    },
+    {
+      "id": "managers_financemanager_financemanager_deletetransaction",
+      "label": ".deleteTransaction()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L331"
+    },
+    {
+      "id": "server_src_models_financemodel_ts",
+      "label": "financeModel.ts",
+      "file_type": "code",
+      "source_file": "server/src/models/financeModel.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "models_financemodel_transactions",
+      "label": "Transactions",
+      "file_type": "code",
+      "source_file": "server/src/models/financeModel.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "models_financemodel_transactions_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "server/src/models/financeModel.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "server_src_models_banktransactionmodel_ts",
+      "label": "bankTransactionModel.ts",
+      "file_type": "code",
+      "source_file": "server/src/models/bankTransactionModel.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "models_banktransactionmodel_bankmappings",
+      "label": "bankMappings",
+      "file_type": "code",
+      "source_file": "server/src/models/bankTransactionModel.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_machinelearningmodels_categorymodel_ts",
+      "label": "categoryModel.ts",
+      "file_type": "code",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "machinelearningmodels_categorymodel_preprocesstext",
+      "label": "preprocessText()",
+      "file_type": "code",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "machinelearningmodels_categorymodel_trainmodel",
+      "label": "trainModel()",
+      "file_type": "code",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "machinelearningmodels_categorymodel_predictcategory",
+      "label": "predictCategory()",
+      "file_type": "code",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "server_src_controllers_financecontroller_ts",
+      "label": "financeController.ts",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "controllers_financecontroller_router",
+      "label": "router",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "controllers_financecontroller_upload",
+      "label": "upload",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "controllers_financecontroller_reformatdate",
+      "label": "reformatDate()",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "controllers_financecontroller_entries",
+      "label": "entries",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "controllers_financecontroller_entry",
+      "label": "entry",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L38"
+    },
+    {
+      "id": "controllers_financecontroller_idlist",
+      "label": "idList",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L106"
+    },
+    {
+      "id": "client_vite_config_ts",
+      "label": "vite.config.ts",
+      "file_type": "code",
+      "source_file": "client/vite.config.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_src_app_tsx",
+      "label": "App.tsx",
+      "file_type": "code",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_app_app",
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "client_src_main_tsx",
+      "label": "main.tsx",
+      "file_type": "code",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_main_store",
+      "label": "store",
+      "file_type": "code",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "client_src_api_ts",
+      "label": "api.ts",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_api_transactionsqueryparams",
+      "label": "TransactionsQueryParams",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_api_api",
+      "label": "api",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "client_src_expanded_theme_ts",
+      "label": "expanded-theme.ts",
+      "file_type": "code",
+      "source_file": "client/src/expanded-theme.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_expanded_theme_palettecolor",
+      "label": "PaletteColor",
+      "file_type": "code",
+      "source_file": "client/src/expanded-theme.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_expanded_theme_palette",
+      "label": "Palette",
+      "file_type": "code",
+      "source_file": "client/src/expanded-theme.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "client_src_theme_ts",
+      "label": "theme.ts",
+      "file_type": "code",
+      "source_file": "client/src/theme.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_theme_tokens",
+      "label": "tokens",
+      "file_type": "code",
+      "source_file": "client/src/theme.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "src_theme_themesettings",
+      "label": "themeSettings",
+      "file_type": "code",
+      "source_file": "client/src/theme.ts",
+      "source_location": "L46"
+    },
+    {
+      "id": "client_src_scenes_reviewtransactions_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "reviewtransactions_index_transaction",
+      "label": "Transaction",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "reviewtransactions_index_reviewtransactions",
+      "label": "ReviewTransactions()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "client_src_scenes_daterange_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "daterange_index_daterange",
+      "label": "DateRange()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "client_src_scenes_daterange_daterangecontext_tsx",
+      "label": "DateRangeContext.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "daterange_daterangecontext_daterangecontextprops",
+      "label": "DateRangeContextProps",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "daterange_daterangecontext_daterangecontext",
+      "label": "DateRangeContext",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "daterange_daterangecontext_daterangeprovider",
+      "label": "DateRangeProvider()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "daterange_daterangecontext_usedaterange",
+      "label": "useDateRange()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L52"
+    },
+    {
+      "id": "daterange_daterangecontext_formatdate",
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L60"
+    },
+    {
+      "id": "client_src_scenes_daterange_daterangebox_tsx",
+      "label": "DateRangeBox.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeBox.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "daterange_daterangebox_daterangebox",
+      "label": "DateRangeBox",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeBox.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "client_src_scenes_dashboard_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_index_dashboard",
+      "label": "Dashboard()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "label": "ReviewTransaction.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_reviewtransaction_props",
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "dashboard_reviewtransaction_reviewbutton",
+      "label": "ReviewButton()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "label": "SortableTransactionTable.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_sortabletransactiontable_transaction",
+      "label": "Transaction",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "dashboard_sortabletransactiontable_sortabletransactiontableprops",
+      "label": "SortableTransactionTableProps",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "dashboard_sortabletransactiontable_sortabletransactiontable",
+      "label": "SortableTransactionTable()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "label": "TransactionDetails.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_transactiondetails_transaction",
+      "label": "Transaction",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "dashboard_transactiondetails_transactiondetailsprops",
+      "label": "TransactionDetailsProps",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "dashboard_transactiondetails_transactiondetails",
+      "label": "TransactionDetails()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "client_src_scenes_dashboard_addinvestments_tsx",
+      "label": "AddInvestments.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_addinvestments_addinvestmentsbutton",
+      "label": "AddInvestmentsButton()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "label": "SpendingBreakdown.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_spendingbreakdown_categorysums",
+      "label": "CategorySums",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "dashboard_spendingbreakdown_spendingbreakdownprops",
+      "label": "SpendingBreakdownProps",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "dashboard_spendingbreakdown_categorizeitems",
+      "label": "categorizeItems()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "dashboard_spendingbreakdown_spendingbreakdown",
+      "label": "SpendingBreakdown()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L36"
+    },
+    {
+      "id": "client_src_scenes_dashboard_periodsummary_tsx",
+      "label": "PeriodSummary.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_periodsummary_exchangetype",
+      "label": "ExchangeType",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "dashboard_periodsummary_incomeexpenseitem",
+      "label": "IncomeExpenseItem",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "dashboard_periodsummary_props",
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "dashboard_periodsummary_splitincomeexpense",
+      "label": "splitIncomeExpense()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L22"
+    },
+    {
+      "id": "dashboard_periodsummary_periodsummary",
+      "label": "PeriodSummary()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L40"
+    },
+    {
+      "id": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "label": "SortableSpendingTable.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_sortablespendingtable_sortablespendingtableprops",
+      "label": "SortableSpendingTableProps",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "dashboard_sortablespendingtable_sortablespendingtable",
+      "label": "SortableSpendingTable()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "client_src_scenes_dashboard_addtransactions_tsx",
+      "label": "AddTransactions.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_addtransactions_addtransactionsbutton",
+      "label": "AddTransactionsButton()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "client_src_scenes_dashboard_accountoverview_tsx",
+      "label": "AccountOverview.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_accountoverview_accountcategory",
+      "label": "AccountCategory",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "dashboard_accountoverview_groupbyaccounttype",
+      "label": "groupByAccountType()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "dashboard_accountoverview_accountsoverview",
+      "label": "AccountsOverview()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "client_src_scenes_subheader_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "subheader_index_actionbuttons",
+      "label": "ActionButtons()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "client_src_scenes_header_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "header_index_props",
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "header_index_header",
+      "label": "Header()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "client_src_components_dashboardbox_tsx",
+      "label": "DashboardBox.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/DashboardBox.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_dashboardbox_dashboardbox",
+      "label": "DashboardBox",
+      "file_type": "code",
+      "source_file": "client/src/components/DashboardBox.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "client_src_components_uploadinvestbutton_tsx",
+      "label": "UploadInvestButton.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_uploadinvestbutton_investment",
+      "label": "Investment",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "components_uploadinvestbutton_uploadinvestbutton",
+      "label": "UploadInvestButton()",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "components_uploadinvestbutton_style",
+      "label": "style",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L252"
+    },
+    {
+      "id": "client_src_components_uploadbutton_tsx",
+      "label": "UploadButton.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_uploadbutton_uploadbuttonprops",
+      "label": "UploadButtonProps",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "components_uploadbutton_uploadbutton",
+      "label": "UploadButton()",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L13"
+    },
+    {
+      "id": "components_uploadbutton_style",
+      "label": "style",
+      "file_type": "code",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L156"
+    },
+    {
+      "id": "client_src_components_flexbetween_tsx",
+      "label": "FlexBetween.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/FlexBetween.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_flexbetween_flexbetween",
+      "label": "FlexBetween",
+      "file_type": "code",
+      "source_file": "client/src/components/FlexBetween.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "client_src_components_deletepopup_tsx",
+      "label": "DeletePopup.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_deletepopup_deletepopupprops",
+      "label": "DeletePopupProps",
+      "file_type": "code",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "components_deletepopup_deletepopup",
+      "label": "DeletePopup()",
+      "file_type": "code",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "components_deletepopup_style",
+      "label": "style",
+      "file_type": "code",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L64"
+    },
+    {
+      "id": "client_src_components_arrowbutton_tsx",
+      "label": "ArrowButton.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/ArrowButton.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_arrowbutton_arrowbutton",
+      "label": "ArrowButton",
+      "file_type": "code",
+      "source_file": "client/src/components/ArrowButton.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "client_src_components_multicolorprogress_tsx",
+      "label": "MultiColorProgress.tsx",
+      "file_type": "code",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_multicolorprogress_multicolorprogressprops",
+      "label": "MultiColorProgressProps",
+      "file_type": "code",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "components_multicolorprogress_multicolorprogress",
+      "label": "MultiColorProgress()",
+      "file_type": "code",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L9"
+    }
+  ],
+  "edges": [
+    {
+      "source": "server_src_index_ts",
+      "target": "register",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index_ts",
+      "target": "express",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index_ts",
+      "target": "body_parser",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index_ts",
+      "target": "server_src_controllers_financecontroller_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index_ts",
+      "target": "cors",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index_ts",
+      "target": "morgan",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index_ts",
+      "target": "src_index_app",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_context_dbcontext_ts",
+      "target": "pg",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_context_dbcontext_ts",
+      "target": "dotenv",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_context_dbcontext_ts",
+      "target": "context_dbcontext_dbcontext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "context_dbcontext_dbcontext",
+      "target": "context_dbcontext_dbcontext_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "context_dbcontext_dbcontext",
+      "target": "context_dbcontext_dbcontext_connect",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/dbContext.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_managers_financemanager_ts",
+      "target": "server_src_context_dbcontext_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_managers_financemanager_ts",
+      "target": "server_src_models_financemodel_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_managers_financemanager_ts",
+      "target": "managers_financemanager_financemanager",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_addtransactions",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_gettransactions",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getcategorysums",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getincomeexpensessum",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getemptycategorytransactions",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L184",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_updatetransaction",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getaccountoverview",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L226",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getcategorylist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L268",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getinvestmentaccounts",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L285",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_addinvestments",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L302",
+      "weight": 1.0
+    },
+    {
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_deletetransaction",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L331",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_models_financemodel_ts",
+      "target": "models_financemodel_transactions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/models/financeModel.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "models_financemodel_transactions",
+      "target": "models_financemodel_transactions_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/models/financeModel.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_models_banktransactionmodel_ts",
+      "target": "models_banktransactionmodel_bankmappings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/models/bankTransactionModel.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_machinelearningmodels_categorymodel_ts",
+      "target": "natural",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_machinelearningmodels_categorymodel_ts",
+      "target": "server_src_managers_financemanager_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_machinelearningmodels_categorymodel_ts",
+      "target": "machinelearningmodels_categorymodel_preprocesstext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_machinelearningmodels_categorymodel_ts",
+      "target": "machinelearningmodels_categorymodel_trainmodel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_machinelearningmodels_categorymodel_ts",
+      "target": "machinelearningmodels_categorymodel_predictcategory",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "machinelearningmodels_categorymodel_trainmodel",
+      "target": "machinelearningmodels_categorymodel_preprocesstext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "machinelearningmodels_categorymodel_predictcategory",
+      "target": "machinelearningmodels_categorymodel_trainmodel",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "machinelearningmodels_categorymodel_predictcategory",
+      "target": "machinelearningmodels_categorymodel_preprocesstext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/machineLearningModels/categoryModel.ts",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "express",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "server_src_managers_financemanager_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "server_src_models_banktransactionmodel_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "models_banktransactionmodel_bankmappings",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "multer",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "fs",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "csv_parser",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "server_src_machinelearningmodels_categorymodel_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "machinelearningmodels_categorymodel_predictcategory",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "body_parser",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_router",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_upload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_reformatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_entries",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_entry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_idlist",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L106",
+      "weight": 1.0
+    },
+    {
+      "source": "client_vite_config_ts",
+      "target": "vite",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/vite.config.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_vite_config_ts",
+      "target": "plugin_react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/vite.config.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_vite_config_ts",
+      "target": "path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/vite.config.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "client_src_scenes_header_index_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "client_src_scenes_dashboard_index_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "styles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "client_src_theme_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "src_theme_themesettings",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "client_src_scenes_daterange_daterangecontext_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "daterange_daterangecontext_daterangeprovider",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "client_src_scenes_reviewtransactions_index_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_app_tsx",
+      "target": "src_app_app",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "client",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "client_src_app_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "users_jelle_documents_github_financeapp_1_client_src_index_css",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "toolkit",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "src_api_api",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "react_redux",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "query",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_main_tsx",
+      "target": "src_main_store",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/main.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_api_ts",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_api_ts",
+      "target": "client_src_components_uploadinvestbutton_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_api_ts",
+      "target": "components_uploadinvestbutton_investment",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_api_ts",
+      "target": "src_api_transactionsqueryparams",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_api_ts",
+      "target": "src_api_api",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_expanded_theme_ts",
+      "target": "createpalette",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/expanded-theme.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_expanded_theme_ts",
+      "target": "src_expanded_theme_palettecolor",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/expanded-theme.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_expanded_theme_ts",
+      "target": "src_expanded_theme_palette",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/expanded-theme.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_theme_ts",
+      "target": "icons_material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/theme.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_theme_ts",
+      "target": "src_theme_tokens",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/theme.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_theme_ts",
+      "target": "src_theme_themesettings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/theme.ts",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "delete",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "save",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "src_api_usegettransactionsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "src_api_usegetemptycategorytransactionsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "src_api_useupdatetransactionmutation",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "src_api_usegetcategorylistquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "src_api_usedeletetransactionmutation",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "client_src_scenes_subheader_index_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "client_src_components_deletepopup_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "reviewtransactions_index_transaction",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "reviewtransactions_index_reviewtransactions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "client_src_components_flexbetween_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "arrowleft",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "arrowright",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "calendarmonth",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "client_src_components_arrowbutton_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "client_src_scenes_daterange_daterangebox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "client_src_scenes_daterange_daterangecontext_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_index_tsx",
+      "target": "daterange_index_daterange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_daterangecontextprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_daterangecontext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_daterangeprovider",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangebox_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeBox.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangebox_tsx",
+      "target": "system",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeBox.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_daterange_daterangebox_tsx",
+      "target": "daterange_daterangebox_daterangebox",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeBox.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_accountoverview_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_periodsummary_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_daterange_index_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_addtransactions_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "client_src_scenes_dashboard_addinvestments_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_index_tsx",
+      "target": "dashboard_index_dashboard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/index.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "styles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "receiptlong",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "dashboard_reviewtransaction_props",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_reviewtransaction_tsx",
+      "target": "dashboard_reviewtransaction_reviewbutton",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/ReviewTransaction.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "target": "dashboard_sortabletransactiontable_transaction",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "target": "dashboard_sortabletransactiontable_sortabletransactiontableprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "target": "dashboard_sortabletransactiontable_sortabletransactiontable",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "edit",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "users_jelle_documents_github_financeapp_1_client_src_styles_css",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "client_src_scenes_daterange_daterangecontext_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "src_api_usegettransactionsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "dashboard_transactiondetails_transaction",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "dashboard_transactiondetails_transactiondetailsprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_transactiondetails_tsx",
+      "target": "dashboard_transactiondetails_transactiondetails",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "styles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "client_src_components_uploadinvestbutton_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "src_api_usegetemptycategorytransactionsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addinvestments_tsx",
+      "target": "dashboard_addinvestments_addinvestmentsbutton",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "client_src_components_multicolorprogress_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "client_src_scenes_daterange_daterangecontext_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "src_api_usegetcategorysumsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "dashboard_spendingbreakdown_categorysums",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "dashboard_spendingbreakdown_spendingbreakdownprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "dashboard_spendingbreakdown_categorizeitems",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "target": "dashboard_spendingbreakdown_spendingbreakdown",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_spendingbreakdown_spendingbreakdown",
+      "target": "dashboard_spendingbreakdown_categorizeitems",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "icons_material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "client_src_scenes_daterange_daterangecontext_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "src_api_usegetincomeexpensessumquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "dashboard_periodsummary_exchangetype",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "dashboard_periodsummary_incomeexpenseitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "dashboard_periodsummary_props",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "dashboard_periodsummary_splitincomeexpense",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_periodsummary_tsx",
+      "target": "dashboard_periodsummary_periodsummary",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_periodsummary_periodsummary",
+      "target": "dashboard_periodsummary_splitincomeexpense",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "client_src_components_multicolorprogress_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "users_jelle_documents_github_financeapp_1_client_src_styles_css",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "client_src_scenes_dashboard_spendingbreakdown_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "dashboard_spendingbreakdown_categorysums",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "dashboard_sortablespendingtable_sortablespendingtableprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_sortablespendingtable_tsx",
+      "target": "dashboard_sortablespendingtable_sortablespendingtable",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "styles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "client_src_components_uploadbutton_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "src_api_usegetemptycategorytransactionsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "dashboard_addtransactions_addtransactionsbutton",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "icons_material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "src_api_usegetaccountoverviewquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "visibilityoff",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "visibility",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "dashboard_accountoverview_accountcategory",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "dashboard_accountoverview_groupbyaccounttype",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_dashboard_accountoverview_tsx",
+      "target": "dashboard_accountoverview_accountsoverview",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_accountoverview_accountsoverview",
+      "target": "dashboard_accountoverview_groupbyaccounttype",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "check",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "src_api_usegetemptycategorytransactionsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "subheader_index_actionbuttons",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_header_index_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_header_index_tsx",
+      "target": "client_src_components_flexbetween_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_header_index_tsx",
+      "target": "savings",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_header_index_tsx",
+      "target": "header_index_props",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_scenes_header_index_tsx",
+      "target": "header_index_header",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/header/index.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_dashboardbox_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DashboardBox.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_dashboardbox_tsx",
+      "target": "system",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DashboardBox.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_dashboardbox_tsx",
+      "target": "components_dashboardbox_dashboardbox",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DashboardBox.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "styles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "lineaxis",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "delete",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "src_api_usegetinvestmentaccountsquery",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "src_api_useuploadinvestmentsmutation",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "components_uploadinvestbutton_investment",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "components_uploadinvestbutton_uploadinvestbutton",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadinvestbutton_tsx",
+      "target": "components_uploadinvestbutton_style",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadInvestButton.tsx",
+      "source_location": "L252",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "styles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "cloudupload",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "client_src_api_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "src_api_useuploadtransactionsmutation",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "components_uploadbutton_uploadbuttonprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "components_uploadbutton_uploadbutton",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_uploadbutton_tsx",
+      "target": "components_uploadbutton_style",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/UploadButton.tsx",
+      "source_location": "L156",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_flexbetween_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/FlexBetween.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_flexbetween_tsx",
+      "target": "system",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/FlexBetween.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_flexbetween_tsx",
+      "target": "components_flexbetween_flexbetween",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/FlexBetween.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_deletepopup_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_deletepopup_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_deletepopup_tsx",
+      "target": "client_src_components_dashboardbox_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_deletepopup_tsx",
+      "target": "components_deletepopup_deletepopupprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_deletepopup_tsx",
+      "target": "components_deletepopup_deletepopup",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_deletepopup_tsx",
+      "target": "components_deletepopup_style",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/DeletePopup.tsx",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_arrowbutton_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/ArrowButton.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_arrowbutton_tsx",
+      "target": "system",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/ArrowButton.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_arrowbutton_tsx",
+      "target": "components_arrowbutton_arrowbutton",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/ArrowButton.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_multicolorprogress_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_multicolorprogress_tsx",
+      "target": "material",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_multicolorprogress_tsx",
+      "target": "components_multicolorprogress_multicolorprogressprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_components_multicolorprogress_tsx",
+      "target": "components_multicolorprogress_multicolorprogress",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/components/MultiColorProgress.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "daterange_index_daterange",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dateRange/index.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_transactiondetails_transactiondetails",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_transactiondetails_transactiondetails",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_spendingbreakdown_spendingbreakdown",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_spendingbreakdown_spendingbreakdown",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_periodsummary_periodsummary",
+      "target": "daterange_daterangecontext_usedaterange",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_periodsummary_periodsummary",
+      "target": "daterange_daterangecontext_formatdate",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
+      "source_location": "L47",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

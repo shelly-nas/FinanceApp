@@ -10,7 +10,7 @@ interface DateRangeContextProps {
 const DateRangeContext = createContext<DateRangeContextProps | undefined>(undefined);
 
 export const DateRangeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [, setCurrentDate] = useState(new Date());
   const [dateOneMonthAgo, setDateOneMonthAgo] = useState(new Date());
 
   useEffect(() => {

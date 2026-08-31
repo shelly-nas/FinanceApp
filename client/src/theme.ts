@@ -1,4 +1,5 @@
-import { LineWeight } from "@mui/icons-material";
+import { ThemeOptions } from "@mui/material/styles";
+import "@/expanded-theme";
 
 export const tokens = {
     grey: {
@@ -43,7 +44,7 @@ export const tokens = {
   };
   
   // mui theme settings
-  export const themeSettings = {
+  export const themeSettings: ThemeOptions = {
     palette: {
       primary: {
         ...tokens.primary,
@@ -56,7 +57,6 @@ export const tokens = {
       },
       grey: {
         ...tokens.grey,
-        main: tokens.grey[500],
       },
       background: {
         default: tokens.background.main,

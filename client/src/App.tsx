@@ -7,6 +7,7 @@ import { createTheme } from '@mui/material/styles';
 import { themeSettings } from '@/theme';
 import { DateRangeProvider } from '@/scenes/dateRange/DateRangeContext';
 import ReviewTransactions from '@/scenes/reviewTransactions';
+import Tags from '@/scenes/tags';
 
 const App: React.FC = () => {
   const theme = useMemo(() => createTheme(themeSettings), []);
@@ -22,6 +23,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/review-transactions" element={<ReviewTransactions />} />
+                <Route path="/events" element={<Tags />} />
                 {/* <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} /> */}
               </Routes>
             </Box>
