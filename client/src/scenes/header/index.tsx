@@ -3,6 +3,7 @@ import FlexBetween from "@/components/FlexBetween"
 import SavingsIcon from '@mui/icons-material/Savings';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { Link, useLocation } from 'react-router-dom';
+import ThemeModeToggle from "@/components/ThemeModeToggle";
 
 type Props = {};
 
@@ -30,6 +31,7 @@ const Header = (_props: Props) => {
         >
           {pathname === '/events' ? 'Dashboard' : 'Events'}
         </Button>
+        <ThemeModeToggle />
       </FlexBetween>
     </FlexBetween>
   )
