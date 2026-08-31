@@ -1,3 +1,4 @@
+import { PaletteMode } from "@mui/material";
 import { ThemeOptions } from "@mui/material/styles";
 import "@/expanded-theme";
 
@@ -42,13 +43,43 @@ export const tokens = {
       main: "#fbfbfb",
     },
   };
-  
+
+  // Dark mode reuses the same hues but flips the grey ramp so that the
+  // low keys stay "closest to the text colour" and the high keys stay
+  // "closest to the surface", which is how components consume them.
+  const darkGrey = {
+    100: "#e6e7ea",
+    200: "#c9cbd1",
+    300: "#a7aab3",
+    400: "#878b95",
+    500: "#6b6f79",
+    600: "#565a63",
+    700: "#3f434b",
+    800: "#2b2e34",
+    900: "#191b1f",
+  };
+
+  const darkBackground = {
+    light: "#1e2126",
+    main: "#15171b",
+  };
+
   // mui theme settings
-  export const themeSettings: ThemeOptions = {
+  export const themeSettings = (mode: PaletteMode = "light"): ThemeOptions => {
+    const isDark = mode === "dark";
+    const grey = isDark ? darkGrey : tokens.grey;
+    const background = isDark ? darkBackground : tokens.background;
+
+    // Body/heading text keys, inverted for dark so contrast is preserved.
+    const textStrong = isDark ? grey[100] : grey[800];
+    const textMuted = isDark ? grey[300] : grey[600];
+
+    return {
     palette: {
+      mode,
       primary: {
         ...tokens.primary,
-        main: tokens.primary[600],
+        main: isDark ? tokens.primary[500] : tokens.primary[600],
         light: tokens.primary[500],
       },
       secondary: {
@@ -56,16 +87,21 @@ export const tokens = {
         main: tokens.secondary[500],
       },
       grey: {
-        ...tokens.grey,
+        ...grey,
       },
       background: {
-        default: tokens.background.main,
-        light: tokens.background.light,
+        default: background.main,
+        paper: background.light,
+        light: background.light,
+      },
+      text: {
+        primary: textStrong,
+        secondary: textMuted,
       },
       cosmetics: {
         radius: 5,
-        colorPrimary: tokens.grey[200],
-        colorSecondary: tokens.grey[100],
+        colorPrimary: isDark ? grey[700] : tokens.grey[200],
+        colorSecondary: isDark ? grey[800] : tokens.grey[100],
         width: 1,
         borderStyle: "Solid",
         spacing: 1
@@ -78,46 +114,47 @@ export const tokens = {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 32,
         fontWeight: "bold",
-        color: tokens.grey[800],
+        color: textStrong,
       },
       h2: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 13,
         fontWeight: "bold",
         textTransform: "uppercase",
-        color: tokens.grey[800],
+        color: textStrong,
       },
       h3: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 13,
         fontWeight: "bold",
         textTransform: "uppercase",
-        color: tokens.grey[600],
+        color: textMuted,
       },
       body1: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 12,
-        color: tokens.grey[800],
+        color: textStrong,
       },
       body2: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 12,
-        color: tokens.grey[800],
+        color: textStrong,
       },
       body3: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 12,
-        color: tokens.grey[600],
+        color: textMuted,
       },
       credit: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 12,
-        color: tokens.primary[600],
+        color: isDark ? tokens.primary[400] : tokens.primary[600],
       },
       debit: {
         fontFamily: ["Reddit Mono", "monospace"].join(","),
         fontSize: 12,
-        color: "#E35335",
+        color: isDark ? "#ff7a5e" : "#E35335",
       },
     },
+    };
   };

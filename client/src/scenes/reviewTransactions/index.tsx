@@ -190,7 +190,7 @@ const ReviewTransactions: React.FC = () => {
                             sx={{
                               width: '100%',
                               marginRight: 1.5, 
-                              backgroundColor: '#fff', 
+                              backgroundColor: palette.background.light, 
                               marginLeft: -0.75,
                               '& .MuiOutlinedInput-notchedOutline': {
                                 borderColor: 'initial',
@@ -217,7 +217,7 @@ const ReviewTransactions: React.FC = () => {
                             sx={{ 
                               width: '100%',
                               marginRight: 1.5, 
-                              backgroundColor: '#fff', 
+                              backgroundColor: palette.background.light, 
                               marginLeft: -0.75,
                               '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
                                 borderColor: palette.secondary.light,
