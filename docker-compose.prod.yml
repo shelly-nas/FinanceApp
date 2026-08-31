@@ -4,16 +4,16 @@ services:
     container_name: finance-app-db
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-financier}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is verplicht in productie}
-      POSTGRES_DB: ${POSTGRES_DB:-finance}
+      POSTGRES_USER: ${DB_USER:-financier}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is verplicht in productie}
+      POSTGRES_DB: ${DB_NAME:-finance}
       TZ: ${TZ:-Europe/Amsterdam}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./database/initProd.sql:/docker-entrypoint-initdb.d/01-init-schema.sql:ro
     healthcheck:
       test:
-        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-financier} -d ${POSTGRES_DB:-finance}"]
+        ["CMD-SHELL", "pg_isready -U ${DB_USER:-financier} -d ${DB_NAME:-finance}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,9 +26,9 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-financier}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB:-finance}
+      DB_USER: ${DB_USER:-financier}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-finance}
       SERVER_PORT: 3000
       TZ: ${TZ:-Europe/Amsterdam}
       NODE_ENV: production
