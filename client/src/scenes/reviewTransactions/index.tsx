@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   TextField, TableSortLabel, IconButton, CircularProgress, Typography, Box, Select, MenuItem,
-  useTheme
+  Tooltip, Snackbar, Alert, useTheme
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
 import { useLocation } from 'react-router-dom';
 import { useGetTransactionsQuery, useGetEmptyCategoryTransactionsQuery, useUpdateTransactionMutation, useGetCategoryListQuery, useDeleteTransactionMutation } from '@/api';
 import ActionButtons from '../subHeader';
@@ -50,6 +49,11 @@ const ReviewTransactions: React.FC = () => {
   const [editValues, setEditValues] = useState<Partial<Transaction>>({});
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string, severity: 'success' | 'error' } | null>(null);
+
+  // 'id' is the database key and must not be edited from the table.
+  const READ_ONLY_COLUMNS: (keyof Transaction)[] = ['id'];
 
   useEffect(() => {
     if (transactionIds && uploadedResults) {
@@ -59,9 +63,29 @@ const ReviewTransactions: React.FC = () => {
     }
   }, [uploadedResults, emptyCategoryResults]);
 
-  const handleDoubleClick = (rowIdx: number, colKey: keyof Transaction) => {
+  // Single click opens the cell for editing - double click made every correction
+  // on this screen a two-step action, which is the bulk of the work here.
+  const handleStartEdit = (rowIdx: number, colKey: keyof Transaction) => {
+    if (READ_ONLY_COLUMNS.includes(colKey)) return;
+    if (editIdx?.rowIdx === rowIdx && editIdx.colKey === colKey) return;
     setEditIdx({ rowIdx, colKey });
     setEditValues({ [colKey]: reviewTransactions[rowIdx][colKey] });
+  };
+
+  const handleCancelEdit = () => {
+    setEditIdx(null);
+    setEditValues({});
+  };
+
+  // Enter commits, Escape discards - so a correction never needs the mouse.
+  const handleKeyDown = (e: React.KeyboardEvent, rowIdx: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSave(rowIdx);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
   };
 
   const handleChange = (
@@ -74,23 +98,58 @@ const ReviewTransactions: React.FC = () => {
     }));
   };
 
-  const handleSave = async (rowIdx: number) => {
-    if (!editIdx) return;
+  // Picking a category is the most common edit on this screen, so commit it on
+  // selection rather than making the user confirm a second time.
+  const handleSelectChange = (
+    e: SelectChangeEvent<string | number>,
+    colKey: keyof Transaction,
+    rowIdx: number,
+  ) => {
+    const value = e.target.value as string;
+    setEditValues({ [colKey]: value });
+    saveValue(rowIdx, colKey, value);
+  };
 
-    const updatedData = [...reviewTransactions];
-    const updatedRow = {
-      ...updatedData[rowIdx],
-      ...editValues,
-    };
-    updatedData[rowIdx] = updatedRow;
-    setData(updatedData);
+  const saveValue = async (
+    rowIdx: number,
+    colKey: keyof Transaction,
+    newValue: Transaction[keyof Transaction],
+  ) => {
+    const originalRow = reviewTransactions[rowIdx];
+
+    // Nothing typed, or unchanged - just close the editor without a round trip.
+    if (newValue === undefined || newValue === originalRow[colKey]) {
+      handleCancelEdit();
+      return;
+    }
+
+    const patch = { [colKey]: newValue };
+    const updatedRow = { ...originalRow, ...patch };
+    const cellKey = `${originalRow.id}-${colKey}`;
+
+    // Apply optimistically so the table stays responsive, but keep the original
+    // row so a rejected save can be rolled back instead of showing a value that
+    // was never persisted.
+    setData((prev) => prev.map((r, i) => (i === rowIdx ? updatedRow : r)));
     setEditIdx(null);
+    setEditValues({});
+    setSavingKey(cellKey);
 
     try {
-      await updateTransaction({ id: updatedRow.id, ...editValues });
+      await updateTransaction({ id: originalRow.id, ...patch }).unwrap();
+      setToast({ message: 'Saved', severity: 'success' });
     } catch (error) {
       console.error('Error updating transaction:', error);
+      setData((prev) => prev.map((r, i) => (i === rowIdx ? originalRow : r)));
+      setToast({ message: 'Could not save change, please try again.', severity: 'error' });
+    } finally {
+      setSavingKey((k) => (k === cellKey ? null : k));
     }
+  };
+
+  const handleSave = (rowIdx: number) => {
+    if (!editIdx) return;
+    saveValue(rowIdx, editIdx.colKey, editValues[editIdx.colKey] as Transaction[keyof Transaction]);
   };
 
   const handleDeleteConfirmation = (id: number) => {
@@ -136,6 +195,11 @@ const ReviewTransactions: React.FC = () => {
   return (
     <div>
       <ActionButtons />
+      {reviewTransactions.length > 0 && (
+        <Typography variant="body2" sx={{ px: 1, py: 0.5, opacity: 0.7 }}>
+          Click any cell to edit. Enter saves, Escape cancels, clicking away saves.
+        </Typography>
+      )}
       {reviewTransactions.length === 0 ? (
         <DashboardBox>
           <Box className={`fade hide`} sx={{ p: 2 }}>
@@ -161,7 +225,7 @@ const ReviewTransactions: React.FC = () => {
                   </TableCell>
                 ))}
                 <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }}>tags</TableCell>
-                <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }} >edit</TableCell>
+                <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }} >delete</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -170,10 +234,12 @@ const ReviewTransactions: React.FC = () => {
                   {Object.keys(row).map((key) => (
                     <TableCell
                       key={key}
-                      onDoubleClick={() => handleDoubleClick(rowIdx, key as keyof Transaction)}
+                      onClick={() => handleStartEdit(rowIdx, key as keyof Transaction)}
                       sx={{
                         position: 'relative',
-                        '&:hover': {
+                        cursor: READ_ONLY_COLUMNS.includes(key as keyof Transaction) ? 'default' : 'pointer',
+                        opacity: savingKey === `${row.id}-${key}` ? 0.5 : 1,
+                        '&:hover': READ_ONLY_COLUMNS.includes(key as keyof Transaction) ? undefined : {
                           backgroundColor: palette.secondary[100],
                           borderRadius: 2,
                         },
@@ -185,7 +251,9 @@ const ReviewTransactions: React.FC = () => {
                         key === 'category' ? (
                           <Select
                             value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
-                            onChange={(e) => handleChange(e, key as keyof Transaction)}
+                            onChange={(e) => handleSelectChange(e, key as keyof Transaction, rowIdx)}
+                            onClose={() => setTimeout(() => handleCancelEdit(), 0)}
+                            open
                             autoFocus
                             sx={{
                               width: '100%',
@@ -213,6 +281,9 @@ const ReviewTransactions: React.FC = () => {
                           <TextField
                             value={editValues[key as keyof Transaction] ?? row[key as keyof Transaction]}
                             onChange={(e) => handleChange(e, key as keyof Transaction)}
+                            onKeyDown={(e) => handleKeyDown(e, rowIdx)}
+                            onBlur={() => handleSave(rowIdx)}
+                            size="small"
                             autoFocus
                             sx={{ 
                               width: '100%',
@@ -234,15 +305,11 @@ const ReviewTransactions: React.FC = () => {
                     <TagPicker transactionId={row.id} />
                   </TableCell>
                   <TableCell>
-                    {editIdx?.rowIdx === rowIdx ? (
-                      <IconButton onClick={() => handleSave(rowIdx)}>
-                        <SaveIcon />
-                      </IconButton>
-                    ) : (
+                    <Tooltip title="Delete transaction">
                       <IconButton onClick={() => handleDeleteConfirmation(row.id)}>
                         <DeleteIcon />
                       </IconButton>
-                    )}
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
@@ -250,6 +317,21 @@ const ReviewTransactions: React.FC = () => {
           </Table>
         </TableContainer>
       )}
+      <Snackbar
+        open={toast !== null}
+        autoHideDuration={2500}
+        onClose={() => setToast(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setToast(null)}
+          severity={toast?.severity ?? 'success'}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {toast?.message}
+        </Alert>
+      </Snackbar>
       <DeletePopup
         open={openDialog}
         handleClose={() => setOpenDialog(false)}

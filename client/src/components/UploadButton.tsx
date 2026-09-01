@@ -97,6 +97,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
             >
               <MenuItem value="ING_NL">ING (NL)</MenuItem>
               <MenuItem value="ING_SAVINGS_NL">ING Savings (NL)</MenuItem>
+              <MenuItem value="ASN">ASN Bank</MenuItem>
               <MenuItem value="Rabobank">Rabobank</MenuItem> 
               <MenuItem value="Rabobank_CC">Rabobank Credit Card</MenuItem>
             </Select>
