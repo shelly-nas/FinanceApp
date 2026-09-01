@@ -42,7 +42,7 @@ jobs:
       registry_password: ${{ secrets.REGISTRY_PASSWORD }}
       env_file_content: |
         REGISTRY=${{ vars.REGISTRY_URL }}
-        DB_NAME=${{ vars.DB_NAME || vars.POSTGRES_DB }}
-        DB_USER=${{ vars.DB_USER || vars.POSTGRES_USER }}
-        DB_PASSWORD=${{ secrets.DB_PASSWORD || secrets.POSTGRES_PASSWORD }}
+        DB_NAME=${{ vars.DB_NAME }}
+        DB_USER=${{ vars.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         TZ=${{ vars.TZ || 'Europe/Amsterdam' }}
