@@ -72,7 +72,31 @@ Rules that matter:
 CI applies the migrations to a fresh Postgres on every change, so a broken one
 fails before it reaches main.
 
+## Tests
+
+```bash
+cd server && npm test    # 67 tests; the database ones skip without DB_HOST
+cd client && npm test    # 16 tests
+```
+
+Three areas are covered, chosen because a mistake there produces a wrong figure
+rather than an error:
+
+- **CSV parsing per bank** (`server/src/utils/parseBankRow.ts`) - five column
+  mappings, three date formats, two amount conventions. A misread date files a
+  transaction in the wrong month; a misread sign turns spending into income.
+- **The summary queries** - the debit/credit sign logic is restated in three
+  separate SQL statements, and the transfer exclusion has to hold in the
+  summaries while *not* holding in the account balances.
+- **Month arithmetic** (`client/src/utils/monthRange.ts`) - stepping across
+  month lengths and year boundaries.
+
+The server's database tests need Postgres. Point `DB_HOST`/`DB_PORT`/... at a
+throwaway instance; without one they skip rather than fail, so `npm test` works
+anywhere. CI provides a service container.
+
 ## Local development
+
 
 ```bash
 cp .env.example .env      # fill in DB_PASSWORD

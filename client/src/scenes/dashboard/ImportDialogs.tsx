@@ -23,7 +23,7 @@ const ImportDialogs: React.FC<Props> = ({ opened, onClose }) => {
       <UploadButton
         openExternally={opened === 'transactions'}
         onCloseExternally={onClose}
-        onUploadSuccess={() => navigate('/review-transactions')}
+        onUploadSuccess={() => navigate('/transactions')}
       />
       <UploadInvestButton
         openExternally={opened === 'investments'}

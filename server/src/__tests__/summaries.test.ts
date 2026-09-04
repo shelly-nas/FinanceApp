@@ -218,3 +218,149 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
     });
   });
 });
+
+describe('searchTransactions', { skip: !hasDatabase && 'no database configured' }, () => {
+  before(async () => {
+    await runMigrations();
+    await FinanceManager.addTransactions([
+      row({ name_description: 'Albert Heijn Rotterdam', amount: 42.15, date_str: '2026-08-05', notifications: 'pinbetaling' }),
+      row({ name_description: 'Jumbo', amount: 18.40, date_str: '2026-08-12', notifications: 'pin' }),
+      row({ name_description: 'Salaris', category: 'Vast Inkomen', debit_credit: 'Credit', amount: 3000, date_str: '2026-08-25' }),
+      row({ name_description: 'Onbekend', category: null, amount: 9.99, date_str: '2026-08-28' }),
+      row({ name_description: 'Vorige maand', amount: 5, date_str: '2026-07-15' }),
+    ]);
+  });
+
+  test('finds a merchant by free text', async () => {
+    const { rows, total } = await FinanceManager.searchTransactions({ query: 'albert' });
+    assert.equal(total, 1);
+    assert.equal(rows[0].name_description, 'Albert Heijn Rotterdam');
+  });
+
+  test('searches the remittance text as well as the description', async () => {
+    // The merchant is named in different columns depending on the bank.
+    const { total } = await FinanceManager.searchTransactions({ query: 'pinbetaling' });
+    assert.equal(total, 1);
+  });
+
+  test('filters by category', async () => {
+    const { rows } = await FinanceManager.searchTransactions({ categories: ['Vast Inkomen'] });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].name_description, 'Salaris');
+  });
+
+  test('filters by direction', async () => {
+    const { total } = await FinanceManager.searchTransactions({ debitCredit: 'Credit' });
+    assert.equal(total, 1);
+  });
+
+  test('filters by amount range', async () => {
+    const { total } = await FinanceManager.searchTransactions({ minAmount: 10, maxAmount: 50 });
+    assert.equal(total, 2, 'the 42.15 and the 18.40');
+  });
+
+  test('filters by date range', async () => {
+    const { total } = await FinanceManager.searchTransactions({ startDate: '2026-08-01', endDate: '2026-08-31' });
+    assert.equal(total, 4, 'July is excluded');
+  });
+
+  test('lists only uncategorised rows when asked', async () => {
+    const { rows, total } = await FinanceManager.searchTransactions({ uncategorised: true });
+    assert.equal(total, 1);
+    assert.equal(rows[0].name_description, 'Onbekend');
+  });
+
+  test('reports the total independently of the page size', async () => {
+    const { rows, total } = await FinanceManager.searchTransactions({ limit: 2 });
+    assert.equal(rows.length, 2);
+    assert.equal(total, 5, 'the count ignores paging');
+  });
+
+  test('pages without repeating a row', async () => {
+    const first = await FinanceManager.searchTransactions({ limit: 2, offset: 0 });
+    const second = await FinanceManager.searchTransactions({ limit: 2, offset: 2 });
+    const overlap = first.rows.filter((a: any) => second.rows.some((b: any) => b.id === a.id));
+    assert.equal(overlap.length, 0);
+  });
+
+  test('sorts by amount when asked', async () => {
+    const { rows } = await FinanceManager.searchTransactions({ sortBy: 'amount', sortDir: 'desc' });
+    assert.equal(Number(rows[0].amount), 3000);
+  });
+
+  test('ignores an unknown sort column instead of failing', async () => {
+    // The column cannot be parameterised, so anything unrecognised falls back
+    // to the default rather than reaching the query.
+    const { rows } = await FinanceManager.searchTransactions({ sortBy: 'amount; DROP TABLE transactions' });
+    assert.ok(rows.length > 0, 'still returns rows');
+  });
+
+  test('combines filters', async () => {
+    const { total } = await FinanceManager.searchTransactions({
+      query: 'jumbo',
+      startDate: '2026-08-01',
+      endDate: '2026-08-31',
+      debitCredit: 'Debit',
+    });
+    assert.equal(total, 1);
+  });
+
+  test('returns each row with its tags attached', async () => {
+    const { rows } = await FinanceManager.searchTransactions({ query: 'jumbo' });
+    assert.ok(Array.isArray(rows[0].tags), 'tags should be an array, empty when none');
+  });
+});
+
+describe('bulk edits', { skip: !hasDatabase && 'no database configured' }, () => {
+  before(async () => {
+    await runMigrations();
+  });
+
+  beforeEach(async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
+  });
+
+  test('applies one category to many rows at once', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'A', category: null, amount: 1 }),
+      row({ name_description: 'B', category: null, amount: 2 }),
+      row({ name_description: 'C', category: null, amount: 3 }),
+    ]);
+
+    const updated = await FinanceManager.bulkUpdateTransactions(createdIds, { category: 'Boodschappen' });
+    assert.equal(updated, 3);
+
+    const { total } = await FinanceManager.searchTransactions({ uncategorised: true });
+    assert.equal(total, 0);
+  });
+
+  test('leaves rows outside the selection alone', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Selected', category: null, amount: 1 }),
+      row({ name_description: 'Untouched', category: null, amount: 2 }),
+    ]);
+
+    await FinanceManager.bulkUpdateTransactions([createdIds[0]], { category: 'Boodschappen' });
+
+    const { rows } = await FinanceManager.searchTransactions({ uncategorised: true });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].name_description, 'Untouched');
+  });
+
+  test('rejects a column that is not editable in bulk', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([row({ amount: 1 })]);
+    await assert.rejects(
+      () => FinanceManager.bulkUpdateTransactions(createdIds, { amount: 999 }),
+      /No updatable columns supplied/,
+    );
+  });
+
+  test('does nothing for an empty selection', async () => {
+    assert.equal(await FinanceManager.bulkUpdateTransactions([], { category: 'Boodschappen' }), 0);
+  });
+});

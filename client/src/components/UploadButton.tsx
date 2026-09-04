@@ -50,7 +50,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
                 // Rows already stored are skipped, so overlapping export periods
                 // are harmless - but say so, otherwise a partial import looks
                 // like the file was wrong.
-                navigate('/review-transactions', {
+                navigate('/transactions', {
                     state: {
                         transactionIds: JSON.stringify(response.data.createdIds),
                         imported: response.data.imported,

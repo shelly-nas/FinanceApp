@@ -130,7 +130,6 @@ async function classifyWith(
     }
 
     const confidentThreshold = parseFloat(process.env.ML_CONFIDENT_THRESHOLD || '0.65');
-    const fallbackThreshold = parseFloat(process.env.ML_PROBABILITY_THRESHOLD || '0.35');
 
     // A confident learned prediction reflects the user's own past corrections.
     if (learnedLabel && learnedConfidence >= confidentThreshold) {
@@ -142,18 +141,17 @@ async function classifyWith(
         return ruleMatch;
     }
 
-    // The bank's own category, mapped onto our taxonomy, is weaker than both of
-    // the above but better than leaving the row blank.
+    // The bank's own category, mapped onto our taxonomy. Weaker than the above,
+    // but it is still a classification the bank made rather than a guess of
+    // ours, so it is worth more than an empty field.
     if (bankCategoryHint) {
         return bankCategoryHint;
     }
 
-    // Last resort: a weak learned guess still beats nothing, since every import
-    // lands on the review screen anyway.
-    if (learnedLabel && learnedConfidence >= fallbackThreshold) {
-        return learnedLabel;
-    }
-
+    // Below the confidence threshold the row is left uncategorised on purpose.
+    // A weak guess that lands in the summaries is worse than a blank: it looks
+    // settled, so nobody checks it, and the figure is quietly wrong. Leaving it
+    // empty is what makes "no category" a reliable list of what needs review.
     return null;
 }
 

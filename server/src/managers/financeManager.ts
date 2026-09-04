@@ -165,6 +165,227 @@ class FinanceManager {
   }
 
   /**
+   * Search transactions.
+   *
+   * One query behind every list of transactions in the app: the review screen is
+   * this with `uncategorised: true`, a category drill-down is this with a
+   * category, and the search screen is this with whatever the user typed. Having
+   * a single source avoids two tables that drift apart in what they can show.
+   *
+   * Returns the page plus the total, so the client can page without guessing how
+   * many rows there are.
+   */
+  public async searchTransactions(filters: {
+    query?: string,
+    startDate?: string,
+    endDate?: string,
+    categories?: string[],
+    accounts?: string[],
+    tagIds?: number[],
+    debitCredit?: string,
+    minAmount?: number,
+    maxAmount?: number,
+    uncategorised?: boolean,
+    includeInternal?: boolean,
+    sortBy?: string,
+    sortDir?: 'asc' | 'desc',
+    limit?: number,
+    offset?: number,
+  }): Promise<{ rows: any[], total: number }> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+    const where: string[] = ['1=1'];
+
+    const add = (value: any) => {
+      params.push(value);
+      return `$${params.length}`;
+    };
+
+    if (filters.query) {
+      // One parameter matched against the three free-text columns: a merchant
+      // may be named in the description on one bank's export and only in the
+      // remittance text on another's.
+      const term = add(`%${filters.query}%`);
+      where.push(`(
+        t.name_description ILIKE ${term}
+        OR t.notifications ILIKE ${term}
+        OR t.counterparty ILIKE ${term}
+        OR t.account ILIKE ${term}
+      )`);
+    }
+
+    if (filters.startDate) where.push(`t.date_str >= ${add(filters.startDate)}`);
+    if (filters.endDate) where.push(`t.date_str <= ${add(filters.endDate)}`);
+
+    if (filters.categories && filters.categories.length > 0) {
+      where.push(`t.category = ANY(${add(filters.categories)}::text[])`);
+    }
+
+    if (filters.accounts && filters.accounts.length > 0) {
+      where.push(`t.account = ANY(${add(filters.accounts)}::text[])`);
+    }
+
+    if (filters.tagIds && filters.tagIds.length > 0) {
+      where.push(`EXISTS (
+        SELECT 1 FROM public.${transaction_tag_table} tt
+        WHERE tt.transaction_id = t.id AND tt.tag_id = ANY(${add(filters.tagIds)}::int[])
+      )`);
+    }
+
+    if (filters.debitCredit) where.push(`t.debit_credit = ${add(filters.debitCredit)}`);
+    if (filters.minAmount !== undefined) where.push(`t.amount >= ${add(filters.minAmount)}`);
+    if (filters.maxAmount !== undefined) where.push(`t.amount <= ${add(filters.maxAmount)}`);
+
+    // The review list: rows the classifier was not confident enough to label.
+    if (filters.uncategorised) where.push('t.category IS NULL');
+
+    // Confirmed transfers are money moved rather than spent. They stay out of
+    // the default view for the same reason they stay out of the summaries, but
+    // remain findable when explicitly asked for.
+    if (!filters.includeInternal) where.push('t.is_internal IS NOT TRUE');
+
+    const whereClause = where.join(' AND ');
+
+    // Whitelisted: a sort column cannot be parameterised, so it is matched
+    // against known names rather than interpolated.
+    const SORTABLE = new Set(['date_str', 'name_description', 'account', 'category', 'amount', 'debit_credit']);
+    const sortBy = filters.sortBy && SORTABLE.has(filters.sortBy) ? filters.sortBy : 'date_str';
+    const sortDir = filters.sortDir === 'asc' ? 'ASC' : 'DESC';
+
+    const limit = Math.min(filters.limit ?? 100, 1000);
+    const offset = filters.offset ?? 0;
+
+    // The count runs on the filter parameters only; limit and offset are added
+    // after this snapshot so the two queries cannot drift apart.
+    const filterParams = [...params];
+
+    const rowsQuery = `
+      SELECT
+        t.*,
+        COALESCE(
+          (SELECT JSON_AGG(JSON_BUILD_OBJECT('id', tg.id, 'tag_name', tg.tag_name, 'color', tg.color)
+                           ORDER BY tg.tag_name)
+           FROM public.${transaction_tag_table} tt
+           JOIN public.${tag_table} tg ON tg.id = tt.tag_id
+           WHERE tt.transaction_id = t.id),
+          '[]'::json
+        ) AS tags
+      FROM public.${transaction_table} t
+      WHERE ${whereClause}
+      ORDER BY ${sortBy} ${sortDir}, t.id ${sortDir}
+      LIMIT ${add(limit)} OFFSET ${add(offset)};
+    `;
+
+    // Counted with the same filters but without paging, so the client can show
+    // "showing 100 of 1,432" rather than inferring it from a short page.
+    const countQuery = `
+      SELECT COUNT(*)::int AS total
+      FROM public.${transaction_table} t
+      WHERE ${whereClause};
+    `;
+
+    try {
+      const [rows, count] = await Promise.all([
+        client.query(rowsQuery, params),
+        client.query(countQuery, filterParams),
+      ]);
+
+      return { rows: rows.rows, total: count.rows[0].total };
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Apply one change to many transactions at once.
+   *
+   * Categorising an import row by row is the bulk of the work on this screen;
+   * with filters in place, "everything matching this search" is usually the same
+   * category.
+   */
+  public async bulkUpdateTransactions(ids: number[], updates: { [key: string]: any }): Promise<number> {
+    if (ids.length === 0) return 0;
+
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['category', 'debit_credit', 'account', 'counterparty', 'is_internal']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    try {
+      const result = await client.query(
+        `UPDATE public.${transaction_table}
+         SET ${setClause}
+         WHERE id = ANY($${values.length + 1}::int[])`,
+        [...values, ids],
+      );
+      return result.rowCount ?? 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Assign or clear one tag across many transactions in a single statement. */
+  public async bulkSetTag(ids: number[], tagId: number, mode: 'add' | 'remove'): Promise<number> {
+    if (ids.length === 0) return 0;
+
+    const client = await dbContext.connect();
+
+    try {
+      if (mode === 'remove') {
+        const result = await client.query(
+          `DELETE FROM public.${transaction_tag_table}
+           WHERE tag_id = $1 AND transaction_id = ANY($2::int[])`,
+          [tagId, ids],
+        );
+        return result.rowCount ?? 0;
+      }
+
+      const result = await client.query(
+        `INSERT INTO public.${transaction_tag_table} (transaction_id, tag_id)
+         SELECT UNNEST($2::int[]), $1
+         ON CONFLICT DO NOTHING`,
+        [tagId, ids],
+      );
+      return result.rowCount ?? 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Distinct account identifiers present in transactions, for the filter list. */
+  public async getTransactionAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.account AS details,
+        COALESCE(a.account_name, t.account) AS account_name,
+        COUNT(*)::int AS transaction_count
+      FROM public.${transaction_table} t
+      LEFT JOIN public.${account_table} a ON a.details = t.account
+      WHERE t.account IS NOT NULL
+      GROUP BY t.account, a.account_name
+      ORDER BY 2;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * The rows the classifier learns from: categorised transactions, and only the
    * three columns it reads.
    *

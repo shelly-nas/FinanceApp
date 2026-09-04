@@ -242,6 +242,127 @@ router.delete('/remove-transaction/:id', async (req: Request, res: Response, nex
   }
 });
 
+// --- Search and bulk edits --------------------------------------------------
+
+const parseJsonArray = (value: unknown): any[] | undefined => {
+  if (value === undefined) return undefined;
+  try {
+    const parsed = JSON.parse(value as string);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+// The one query behind every transaction list: the review screen passes
+// uncategorised=true, a category drill-down passes categories, the search screen
+// passes whatever was typed.
+router.get('/transactions/search', async (req: Request, res: Response, next: NextFunction) => {
+  const {
+    query, startDate, endDate, categories, accounts, tagIds,
+    debitCredit, minAmount, maxAmount, uncategorised, includeInternal,
+    sortBy, sortDir, limit, offset,
+  } = req.query;
+
+  const parsedLimit = limit === undefined ? 100 : Number(limit);
+  const parsedOffset = offset === undefined ? 0 : Number(offset);
+
+  if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
+    return res.status(400).json({ error: 'limit must be a positive number' });
+  }
+  if (!Number.isFinite(parsedOffset) || parsedOffset < 0) {
+    return res.status(400).json({ error: 'offset must be zero or more' });
+  }
+  if (debitCredit !== undefined && debitCredit !== 'Debit' && debitCredit !== 'Credit') {
+    return res.status(400).json({ error: "debitCredit must be 'Debit' or 'Credit'" });
+  }
+
+  try {
+    const result = await FinanceManager.searchTransactions({
+      query: query as string | undefined,
+      startDate: startDate as string | undefined,
+      endDate: endDate as string | undefined,
+      categories: parseJsonArray(categories),
+      accounts: parseJsonArray(accounts),
+      tagIds: parseJsonArray(tagIds),
+      debitCredit: debitCredit as string | undefined,
+      minAmount: minAmount === undefined ? undefined : Number(minAmount),
+      maxAmount: maxAmount === undefined ? undefined : Number(maxAmount),
+      uncategorised: uncategorised === 'true',
+      includeInternal: includeInternal === 'true',
+      sortBy: sortBy as string | undefined,
+      sortDir: sortDir === 'asc' ? 'asc' : 'desc',
+      limit: parsedLimit,
+      offset: parsedOffset,
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Account identifiers actually present in transactions, for the filter list -
+// including ones with no entry in the accounts table yet.
+router.get('/transactions/accounts', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getTransactionAccounts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+// One change applied to a selection: categorising an import row by row is the
+// bulk of the work on the review screen.
+router.patch('/transactions/bulk', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, updates } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0 || ids.some((id) => !Number.isInteger(id))) {
+    return res.status(400).json({ error: 'ids must be a non-empty array of integers' });
+  }
+  if (!updates || typeof updates !== 'object') {
+    return res.status(400).json({ error: 'updates must be an object' });
+  }
+
+  try {
+    const updated = await FinanceManager.bulkUpdateTransactions(ids, updates);
+    res.status(200).json({ updated });
+  } catch (error: any) {
+    if (error?.message === 'No updatable columns supplied') {
+      return res.status(400).json({ error: error.message });
+    }
+    // 23503 = foreign_key_violation, an unknown category
+    if (error?.code === '23503') {
+      return res.status(400).json({ error: 'Unknown category' });
+    }
+    next(error);
+  }
+});
+
+router.post('/transactions/bulk-tag', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, tagId, mode } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0 || ids.some((id) => !Number.isInteger(id))) {
+    return res.status(400).json({ error: 'ids must be a non-empty array of integers' });
+  }
+  if (!Number.isInteger(tagId)) {
+    return res.status(400).json({ error: 'tagId must be an integer' });
+  }
+  if (mode !== 'add' && mode !== 'remove') {
+    return res.status(400).json({ error: "mode must be 'add' or 'remove'" });
+  }
+
+  try {
+    const affected = await FinanceManager.bulkSetTag(ids, tagId, mode);
+    res.status(200).json({ affected });
+  } catch (error: any) {
+    if (error?.code === '23503') {
+      return res.status(400).json({ error: 'Unknown transaction or tag id' });
+    }
+    next(error);
+  }
+});
+
 // --- Accounts ---------------------------------------------------------------
 
 router.get('/accounts', async (_req: Request, res: Response, next: NextFunction) => {

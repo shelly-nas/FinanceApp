@@ -83,6 +83,50 @@ export interface UnknownAccount {
   last_description: string | null;
 }
 
+export interface TransactionRow {
+  id: number;
+  date_str: string;
+  name_description: string | null;
+  account: string | null;
+  counterparty: string | null;
+  category: string | null;
+  debit_credit: string;
+  amount: string;
+  notifications: string | null;
+  is_internal: boolean | null;
+  tags: { id: number; tag_name: string; color: string | null }[];
+}
+
+export interface SearchFilters {
+  query?: string;
+  startDate?: string;
+  endDate?: string;
+  categories?: string[];
+  accounts?: string[];
+  tagIds?: number[];
+  debitCredit?: 'Debit' | 'Credit';
+  minAmount?: number;
+  maxAmount?: number;
+  uncategorised?: boolean;
+  includeInternal?: boolean;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchResult {
+  rows: TransactionRow[];
+  /** Matches ignoring paging, so the client can show "100 of 1,432". */
+  total: number;
+}
+
+export interface TransactionAccount {
+  details: string;
+  account_name: string;
+  transaction_count: number;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
@@ -104,6 +148,8 @@ export const api = createApi({
     "transfers",
     "accounts",
     "unknownAccounts",
+    "searchTransactions",
+    "transactionAccounts",
   ],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
@@ -143,9 +189,10 @@ export const api = createApi({
         params: {bankType}
       }),
       // An import changes every derived figure at once.
-      invalidatesTags: ["transactions", "categorySums", "incomeExpensesSum",
-                        "emptyCategoryTransactions", "accountOverview",
-                        "transferCandidates"],
+      invalidatesTags: ["transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview", "transferCandidates",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getEmptyCategoryTransactions: build.query<any, void>({
       query: () => ({
@@ -161,9 +208,10 @@ export const api = createApi({
       }),
       // Editing a category moves money between breakdowns, so the sums and the
       // review list are stale too - not just the transaction itself.
-      invalidatesTags: ["transactions", "categorySums", "incomeExpensesSum",
-                        "emptyCategoryTransactions", "accountOverview",
-                        "transferCandidates"],
+      invalidatesTags: ["transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview", "transferCandidates",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getAccountOverview: build.query<any, void>({
       query: () => ({
@@ -199,9 +247,10 @@ export const api = createApi({
         url: `api/remove-transaction/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ["transactions", "categorySums", "incomeExpensesSum",
-                        "emptyCategoryTransactions", "accountOverview",
-                        "transferCandidates"],
+      invalidatesTags: ["transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview", "transferCandidates",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getTags: build.query<Tag[], { includeClosed?: boolean } | void>({
       query: (args) => ({
@@ -244,6 +293,56 @@ export const api = createApi({
         url: `api/transactions/${id}/tags`,
       }),
       providesTags: ["transactionTags"],
+    }),
+    searchTransactions: build.query<SearchResult, SearchFilters>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+        const set = (key: string, value: unknown) => {
+          if (value === undefined || value === '' || value === false) return;
+          params.set(key, Array.isArray(value) ? JSON.stringify(value) : String(value));
+        };
+
+        set('query', filters.query);
+        set('startDate', filters.startDate);
+        set('endDate', filters.endDate);
+        if (filters.categories?.length) set('categories', filters.categories);
+        if (filters.accounts?.length) set('accounts', filters.accounts);
+        if (filters.tagIds?.length) set('tagIds', filters.tagIds);
+        set('debitCredit', filters.debitCredit);
+        set('minAmount', filters.minAmount);
+        set('maxAmount', filters.maxAmount);
+        set('uncategorised', filters.uncategorised);
+        set('includeInternal', filters.includeInternal);
+        set('sortBy', filters.sortBy);
+        set('sortDir', filters.sortDir);
+        set('limit', filters.limit);
+        set('offset', filters.offset);
+
+        return { url: `api/transactions/search`, params };
+      },
+      providesTags: ["searchTransactions"],
+    }),
+    getTransactionAccounts: build.query<TransactionAccount[], void>({
+      query: () => ({ url: `api/transactions/accounts` }),
+      providesTags: ["transactionAccounts"],
+    }),
+    bulkUpdateTransactions: build.mutation<{ updated: number }, { ids: number[]; updates: Record<string, unknown> }>({
+      query: (body) => ({
+        url: `api/transactions/bulk`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ["searchTransactions", "transactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview"],
+    }),
+    bulkSetTag: build.mutation<{ affected: number }, { ids: number[]; tagId: number; mode: 'add' | 'remove' }>({
+      query: (body) => ({
+        url: `api/transactions/bulk-tag`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["searchTransactions", "transactionTags", "tags", "tagSummary"],
     }),
     getAccounts: build.query<Account[], void>({
       query: () => ({ url: `api/accounts` }),
@@ -360,4 +459,8 @@ export const {
   useCreateAccountMutation,
   useUpdateAccountMutation,
   useDeleteAccountMutation,
+  useSearchTransactionsQuery,
+  useGetTransactionAccountsQuery,
+  useBulkUpdateTransactionsMutation,
+  useBulkSetTagMutation,
 } = api;

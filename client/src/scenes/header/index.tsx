@@ -16,7 +16,7 @@ import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 // looking like dashboard panels.
 const TABS = [
   { label: 'Dashboard', path: '/' },
-  { label: 'Transactions', path: '/review-transactions' },
+  { label: 'Transactions', path: '/transactions' },
   { label: 'Events', path: '/events' },
   { label: 'Accounts', path: '/accounts' },
 ];
@@ -35,7 +35,11 @@ const Header = (_props: Props) => {
   const reviewCount = needsReview?.length ?? 0;
 
   const activeTab = TABS.findIndex((tab) =>
-    tab.path === '/' ? pathname === '/' : pathname.startsWith(tab.path),
+    tab.path === '/'
+      ? pathname === '/'
+      // The import flow lands on /review-transactions, which is the same screen.
+      : pathname.startsWith(tab.path) ||
+        (tab.path === '/transactions' && pathname.startsWith('/review-transactions')),
   );
 
   const closeMenu = () => setMenuAnchor(null);
@@ -75,10 +79,16 @@ const Header = (_props: Props) => {
           <Tab
             key={tab.path}
             component={Link}
-            to={tab.path}
+            // With rows awaiting a category, the tab opens on that filter -
+            // which is what the badge is counting.
+            to={
+              tab.path === '/transactions' && reviewCount > 0
+                ? '/transactions?review=true'
+                : tab.path
+            }
             sx={{ minHeight: 40, textTransform: 'none' }}
             label={
-              tab.path === '/review-transactions' && reviewCount > 0 ? (
+              tab.path === '/transactions' && reviewCount > 0 ? (
                 <Badge badgeContent={reviewCount} color="secondary" sx={{ pr: 1.5 }}>
                   {tab.label}
                 </Badge>
