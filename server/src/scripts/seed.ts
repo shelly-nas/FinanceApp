@@ -3,11 +3,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import dbContext from '@/context/dbContext';
 
-// Seeds the category reference data. Separate from the migrations because it is
-// data rather than schema: a user who has renamed or recoloured categories
-// should not have that undone by a deploy.
+
 async function seed() {
-  const file = path.join(__dirname, '..', '..', 'migrations', 'seed_categories.sql');
+  const file = path.join(__dirname, '..', '..', '..', 'database', 'seed.sql');
   const sql = await fs.readFile(file, 'utf8');
   const client = await dbContext.connect();
 

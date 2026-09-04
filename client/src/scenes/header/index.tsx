@@ -18,6 +18,7 @@ import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 const TABS = [
   { label: 'Dashboard', path: '/' },
   { label: 'Transactions', path: '/transactions' },
+  { label: 'Reports', path: '/reports' },
   { label: 'Events', path: '/events' },
   { label: 'Accounts', path: '/accounts' },
 ];

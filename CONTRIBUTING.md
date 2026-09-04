@@ -44,33 +44,39 @@ version still selects.
 
 ## Database changes
 
-The schema lives in `server/migrations/`, applied by the server as it starts. The
-bootstrap directory of the postgres image is not used: it only ever runs against
-an empty data volume, and production's volume is a bind mount that outlives the
-container.
+**Until 1.0.0 ships**, the schema lives in `database/init.sql` and reference data
+in `database/seed.sql`. Both run on the first start of an empty data volume.
+There is no installed database to migrate from, so a change goes straight into
+those files - wipe the volume and start again:
 
-To change the schema, add a file — never edit one that has already shipped, since
-applied migrations are recorded by filename and are not re-run:
-
-```
-server/migrations/004_add_something.sql
+```bash
+docker compose down -v && docker compose up --build
 ```
 
-Rules that matter:
+**After 1.0.0 is running somewhere with data in it**, that stops being enough:
+the entrypoint scripts are never re-run against an existing volume. From that
+point a schema change is a numbered file under `server/migrations/`, which the
+server applies on startup and records in `schema_migrations`:
 
+```
+server/migrations/001_add_something.sql
+```
+
+Rules that matter from then on:
+
+- **Update `database/init.sql` alongside every migration**, so a fresh install
+  and a migrated one end up with the same schema.
 - **Number sequentially, no gaps, no duplicates.** CI fails on a duplicate
-  number. Two branches both adding `004_` merge cleanly in git and then collide
+  number. Two branches both adding `001_` merge cleanly in git and then collide
   in production, where one is recorded as applied and the other silently never
   runs.
 - **Write it idempotently** (`IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`). CI
   applies every migration twice and the second run must be a no-op.
 - **Additive, wherever possible.** A column the previous version still selects
   cannot be dropped without breaking a rollback.
-- **Schema only.** Reference data belongs in `seed_categories.sql`, run
-  deliberately with `npm run seed`.
 
-CI applies the migrations to a fresh Postgres on every change, so a broken one
-fails before it reaches main.
+CI applies the schema to a fresh Postgres on every change, so a broken one fails
+before it reaches main.
 
 ## Tests
 

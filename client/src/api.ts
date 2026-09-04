@@ -168,6 +168,15 @@ export interface Category {
   transaction_count?: number;
 }
 
+/** One category's spend in one month. Spending is positive. */
+export interface CategoryHistoryPoint {
+  month: string;
+  category: string;
+  color: string | null;
+  income_outcome: string | null;
+  total: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
@@ -193,6 +202,7 @@ export const api = createApi({
     "searchTransactions",
     "transactionAccounts",
     "netWorthHistory",
+    "categoryHistory",
     "categories",
   ],
   endpoints: (build) => ({
@@ -235,7 +245,7 @@ export const api = createApi({
       // An import changes every derived figure at once.
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
-                        "accountOverview", "netWorthHistory",
+                        "accountOverview", "netWorthHistory", "categoryHistory",
                         "transferCandidates", "oneSidedTransfers",
                         "unknownAccounts", "transactionAccounts"],
     }),
@@ -255,7 +265,7 @@ export const api = createApi({
       // review list are stale too - not just the transaction itself.
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
-                        "accountOverview", "netWorthHistory",
+                        "accountOverview", "netWorthHistory", "categoryHistory",
                         "transferCandidates", "oneSidedTransfers",
                         "unknownAccounts", "transactionAccounts"],
     }),
@@ -305,7 +315,7 @@ export const api = createApi({
       }),
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
-                        "accountOverview", "netWorthHistory",
+                        "accountOverview", "netWorthHistory", "categoryHistory",
                         "transferCandidates", "oneSidedTransfers",
                         "unknownAccounts", "transactionAccounts"],
     }),
@@ -400,6 +410,22 @@ export const api = createApi({
         body,
       }),
       invalidatesTags: ["searchTransactions", "transactionTags", "tags", "tagSummary"],
+    }),
+    getCategoryHistory: build.query<CategoryHistoryPoint[], {
+      startDate: string;
+      endDate: string;
+      categories?: string[];
+      accounts?: string[];
+      includeInternal?: boolean;
+    }>({
+      query: ({ startDate, endDate, categories, accounts, includeInternal }) => {
+        const params = new URLSearchParams({ startDate, endDate });
+        if (categories?.length) params.set('categories', JSON.stringify(categories));
+        if (accounts?.length) params.set('accounts', JSON.stringify(accounts));
+        if (includeInternal) params.set('includeInternal', 'true');
+        return { url: `api/reports/category-history`, params };
+      },
+      providesTags: ["categoryHistory"],
     }),
     getCategories: build.query<Category[], void>({
       query: () => ({ url: `api/categories` }),
@@ -569,6 +595,7 @@ export const {
   useBulkUpdateTransactionsMutation,
   useBulkSetTagMutation,
   useGetNetWorthHistoryQuery,
+  useGetCategoryHistoryQuery,
   useGetCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,

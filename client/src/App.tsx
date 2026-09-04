@@ -12,6 +12,7 @@ import Transactions from '@/scenes/transactions';
 import Tags from '@/scenes/tags';
 import Accounts from '@/scenes/accounts';
 import Categories from '@/scenes/categories';
+import Reports from '@/scenes/reports';
 
 const ThemedApp: React.FC = () => {
   const { resolvedMode } = useColorMode();
@@ -34,6 +35,7 @@ const ThemedApp: React.FC = () => {
             <Route path="/events" element={<Tags />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/categories" element={<Categories />} />
+            <Route path="/reports" element={<Reports />} />
             {/* <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} /> */}
           </Routes>
         </Box>

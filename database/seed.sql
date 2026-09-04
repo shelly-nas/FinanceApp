@@ -1,13 +1,14 @@
--- Reference data, not schema.
+-- Category reference data.
 --
--- The categories are seeded rather than left to the user because
--- transactions.category is a foreign key onto this table: without rows here no
--- transaction can be categorised at all, and the classifier has no label set to
--- predict from.
+-- Runs after init.sql on the first start of an empty volume (the entrypoint
+-- executes files in filename order, hence the numbered prefixes on the mount).
 --
--- Run separately from the migrations (npm run seed). ON CONFLICT DO NOTHING
--- makes it safe to re-run and keeps any colour or type the user has since
--- changed - it only ever fills gaps.
+-- Seeded rather than left to the user because transactions.category is a
+-- foreign key onto this table: with no rows here nothing can be categorised at
+-- all, and the classifier has no label set to predict from.
+--
+-- ON CONFLICT DO NOTHING keeps any colour or type the user has since changed,
+-- so re-running it only ever fills gaps.
 
 INSERT INTO public.categories (category_name, color, category_type, income_outcome) VALUES
 ('Bankkosten', '#b0a4c2', 'Vast', 'Uitgaven'),

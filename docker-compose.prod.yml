@@ -5,12 +5,16 @@
 # rollback a change of one line here instead of a rebuild, and what keeps a
 # container restart from silently pulling a newer build.
 #
-# Database migrations are applied by the server on startup, so a deploy that
-# carries schema changes needs no separate step.
+# The schema is created by database/init.sql on the first start of an empty
+# volume. Once this is running with data in it, a schema change can no longer go
+# there: add a migration under server/migrations/ instead, which the server
+# applies on startup.
 services:
   db:
-    # Het schema komt van de migraties in de server, niet uit een eigen image.
-    image: postgres:16-alpine
+    # Eigen image: het schema zit erin gebakken, omdat de deploy alleen dit
+    # compose-bestand naar de host kopieert en een bind mount naar
+    # ./database/ daar niet bestaat.
+    image: ${REGISTRY}/finance-app-db:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
     container_name: finance-app-db
     restart: always
     environment:

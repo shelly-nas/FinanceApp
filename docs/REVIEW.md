@@ -161,8 +161,19 @@ gebeurt bij een lege volume. De tags-tabellen zijn nooit in een draaiende
 productiedatabase terechtgekomen tenzij handmatig aangemaakt — en de laatste commit
 koppelt een bind mount aan de PostgreSQL-data, dus die volume blijft bestaan.
 
-`node-pg-migrate` past bij deze stack. Alles hierna (transfer-detectie,
-import-hash, `is_internal`) vereist schemawijzigingen op bestaande data.
+**Opgelost, herzien 4 september 2026.** Er staat een migratierunner in de server
+die bij het opstarten pending `.sql`-bestanden uit `server/migrations/` toepast en
+bijhoudt wat al gedraaid is.
+
+Die map is nu bewust leeg: 1.0.0 is nog niet uit, dus er is geen geïnstalleerde
+database om vanaf te migreren en het volledige schema staat in
+`database/init.sql`. Vier migratiebestanden voor een schema dat nooit anders is
+geweest, zijn ballast.
+
+Zodra 1.0.0 ergens met data draait verandert dat: de entrypoint-scripts draaien
+nooit opnieuw op een bestaand volume, dus vanaf dat moment is elke
+schemawijziging een genummerde migratie — en moet `init.sql` mee, zodat een
+verse installatie en een gemigreerde op hetzelfde schema uitkomen.
 
 ### 9. Nul tests
 
@@ -303,8 +314,8 @@ Twee bugs kwamen daarbij naar boven, beide gevonden doordat de nieuwe beheersche
 hernoemen mogelijk maakten: `transactions.category` en `investments.account`
 verwijzen op naam, en hun foreign keys blokkeerden de eerste van de twee benodigde
 UPDATEs. **Een categorie of beleggingsrekening hernoemen was daardoor onmogelijk.**
-Migratie `004_deferrable_name_fks.sql` maakt beide constraints uitstelbaar, zodat de
-twee tabellen samen worden bijgewerkt en pas bij commit gecontroleerd.
+Beide constraints zijn nu `DEFERRABLE` in `database/init.sql`, zodat de twee
+tabellen samen worden bijgewerkt en pas bij commit gecontroleerd.
 
 ### Voorstel: een rapportagetab voor historisch verloop
 
@@ -376,6 +387,35 @@ staat — dezelfde regel als de bestaande sommaties.
 - **Categorieën die je hernoemt breken de historie**, want `transactions.category`
   verwijst op naam. Hetzelfde probleem als bij `accounts.details`, met dezelfde
   oplossing: bij hernoemen meeschrijven.
+
+#### Status
+
+**Stap 1 en 2 gebouwd, 4 september 2026.** De rapportagetab staat op `/reports`,
+met een bereikkiezer (6 / 12 / 24 maanden, dit jaar, of vrij van-tot) en een
+categoriefilter.
+
+- **Net worth per maandeinde**, gestapeld naar rekeningtype, met het laatste
+  bedrag en de verandering over de periode als kop. Draait op het bestaande
+  `getNetWorthHistory()`.
+- **Uitgaven per categorie per maand**, in twee vormen: gestapelde staven voor
+  waar een maand uit bestond, en lijnen om één categorie over de maanden te
+  volgen. Nieuw endpoint `GET /api/reports/category-history`.
+
+Categorieën houden de kleur die in de database staat, dus een categorie ziet er
+in de grafiek hetzelfde uit als in de Spending Breakdown. Voorbij acht reeksen
+wordt de rest samengevoegd tot "Other" in plaats van nieuwe kleuren te verzinnen.
+
+De drie kleuren voor rekeningtypes zijn gevalideerd met een palet-checker op
+lichtheidsband, chroma, kleurenblind-scheiding van elk aangrenzend paar en
+contrast tegen de ondergrond — in zowel de lichte als de donkere modus.
+
+Drie fouten kwamen alleen aan het licht door de gerenderde pagina te bekijken:
+inkomstencategorieën trokken de as onder nul, categorienamen met een komma
+(`Kleding, Shoppen, Elektronica`) werden door de grafiekbibliotheek als
+padexpressie gelezen waardoor elke reeks grijs werd, en de lijninterpolatie
+dook onder nul tussen een piek en een lege maand.
+
+Nog te bouwen: cashflow per maand en de periodevergelijking.
 
 #### Bouwvolgorde
 

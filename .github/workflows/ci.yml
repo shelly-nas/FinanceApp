@@ -48,7 +48,7 @@ jobs:
         working-directory: client
 
   server-tests:
-    name: Migrations and server tests
+    name: Schema and server tests
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -82,24 +82,51 @@ jobs:
       - run: npm run build
         working-directory: server
 
-      # Migration numbers must be unique. Two branches each adding 004_ merge
-      # cleanly in git and then collide in production, where one of the two is
-      # recorded as applied and the other silently never runs.
+      # Numbers must be unique. Two branches each adding 001_ merge cleanly in
+      # git and then collide in production, where one is recorded as applied and
+      # the other silently never runs. Empty until 1.0.0 ships, which is fine.
       - name: Check for duplicate migration numbers
         run: |
-          duplicates=$(ls server/migrations/[0-9][0-9][0-9]_*.sql \
-            | xargs -n1 basename \
-            | cut -d_ -f1 \
-            | sort | uniq -d)
+          shopt -s nullglob
+          files=(server/migrations/[0-9][0-9][0-9]_*.sql)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No migrations yet - the schema comes from database/init.sql."
+            exit 0
+          fi
+          duplicates=$(printf '%s\n' "${files[@]}" \
+            | xargs -n1 basename | cut -d_ -f1 | sort | uniq -d)
           if [ -n "$duplicates" ]; then
             echo "Duplicate migration number(s): $duplicates"
-            ls server/migrations/
             exit 1
           fi
           echo "Migration numbering is unique."
 
-      # Against an empty database: every migration has to apply from scratch.
-      - name: Apply migrations to a fresh database
+      # The schema an install actually gets: init.sql and the seed, exactly as
+      # the postgres entrypoint runs them.
+      - name: Apply the schema to a fresh database
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/init.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/seed.sql
+        env:
+          DATABASE_URL: postgresql://financier:ci-password@localhost:5432/finance
+
+      # Re-running the seed must be a no-op, so a redeploy cannot duplicate or
+      # overwrite categories the user has edited.
+      - name: Re-run the seed (must be a no-op)
+        run: |
+          before=$(psql "$DATABASE_URL" -t -A -c 'SELECT COUNT(*) FROM categories')
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/seed.sql
+          after=$(psql "$DATABASE_URL" -t -A -c 'SELECT COUNT(*) FROM categories')
+          if [ "$before" != "$after" ]; then
+            echo "Seed is not idempotent: $before categories before, $after after."
+            exit 1
+          fi
+          echo "Seed is idempotent ($after categories)."
+        env:
+          DATABASE_URL: postgresql://financier:ci-password@localhost:5432/finance
+
+      # Applied on top, so a migration added after 1.0.0 is exercised too.
+      - name: Apply pending migrations
         working-directory: server
         run: |
           node -e "
@@ -109,8 +136,6 @@ jobs:
               .catch((e) => { console.error(e); process.exit(1); });
           "
 
-      # And a second time: re-running must be a no-op, which is what makes a
-      # redeploy of the same version safe.
       - name: Re-run migrations (must be a no-op)
         working-directory: server
         run: |
@@ -121,14 +146,6 @@ jobs:
               .catch((e) => { console.error(e); process.exit(1); });
           "
 
-      - name: Seed categories (twice, must be idempotent)
-        working-directory: server
-        run: |
-          npm run seed
-          npm run seed
-
-      # The suite covers CSV parsing without a database and the summary,
-      # import and transfer queries against this one.
       - name: Server tests
         working-directory: server
         run: npm test

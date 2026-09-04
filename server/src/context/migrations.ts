@@ -4,12 +4,13 @@ import dbContext from '@/context/dbContext';
 
 // Migrations live as plain .sql files next to the compiled output. They run in
 // filename order on every boot; the schema_migrations table records which ones
-// already ran, so a restart is a no-op and an existing production database
-// picks up only what it is missing.
+// already ran, so a restart is a no-op and an existing database picks up only
+// what it is missing.
 //
-// The bootstrap script under /docker-entrypoint-initdb.d only ever runs against
-// an empty data volume, which is why schema changes cannot live there: the
-// volume is a bind mount and outlives the container.
+// The directory is empty until 1.0.0 ships: with no installed database to
+// migrate from, the schema is created in one go by database/init.sql, which the
+// postgres image runs on the first start of an empty volume. After that the
+// entrypoint is never re-run, so every later schema change belongs here.
 const MIGRATIONS_DIR = path.join(__dirname, '..', '..', 'migrations');
 
 async function ensureMigrationsTable(client: any): Promise<void> {
@@ -49,6 +50,12 @@ export async function runMigrations(): Promise<void> {
     const appliedSet = new Set<string>(applied.rows.map((r: any) => r.filename));
     const files = await readMigrationFiles();
     const pending = files.filter((f) => !appliedSet.has(f));
+
+    if (files.length === 0) {
+      // Expected before 1.0.0: the schema comes from database/init.sql.
+      console.log('No migrations to apply.');
+      return;
+    }
 
     if (pending.length === 0) {
       console.log(`Database up to date (${files.length} migrations applied).`);

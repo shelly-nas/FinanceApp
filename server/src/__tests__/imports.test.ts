@@ -1,7 +1,7 @@
 import { test, describe, before, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import dbContext from '@/context/dbContext';
-import { runMigrations } from '@/context/migrations';
+import { ensureSchema } from '@/__tests__/schema';
 import FinanceManager from '@/managers/financeManager';
 import '@/__tests__/teardown';
 
@@ -27,7 +27,7 @@ const row = (overrides: Partial<any> = {}) => ({
 
 describe('imports and transfers', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
     const client = await dbContext.connect();
     try {
       // Anything left behind by an earlier run - including a failed one - would
@@ -238,7 +238,7 @@ describe('imports and transfers', { skip: !hasDatabase && 'no database configure
 
 describe('account discovery', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
   });
 
   beforeEach(async () => {
@@ -378,7 +378,7 @@ describe('account discovery', { skip: !hasDatabase && 'no database configured' }
 
 describe('category management', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
   });
 
   beforeEach(async () => {
@@ -454,7 +454,7 @@ describe('one-sided transfers', { skip: !hasDatabase && 'no database configured'
   const BROKER = 'NL00TEST0000000003';
 
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
     const client = await dbContext.connect();
     try {
       await client.query(
@@ -562,7 +562,7 @@ describe('one-sided transfers', { skip: !hasDatabase && 'no database configured'
 
 describe('transfer matching, one best pair per transaction', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
   });
 
   beforeEach(async () => {

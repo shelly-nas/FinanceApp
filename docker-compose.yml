@@ -34,9 +34,12 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD ontbreekt - zet hem in .env}
       POSTGRES_DB: ${DB_NAME:-finance}
     volumes:
-      # Geen init-script: het schema komt van de migraties die de server bij
-      # het opstarten draait, zodat een bestaande database ze ook krijgt.
       - db_data:/var/lib/postgresql/data
+      # Draait alleen bij een leeg volume, in bestandsvolgorde. Zodra 1.0.0
+      # ergens met data draait, moet een schemawijziging een migratie worden -
+      # dit script wordt op een bestaand volume nooit opnieuw uitgevoerd.
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-financier} -d ${DB_NAME:-finance}"]
       interval: 10s

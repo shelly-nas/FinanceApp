@@ -1,23 +1,11 @@
 {
-  "/Users/jelle/Documents/GitHub/FinanceApp/server/migrations/002_import_hash.sql": {
-    "mtime": 1788491871.3940442,
-    "hash": "c05cb3ff3d0d07b8e688a2d03c9360cc"
+  "/Users/jelle/Documents/GitHub/FinanceApp/database/seed.sql": {
+    "mtime": 1788543220.7137322,
+    "hash": "9c1032cce2f6b552112365d9da4372fb"
   },
-  "/Users/jelle/Documents/GitHub/FinanceApp/server/migrations/seed_categories.sql": {
-    "mtime": 1788491891.4198637,
-    "hash": "d8ace9df06cfdb3d726e320caa7cbba7"
-  },
-  "/Users/jelle/Documents/GitHub/FinanceApp/server/migrations/003_internal_transfers.sql": {
-    "mtime": 1788491871.3967438,
-    "hash": "ed8c0529c8a2e2cdea3f398fb048274c"
-  },
-  "/Users/jelle/Documents/GitHub/FinanceApp/server/migrations/004_deferrable_name_fks.sql": {
-    "mtime": 1788541098.048407,
-    "hash": "6ff54a9087f9c64a905ff2c098b40e68"
-  },
-  "/Users/jelle/Documents/GitHub/FinanceApp/server/migrations/001_base_schema.sql": {
-    "mtime": 1788491855.4124203,
-    "hash": "ebcfa92a8946c1bdfea599cc692038f7"
+  "/Users/jelle/Documents/GitHub/FinanceApp/database/init.sql": {
+    "mtime": 1788543200.535321,
+    "hash": "1f40384a48ca5c7f960b6c3000e7c3c8"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/index.ts": {
     "mtime": 1788511966.8581557,
@@ -32,12 +20,12 @@
     "hash": "9395b1dd599d78f8447ef81c2c18651b"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/context/migrations.ts": {
-    "mtime": 1788492271.490893,
-    "hash": "8b0ddbf01018b4446b66944055e7b37b"
+    "mtime": 1788543264.5845807,
+    "hash": "4650761b2f96b93052b71b77481d8a2b"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/managers/financeManager.ts": {
-    "mtime": 1788541745.7179613,
-    "hash": "f636abbc0cde2bfc8000391600a3c3f6"
+    "mtime": 1788542617.1882207,
+    "hash": "5a7a850e103cbe4bb2b6d68b9787f914"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/utils/importHash.ts": {
     "mtime": 1788491957.8797946,
@@ -55,9 +43,13 @@
     "mtime": 1788246017.3985226,
     "hash": "bae4aa6c9e9f5c678647e66781dec856"
   },
+  "/Users/jelle/Documents/GitHub/FinanceApp/server/src/__tests__/schema.ts": {
+    "mtime": 1788543291.8179216,
+    "hash": "78dd18962324bc3fb459d563026fa717"
+  },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/__tests__/summaries.test.ts": {
-    "mtime": 1788541243.1024663,
-    "hash": "c3a769e32fbb84ee58259f79d2529fd0"
+    "mtime": 1788543291.8510895,
+    "hash": "98d311c7e9aea0ca97d02b0a5bfb3bec"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/__tests__/parseBankRow.test.ts": {
     "mtime": 1788536683.3698642,
@@ -68,8 +60,8 @@
     "hash": "13a149b82afa11558283b1e2c1427b83"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/__tests__/imports.test.ts": {
-    "mtime": 1788541837.3894691,
-    "hash": "aec17d9f8d7151fcc14de9701ffa2e14"
+    "mtime": 1788543291.8514397,
+    "hash": "7e6cbb6faaddd6f1d75eabbdc0bdd097"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/machineLearningModels/categoryModel.ts": {
     "mtime": 1788538680.2681193,
@@ -80,28 +72,28 @@
     "hash": "908b9461338d027e590d1b1f6cf76dfa"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/scripts/seed.ts": {
-    "mtime": 1788491934.9419925,
-    "hash": "8a41d4e1633a603874bb5d97a3e50ef5"
+    "mtime": 1788543264.5840936,
+    "hash": "b6141d5cd722bb178481067f88c396c7"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/controllers/financeController.ts": {
-    "mtime": 1788541761.2804115,
-    "hash": "c9d8db2e23c31963c05de7adf773a1e7"
+    "mtime": 1788542248.7545128,
+    "hash": "7786d3de7e65f36263e8861c3e7158d0"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/vite.config.ts": {
     "mtime": 1788165307.467433,
     "hash": "a376d3d975451516a0bc347b58563511"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/src/App.tsx": {
-    "mtime": 1788540860.2289846,
-    "hash": "95198248aaea7feef0a1cf090b6ef001"
+    "mtime": 1788542466.33695,
+    "hash": "9ee87f7f0d9cc0553cdc53805584c119"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/src/main.tsx": {
     "mtime": 1788165307.4652994,
     "hash": "3d2df0ac1b547a2f28b30c5cc6c0dfa6"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/src/api.ts": {
-    "mtime": 1788541879.7522762,
-    "hash": "fd89ba6231c59173738ace805fecbced"
+    "mtime": 1788542320.2843688,
+    "hash": "5c6894b2aadb82fbdbc8856198019f6f"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/src/expanded-theme.ts": {
     "mtime": 1788176071.407582,
@@ -188,8 +180,28 @@
     "hash": "e93659432d69031d88a558389722d1c7"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/src/scenes/header/index.tsx": {
-    "mtime": 1788540860.2292411,
-    "hash": "910a9fecff3d65e37fd3fc688c245640"
+    "mtime": 1788542466.3373053,
+    "hash": "ea308dbbb622d92001f3a487e3868549"
+  },
+  "/Users/jelle/Documents/GitHub/FinanceApp/client/src/scenes/reports/index.tsx": {
+    "mtime": 1788542466.301664,
+    "hash": "30f75de90741eca44f28569bfd2ab899"
+  },
+  "/Users/jelle/Documents/GitHub/FinanceApp/client/src/scenes/reports/NetWorthChart.tsx": {
+    "mtime": 1788542384.303179,
+    "hash": "2b2328b1993b66f922a25ce96f6a93ae"
+  },
+  "/Users/jelle/Documents/GitHub/FinanceApp/client/src/scenes/reports/ChartTooltip.tsx": {
+    "mtime": 1788542352.93277,
+    "hash": "0ac9bcf0d2d5269a2fe8612c6c51483b"
+  },
+  "/Users/jelle/Documents/GitHub/FinanceApp/client/src/scenes/reports/chartTheme.ts": {
+    "mtime": 1788542352.9293797,
+    "hash": "ac0e1ac5f5da4b75f66698dcbffe6aa2"
+  },
+  "/Users/jelle/Documents/GitHub/FinanceApp/client/src/scenes/reports/CategoryTrendChart.tsx": {
+    "mtime": 1788542714.3902545,
+    "hash": "0eafe6215989e667119a7f76768483d5"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/src/utils/monthRange.ts": {
     "mtime": 1788536733.452457,
@@ -252,28 +264,32 @@
     "hash": "bf162e9f3cb3a903995590e248c027ff"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/CONTRIBUTING.md": {
-    "mtime": 1788539148.889351,
-    "hash": "d48183eb9fc715e4161a54cf1a9f47ca"
+    "mtime": 1788543402.827043,
+    "hash": "44fbcb8caa259e6555f253db457a592a"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/docker-compose.yml": {
-    "mtime": 1788491914.187364,
-    "hash": "2debc38586d55e7c901c0f179e0ed3b5"
+    "mtime": 1788543233.4667695,
+    "hash": "18978f03ad52f392d98474dce123bc8e"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/docker-compose.prod.yml": {
-    "mtime": 1788511957.941319,
-    "hash": "e859af4c25a8e9dcde7b0dfe02047b60"
+    "mtime": 1788543248.276398,
+    "hash": "c4e12fbe45f495b1a0791595a75a39ce"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/CLAUDE.md": {
     "mtime": 1788512268.301709,
     "hash": "dd7f930e31a6a360ffb667a0397e3f3c"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/database/README.md": {
-    "mtime": 1788491891.432025,
-    "hash": "05ed84dfa352d99ced36597deb8fc0ff"
+    "mtime": 1788543402.794555,
+    "hash": "1f685db7f9ee22f893f6eff29680a85a"
+  },
+  "/Users/jelle/Documents/GitHub/FinanceApp/server/migrations/README.md": {
+    "mtime": 1788543220.7222335,
+    "hash": "b9b62b6f16d05bd8c6cf1fca76984993"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/docs/REVIEW.md": {
-    "mtime": 1788542025.2101965,
-    "hash": "08b4c0aa5141f5bfb4cd5eb7d88d1e91"
+    "mtime": 1788542800.0124884,
+    "hash": "011438be9eadb785e2a95b139f8186e2"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/index.html": {
     "mtime": 1788165307.4618204,

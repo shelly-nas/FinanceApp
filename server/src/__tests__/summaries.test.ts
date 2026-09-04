@@ -1,7 +1,7 @@
 import { test, describe, before, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import dbContext from '@/context/dbContext';
-import { runMigrations } from '@/context/migrations';
+import { ensureSchema } from '@/__tests__/schema';
 import FinanceManager from '@/managers/financeManager';
 import '@/__tests__/teardown';
 
@@ -31,7 +31,7 @@ const row = (overrides: Partial<any> = {}) => ({
 
 describe('summary queries', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
     const client = await dbContext.connect();
     try {
       // Only this file's own accounts: anything else - left by manual testing or
@@ -225,7 +225,7 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
 
 describe('searchTransactions', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
     await FinanceManager.addTransactions([
       row({ name_description: 'Albert Heijn Rotterdam', amount: 42.15, date_str: '2026-08-05', notifications: 'pinbetaling' }),
       row({ name_description: 'Jumbo', amount: 18.40, date_str: '2026-08-12', notifications: 'pin' }),
@@ -317,7 +317,7 @@ describe('searchTransactions', { skip: !hasDatabase && 'no database configured' 
 
 describe('bulk edits', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
   });
 
   beforeEach(async () => {
@@ -371,7 +371,7 @@ describe('bulk edits', { skip: !hasDatabase && 'no database configured' }, () =>
 
 describe('historical balances', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
   });
 
   beforeEach(async () => {
@@ -449,7 +449,7 @@ describe('historical balances', { skip: !hasDatabase && 'no database configured'
 
 describe('getNetWorthHistory', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
-    await runMigrations();
+    await ensureSchema();
   });
 
   beforeEach(async () => {
@@ -501,5 +501,119 @@ describe('getNetWorthHistory', { skip: !hasDatabase && 'no database configured' 
       Number(august.net_worth),
       'the parts should add up to the whole',
     );
+  });
+});
+
+describe('getCategoryHistory', { skip: !hasDatabase && 'no database configured' }, () => {
+  before(async () => {
+    await ensureSchema();
+  });
+
+  beforeEach(async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
+  });
+
+  test('groups spending by category and month', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', amount: 100 }),
+      row({ date_str: '2026-06-20', amount: 50 }),
+      row({ date_str: '2026-07-10', amount: 80 }),
+    ]);
+
+    const history = await FinanceManager.getCategoryHistory('2026-06-01', '2026-07-31');
+    const june = history.find((h: any) => h.month === '2026-06');
+    const july = history.find((h: any) => h.month === '2026-07');
+
+    assert.equal(Number(june.total), 150, 'the two June rows add up');
+    assert.equal(Number(july.total), 80);
+  });
+
+  test('reports spending as positive, so the chart reads as cost', async () => {
+    await FinanceManager.addTransactions([row({ date_str: '2026-06-10', amount: 100 })]);
+
+    const [entry] = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30');
+    assert.equal(Number(entry.total), 100);
+  });
+
+  test('lets a refund pull the month back down', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', amount: 100 }),
+      row({ date_str: '2026-06-15', debit_credit: 'Credit', amount: 30 }),
+    ]);
+
+    const [entry] = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30');
+    assert.equal(Number(entry.total), 70);
+  });
+
+  test('carries the category colour, so the chart matches the breakdown', async () => {
+    await FinanceManager.addTransactions([row({ date_str: '2026-06-10', amount: 10 })]);
+
+    const [entry] = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30');
+    assert.equal(entry.color, '#8cc2b3', "the category's own colour");
+  });
+
+  test('omits a month with no activity rather than reporting zero', async () => {
+    // The chart fills those gaps: it knows the range it asked for, the query
+    // only reports what happened.
+    await FinanceManager.addTransactions([row({ date_str: '2026-06-10', amount: 10 })]);
+
+    const history = await FinanceManager.getCategoryHistory('2026-06-01', '2026-08-31');
+    assert.equal(history.length, 1);
+  });
+
+  test('excludes confirmed internal transfers', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', category: 'Sparen, Beleggen', counterparty: SAVINGS, amount: 500 }),
+      row({ date_str: '2026-06-10', category: 'Variabel Inkomen', account: SAVINGS, counterparty: CHECKING, debit_credit: 'Credit', amount: 500 }),
+      row({ date_str: '2026-06-11', amount: 40 }),
+    ]);
+    await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
+
+    const history = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30');
+    assert.equal(history.length, 1);
+    assert.equal(history[0].category, 'Boodschappen');
+  });
+
+  test('leaves uncategorised rows out', async () => {
+    // They would all collapse into one unnamed series saying nothing about
+    // where money goes.
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', category: null, amount: 99 }),
+      row({ date_str: '2026-06-11', amount: 40 }),
+    ]);
+
+    const history = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30');
+    assert.equal(history.length, 1);
+  });
+
+  test('narrows to the requested categories', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', amount: 40 }),
+      row({ date_str: '2026-06-11', category: 'Vast Inkomen', debit_credit: 'Credit', amount: 3000 }),
+    ]);
+
+    const history = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30', {
+      categories: ['Boodschappen'],
+    });
+    assert.equal(history.length, 1);
+    assert.equal(history[0].category, 'Boodschappen');
+  });
+
+  test('honours the range on both ends', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-05-31', amount: 10 }),
+      row({ date_str: '2026-06-01', amount: 20 }),
+      row({ date_str: '2026-06-30', amount: 40 }),
+      row({ date_str: '2026-07-01', amount: 80 }),
+    ]);
+
+    const history = await FinanceManager.getCategoryHistory('2026-06-01', '2026-06-30');
+    assert.equal(history.length, 1);
+    assert.equal(Number(history[0].total), 60, 'only the two June rows');
   });
 });

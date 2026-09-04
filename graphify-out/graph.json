@@ -63,7 +63,7 @@
       "source_file": "server/src/context/dbContext.ts",
       "source_location": "L15",
       "id": "context_dbcontext_dbcontext",
-      "community": 2,
+      "community": 13,
       "norm_label": "dbcontext"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "server/src/context/dbContext.ts",
       "source_location": "L18",
       "id": "context_dbcontext_dbcontext_constructor",
-      "community": 2,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "server/src/context/dbContext.ts",
       "source_location": "L28",
       "id": "context_dbcontext_dbcontext_connect",
-      "community": 2,
+      "community": 13,
       "norm_label": ".connect()"
     },
     {
@@ -97,7 +97,7 @@
       "label": "MIGRATIONS_DIR",
       "file_type": "code",
       "source_file": "server/src/context/migrations.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "id": "context_migrations_migrations_dir",
       "community": 2,
       "norm_label": "migrations_dir"
@@ -106,7 +106,7 @@
       "label": "ensureMigrationsTable()",
       "file_type": "code",
       "source_file": "server/src/context/migrations.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "id": "context_migrations_ensuremigrationstable",
       "community": 2,
       "norm_label": "ensuremigrationstable()"
@@ -115,7 +115,7 @@
       "label": "readMigrationFiles()",
       "file_type": "code",
       "source_file": "server/src/context/migrations.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "id": "context_migrations_readmigrationfiles",
       "community": 2,
       "norm_label": "readmigrationfiles()"
@@ -124,7 +124,7 @@
       "label": "runMigrations()",
       "file_type": "code",
       "source_file": "server/src/context/migrations.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "id": "context_migrations_runmigrations",
       "community": 2,
       "norm_label": "runmigrations()"
@@ -153,7 +153,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L19",
       "id": "managers_financemanager_financemanager",
-      "community": 3,
+      "community": 4,
       "norm_label": "financemanager"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L123",
       "id": "managers_financemanager_financemanager_gettransactions",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettransactions()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L178",
       "id": "managers_financemanager_financemanager_searchtransactions",
-      "community": 3,
+      "community": 4,
       "norm_label": ".searchtransactions()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L306",
       "id": "managers_financemanager_financemanager_bulkupdatetransactions",
-      "community": 3,
+      "community": 4,
       "norm_label": ".bulkupdatetransactions()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L337",
       "id": "managers_financemanager_financemanager_bulksettag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".bulksettag()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L365",
       "id": "managers_financemanager_financemanager_gettransactionaccounts",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettransactionaccounts()"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L396",
       "id": "managers_financemanager_financemanager_gettrainingdata",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettrainingdata()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L415",
       "id": "managers_financemanager_financemanager_getcategorysums",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getcategorysums()"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L469",
       "id": "managers_financemanager_financemanager_getincomeexpensessum",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getincomeexpensessum()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L542",
       "id": "managers_financemanager_financemanager_getemptycategorytransactions",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getemptycategorytransactions()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L563",
       "id": "managers_financemanager_financemanager_updatetransaction",
-      "community": 3,
+      "community": 4,
       "norm_label": ".updatetransaction()"
     },
     {
@@ -261,268 +261,277 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L618",
       "id": "managers_financemanager_financemanager_getaccountoverview",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getaccountoverview()"
+    },
+    {
+      "label": ".getCategoryHistory()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L679",
+      "id": "managers_financemanager_financemanager_getcategoryhistory",
+      "community": 4,
+      "norm_label": ".getcategoryhistory()"
     },
     {
       "label": ".getNetWorthHistory()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L675",
+      "source_location": "L743",
       "id": "managers_financemanager_financemanager_getnetworthhistory",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getnetworthhistory()"
     },
     {
       "label": ".getCategories()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L739",
+      "source_location": "L807",
       "id": "managers_financemanager_financemanager_getcategories",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getcategories()"
     },
     {
       "label": ".createCategory()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L763",
+      "source_location": "L831",
       "id": "managers_financemanager_financemanager_createcategory",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createcategory()"
     },
     {
       "label": ".updateCategory()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L790",
+      "source_location": "L858",
       "id": "managers_financemanager_financemanager_updatecategory",
-      "community": 3,
+      "community": 4,
       "norm_label": ".updatecategory()"
     },
     {
       "label": ".deleteCategory()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L856",
+      "source_location": "L924",
       "id": "managers_financemanager_financemanager_deletecategory",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deletecategory()"
     },
     {
       "label": ".getCategoryList()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L886",
+      "source_location": "L954",
       "id": "managers_financemanager_financemanager_getcategorylist",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getcategorylist()"
     },
     {
       "label": ".getInvestmentAccounts()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L903",
+      "source_location": "L971",
       "id": "managers_financemanager_financemanager_getinvestmentaccounts",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getinvestmentaccounts()"
     },
     {
       "label": ".addInvestments()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L920",
+      "source_location": "L988",
       "id": "managers_financemanager_financemanager_addinvestments",
-      "community": 3,
+      "community": 4,
       "norm_label": ".addinvestments()"
     },
     {
       "label": ".deleteTransaction()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L949",
+      "source_location": "L1017",
       "id": "managers_financemanager_financemanager_deletetransaction",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deletetransaction()"
     },
     {
       "label": ".getAccounts()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L980",
+      "source_location": "L1048",
       "id": "managers_financemanager_financemanager_getaccounts",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getaccounts()"
     },
     {
       "label": ".getUnknownAccounts()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1011",
+      "source_location": "L1079",
       "id": "managers_financemanager_financemanager_getunknownaccounts",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getunknownaccounts()"
     },
     {
       "label": ".createAccount()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1038",
+      "source_location": "L1106",
       "id": "managers_financemanager_financemanager_createaccount",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createaccount()"
     },
     {
       "label": ".updateAccount()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1065",
+      "source_location": "L1133",
       "id": "managers_financemanager_financemanager_updateaccount",
-      "community": 3,
+      "community": 4,
       "norm_label": ".updateaccount()"
     },
     {
       "label": ".deleteAccount()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1135",
+      "source_location": "L1203",
       "id": "managers_financemanager_financemanager_deleteaccount",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deleteaccount()"
     },
     {
       "label": ".markCounterpartyTransfers()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1196",
+      "source_location": "L1264",
       "id": "managers_financemanager_financemanager_markcounterpartytransfers",
-      "community": 3,
+      "community": 4,
       "norm_label": ".markcounterpartytransfers()"
     },
     {
       "label": ".getOneSidedTransfers()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1235",
+      "source_location": "L1303",
       "id": "managers_financemanager_financemanager_getonesidedtransfers",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getonesidedtransfers()"
     },
     {
       "label": ".unmarkInternal()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1278",
+      "source_location": "L1346",
       "id": "managers_financemanager_financemanager_unmarkinternal",
-      "community": 3,
+      "community": 4,
       "norm_label": ".unmarkinternal()"
     },
     {
       "label": ".getTransferCandidates()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1310",
+      "source_location": "L1378",
       "id": "managers_financemanager_financemanager_gettransfercandidates",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettransfercandidates()"
     },
     {
       "label": ".confirmTransfer()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1412",
+      "source_location": "L1480",
       "id": "managers_financemanager_financemanager_confirmtransfer",
-      "community": 3,
+      "community": 4,
       "norm_label": ".confirmtransfer()"
     },
     {
       "label": ".rejectTransfer()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1458",
+      "source_location": "L1526",
       "id": "managers_financemanager_financemanager_rejecttransfer",
-      "community": 3,
+      "community": 4,
       "norm_label": ".rejecttransfer()"
     },
     {
       "label": ".unlinkTransfer()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1474",
+      "source_location": "L1542",
       "id": "managers_financemanager_financemanager_unlinktransfer",
-      "community": 3,
+      "community": 4,
       "norm_label": ".unlinktransfer()"
     },
     {
       "label": ".getTransfers()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1507",
+      "source_location": "L1575",
       "id": "managers_financemanager_financemanager_gettransfers",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettransfers()"
     },
     {
       "label": ".getTags()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1543",
+      "source_location": "L1611",
       "id": "managers_financemanager_financemanager_gettags",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettags()"
     },
     {
       "label": ".createTag()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1570",
+      "source_location": "L1638",
       "id": "managers_financemanager_financemanager_createtag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createtag()"
     },
     {
       "label": ".updateTag()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1592",
+      "source_location": "L1660",
       "id": "managers_financemanager_financemanager_updatetag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".updatetag()"
     },
     {
       "label": ".deleteTag()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1622",
+      "source_location": "L1690",
       "id": "managers_financemanager_financemanager_deletetag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deletetag()"
     },
     {
       "label": ".setTransactionTags()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1641",
+      "source_location": "L1709",
       "id": "managers_financemanager_financemanager_settransactiontags",
-      "community": 3,
+      "community": 4,
       "norm_label": ".settransactiontags()"
     },
     {
       "label": ".getTagsForTransaction()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1671",
+      "source_location": "L1739",
       "id": "managers_financemanager_financemanager_gettagsfortransaction",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettagsfortransaction()"
     },
     {
       "label": ".getTagSummary()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L1691",
+      "source_location": "L1759",
       "id": "managers_financemanager_financemanager_gettagsummary",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettagsummary()"
     },
     {
@@ -576,7 +585,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L1",
       "id": "server_src_utils_parsebankrow_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "parsebankrow.ts"
     },
     {
@@ -585,7 +594,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L11",
       "id": "utils_parsebankrow_parsedrow",
-      "community": 1,
+      "community": 3,
       "norm_label": "parsedrow"
     },
     {
@@ -594,7 +603,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L25",
       "id": "utils_parsebankrow_reformatdate",
-      "community": 1,
+      "community": 3,
       "norm_label": "reformatdate()"
     },
     {
@@ -603,7 +612,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L35",
       "id": "utils_parsebankrow_isdayfirstdate",
-      "community": 1,
+      "community": 3,
       "norm_label": "isdayfirstdate()"
     },
     {
@@ -612,7 +621,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L37",
       "id": "utils_parsebankrow_reformatdayfirstdate",
-      "community": 1,
+      "community": 3,
       "norm_label": "reformatdayfirstdate()"
     },
     {
@@ -621,7 +630,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L44",
       "id": "utils_parsebankrow_stripwrappingquotes",
-      "community": 1,
+      "community": 3,
       "norm_label": "stripwrappingquotes()"
     },
     {
@@ -630,7 +639,7 @@
       "source_file": "server/src/utils/parseBankRow.ts",
       "source_location": "L57",
       "id": "utils_parsebankrow_parsebankrow",
-      "community": 1,
+      "community": 3,
       "norm_label": "parsebankrow()"
     },
     {
@@ -639,7 +648,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/financeModel.ts",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_server_src_models_financemodel_ts",
-      "community": 1,
+      "community": 13,
       "norm_label": "financemodel.ts"
     },
     {
@@ -648,7 +657,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/financeModel.ts",
       "source_location": "L1",
       "id": "models_financemodel_transactions",
-      "community": 1,
+      "community": 13,
       "norm_label": "transactions"
     },
     {
@@ -657,7 +666,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/financeModel.ts",
       "source_location": "L13",
       "id": "models_financemodel_transactions_constructor",
-      "community": 1,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -666,7 +675,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L1",
       "id": "server_src_models_banktransactionmodel_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "banktransactionmodel.ts"
     },
     {
@@ -675,7 +684,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L1",
       "id": "models_banktransactionmodel_bankmappings",
-      "community": 1,
+      "community": 3,
       "norm_label": "bankmappings"
     },
     {
@@ -684,7 +693,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L50",
       "id": "models_banktransactionmodel_asncategorymap",
-      "community": 1,
+      "community": 3,
       "norm_label": "asncategorymap"
     },
     {
@@ -693,8 +702,35 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L71",
       "id": "models_banktransactionmodel_bankcategorycolumns",
-      "community": 1,
+      "community": 3,
       "norm_label": "bankcategorycolumns"
+    },
+    {
+      "label": "schema.ts",
+      "file_type": "code",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L1",
+      "id": "server_src_tests_schema_ts",
+      "community": 2,
+      "norm_label": "schema.ts"
+    },
+    {
+      "label": "DATABASE_DIR",
+      "file_type": "code",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L6",
+      "id": "tests_schema_database_dir",
+      "community": 2,
+      "norm_label": "database_dir"
+    },
+    {
+      "label": "ensureSchema()",
+      "file_type": "code",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L18",
+      "id": "tests_schema_ensureschema",
+      "community": 2,
+      "norm_label": "ensureschema()"
     },
     {
       "label": "summaries.test.ts",
@@ -814,12 +850,30 @@
       "norm_label": "balance()"
     },
     {
+      "label": "june",
+      "file_type": "code",
+      "source_file": "server/src/__tests__/summaries.test.ts",
+      "source_location": "L529",
+      "id": "tests_summaries_test_june",
+      "community": 2,
+      "norm_label": "june"
+    },
+    {
+      "label": "july",
+      "file_type": "code",
+      "source_file": "server/src/__tests__/summaries.test.ts",
+      "source_location": "L530",
+      "id": "tests_summaries_test_july",
+      "community": 2,
+      "norm_label": "july"
+    },
+    {
       "label": "parseBankRow.test.ts",
       "file_type": "code",
       "source_file": "server/src/__tests__/parseBankRow.test.ts",
       "source_location": "L1",
       "id": "server_src_tests_parsebankrow_test_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "parsebankrow.test.ts"
     },
     {
@@ -828,7 +882,7 @@
       "source_file": "server/src/__tests__/parseBankRow.test.ts",
       "source_location": "L11",
       "id": "tests_parsebankrow_test_row",
-      "community": 1,
+      "community": 3,
       "norm_label": "row"
     },
     {
@@ -945,7 +999,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L1",
       "id": "server_src_machinelearningmodels_categorymodel_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "categorymodel.ts"
     },
     {
@@ -954,7 +1008,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L8",
       "id": "machinelearningmodels_categorymodel_dutch_stop_words",
-      "community": 1,
+      "community": 3,
       "norm_label": "dutch_stop_words"
     },
     {
@@ -963,7 +1017,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L22",
       "id": "machinelearningmodels_categorymodel_isnoisetoken",
-      "community": 1,
+      "community": 3,
       "norm_label": "isnoisetoken()"
     },
     {
@@ -972,7 +1026,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L33",
       "id": "machinelearningmodels_categorymodel_extractmerchantsegment",
-      "community": 1,
+      "community": 3,
       "norm_label": "extractmerchantsegment()"
     },
     {
@@ -981,7 +1035,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L37",
       "id": "machinelearningmodels_categorymodel_preprocesstext",
-      "community": 1,
+      "community": 3,
       "norm_label": "preprocesstext()"
     },
     {
@@ -990,7 +1044,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L60",
       "id": "machinelearningmodels_categorymodel_trainmodel",
-      "community": 1,
+      "community": 3,
       "norm_label": "trainmodel()"
     },
     {
@@ -999,7 +1053,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L101",
       "id": "machinelearningmodels_categorymodel_classifywith",
-      "community": 1,
+      "community": 3,
       "norm_label": "classifywith()"
     },
     {
@@ -1008,7 +1062,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L159",
       "id": "machinelearningmodels_categorymodel_predictcategory",
-      "community": 1,
+      "community": 3,
       "norm_label": "predictcategory()"
     },
     {
@@ -1017,7 +1071,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L1",
       "id": "server_src_machinelearningmodels_dutchmerchantrules_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "dutchmerchantrules.ts"
     },
     {
@@ -1026,7 +1080,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L13",
       "id": "machinelearningmodels_dutchmerchantrules_merchantrule",
-      "community": 1,
+      "community": 3,
       "norm_label": "merchantrule"
     },
     {
@@ -1035,7 +1089,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L19",
       "id": "machinelearningmodels_dutchmerchantrules_dutchmerchantrules",
-      "community": 1,
+      "community": 3,
       "norm_label": "dutchmerchantrules"
     },
     {
@@ -1044,7 +1098,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L71",
       "id": "machinelearningmodels_dutchmerchantrules_matchmerchantrule",
-      "community": 1,
+      "community": 3,
       "norm_label": "matchmerchantrule()"
     },
     {
@@ -1060,7 +1114,7 @@
       "label": "seed()",
       "file_type": "code",
       "source_file": "server/src/scripts/seed.ts",
-      "source_location": "L9",
+      "source_location": "L7",
       "id": "scripts_seed_seed",
       "community": 2,
       "norm_label": "seed()"
@@ -1071,7 +1125,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L1",
       "id": "server_src_controllers_financecontroller_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "financecontroller.ts"
     },
     {
@@ -1080,7 +1134,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L11",
       "id": "controllers_financecontroller_router",
-      "community": 1,
+      "community": 3,
       "norm_label": "router"
     },
     {
@@ -1089,7 +1143,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L12",
       "id": "controllers_financecontroller_upload",
-      "community": 1,
+      "community": 3,
       "norm_label": "upload"
     },
     {
@@ -1098,7 +1152,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L28",
       "id": "controllers_financecontroller_entries",
-      "community": 1,
+      "community": 3,
       "norm_label": "entries"
     },
     {
@@ -1107,7 +1161,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L33",
       "id": "controllers_financecontroller_entry",
-      "community": 1,
+      "community": 3,
       "norm_label": "entry"
     },
     {
@@ -1116,7 +1170,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L114",
       "id": "controllers_financecontroller_idlist",
-      "community": 1,
+      "community": 3,
       "norm_label": "idlist"
     },
     {
@@ -1125,61 +1179,70 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L216",
       "id": "controllers_financecontroller_isdate",
-      "community": 1,
+      "community": 3,
       "norm_label": "isdate()"
+    },
+    {
+      "label": "parseList()",
+      "file_type": "code",
+      "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L225",
+      "id": "controllers_financecontroller_parselist",
+      "community": 3,
+      "norm_label": "parselist()"
     },
     {
       "label": "parseJsonArray()",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L283",
+      "source_location": "L317",
       "id": "controllers_financecontroller_parsejsonarray",
-      "community": 1,
+      "community": 3,
       "norm_label": "parsejsonarray()"
     },
     {
       "label": "CATEGORY_TYPES",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L404",
+      "source_location": "L438",
       "id": "controllers_financecontroller_category_types",
-      "community": 1,
+      "community": 3,
       "norm_label": "category_types"
     },
     {
       "label": "INCOME_OUTCOME",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L405",
+      "source_location": "L439",
       "id": "controllers_financecontroller_income_outcome",
-      "community": 1,
+      "community": 3,
       "norm_label": "income_outcome"
     },
     {
       "label": "validateCategory()",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L415",
+      "source_location": "L449",
       "id": "controllers_financecontroller_validatecategory",
-      "community": 1,
+      "community": 3,
       "norm_label": "validatecategory()"
     },
     {
       "label": "invalid",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L433",
+      "source_location": "L467",
       "id": "controllers_financecontroller_invalid",
-      "community": 1,
+      "community": 3,
       "norm_label": "invalid"
     },
     {
       "label": "ACCOUNT_TYPES",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L508",
+      "source_location": "L542",
       "id": "controllers_financecontroller_account_types",
-      "community": 1,
+      "community": 3,
       "norm_label": "account_types"
     },
     {
@@ -1188,7 +1251,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/vite.config.ts",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_vite_config_ts",
-      "community": 21,
+      "community": 22,
       "norm_label": "vite.config.ts"
     },
     {
@@ -1204,7 +1267,7 @@
       "label": "ThemedApp()",
       "file_type": "code",
       "source_file": "client/src/App.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "id": "src_app_themedapp",
       "community": 6,
       "norm_label": "themedapp()"
@@ -1213,7 +1276,7 @@
       "label": "App()",
       "file_type": "code",
       "source_file": "client/src/App.tsx",
-      "source_location": "L45",
+      "source_location": "L47",
       "id": "src_app_app",
       "community": 6,
       "norm_label": "app()"
@@ -1224,7 +1287,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/main.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_main_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "main.tsx"
     },
     {
@@ -1233,7 +1296,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/main.tsx",
       "source_location": "L10",
       "id": "src_main_store",
-      "community": 7,
+      "community": 8,
       "norm_label": "store"
     },
     {
@@ -1251,7 +1314,7 @@
       "source_file": "client/src/api.ts",
       "source_location": "L5",
       "id": "src_api_transactionsqueryparams",
-      "community": 7,
+      "community": 8,
       "norm_label": "transactionsqueryparams"
     },
     {
@@ -1368,7 +1431,7 @@
       "source_file": "client/src/api.ts",
       "source_location": "L145",
       "id": "src_api_accountbalance",
-      "community": 13,
+      "community": 6,
       "norm_label": "accountbalance"
     },
     {
@@ -1377,7 +1440,7 @@
       "source_file": "client/src/api.ts",
       "source_location": "L152",
       "id": "src_api_networthpoint",
-      "community": 0,
+      "community": 7,
       "norm_label": "networthpoint"
     },
     {
@@ -1390,12 +1453,21 @@
       "norm_label": "category"
     },
     {
+      "label": "CategoryHistoryPoint",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L172",
+      "id": "src_api_categoryhistorypoint",
+      "community": 0,
+      "norm_label": "categoryhistorypoint"
+    },
+    {
       "label": "api",
       "file_type": "code",
       "source_file": "client/src/api.ts",
-      "source_location": "L171",
+      "source_location": "L180",
       "id": "src_api_api",
-      "community": 7,
+      "community": 8,
       "norm_label": "api"
     },
     {
@@ -1530,7 +1602,7 @@
       "source_file": "client/src/scenes/dateRange/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_daterange_index_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "index.tsx"
     },
     {
@@ -1539,7 +1611,7 @@
       "source_file": "client/src/scenes/dateRange/index.tsx",
       "source_location": "L12",
       "id": "daterange_index_daterange",
-      "community": 4,
+      "community": 1,
       "norm_label": "daterange()"
     },
     {
@@ -1548,7 +1620,7 @@
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_daterange_daterangecontext_tsx",
-      "community": 8,
+      "community": 1,
       "norm_label": "daterangecontext.tsx"
     },
     {
@@ -1557,7 +1629,7 @@
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L5",
       "id": "daterange_daterangecontext_daterangecontextprops",
-      "community": 8,
+      "community": 1,
       "norm_label": "daterangecontextprops"
     },
     {
@@ -1566,7 +1638,7 @@
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L12",
       "id": "daterange_daterangecontext_daterangecontext",
-      "community": 8,
+      "community": 1,
       "norm_label": "daterangecontext"
     },
     {
@@ -1584,7 +1656,7 @@
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L50",
       "id": "daterange_daterangecontext_usedaterange",
-      "community": 4,
+      "community": 1,
       "norm_label": "usedaterange()"
     },
     {
@@ -1593,7 +1665,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/scenes/dateRange/DateRangeBox.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_scenes_daterange_daterangebox_tsx",
-      "community": 18,
+      "community": 20,
       "norm_label": "daterangebox.tsx"
     },
     {
@@ -1602,7 +1674,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/scenes/dateRange/DateRangeBox.tsx",
       "source_location": "L4",
       "id": "daterange_daterangebox_daterangebox",
-      "community": 18,
+      "community": 20,
       "norm_label": "daterangebox"
     },
     {
@@ -1692,7 +1764,7 @@
       "source_file": "client/src/scenes/dashboard/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_index_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "index.tsx"
     },
     {
@@ -1701,7 +1773,7 @@
       "source_file": "client/src/scenes/dashboard/index.tsx",
       "source_location": "L11",
       "id": "dashboard_index_dashboard",
-      "community": 4,
+      "community": 1,
       "norm_label": "dashboard()"
     },
     {
@@ -1710,7 +1782,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_transactiondetails_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "transactiondetails.tsx"
     },
     {
@@ -1719,7 +1791,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L12",
       "id": "dashboard_transactiondetails_transactiondetailsprops",
-      "community": 4,
+      "community": 1,
       "norm_label": "transactiondetailsprops"
     },
     {
@@ -1728,7 +1800,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L16",
       "id": "dashboard_transactiondetails_transactiondetails",
-      "community": 4,
+      "community": 1,
       "norm_label": "transactiondetails()"
     },
     {
@@ -1737,7 +1809,7 @@
       "source_file": "client/src/scenes/dashboard/ImportDialogs.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_importdialogs_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "importdialogs.tsx"
     },
     {
@@ -1746,7 +1818,7 @@
       "source_file": "client/src/scenes/dashboard/ImportDialogs.tsx",
       "source_location": "L6",
       "id": "dashboard_importdialogs_props",
-      "community": 7,
+      "community": 8,
       "norm_label": "props"
     },
     {
@@ -1755,7 +1827,7 @@
       "source_file": "client/src/scenes/dashboard/ImportDialogs.tsx",
       "source_location": "L18",
       "id": "dashboard_importdialogs_importdialogs",
-      "community": 7,
+      "community": 8,
       "norm_label": "importdialogs()"
     },
     {
@@ -1764,7 +1836,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_spendingbreakdown_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "spendingbreakdown.tsx"
     },
     {
@@ -1773,7 +1845,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L9",
       "id": "dashboard_spendingbreakdown_categorysums",
-      "community": 4,
+      "community": 1,
       "norm_label": "categorysums"
     },
     {
@@ -1782,7 +1854,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L15",
       "id": "dashboard_spendingbreakdown_spendingbreakdownprops",
-      "community": 4,
+      "community": 1,
       "norm_label": "spendingbreakdownprops"
     },
     {
@@ -1791,7 +1863,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L19",
       "id": "dashboard_spendingbreakdown_categorizeitems",
-      "community": 4,
+      "community": 1,
       "norm_label": "categorizeitems()"
     },
     {
@@ -1800,7 +1872,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L36",
       "id": "dashboard_spendingbreakdown_spendingbreakdown",
-      "community": 4,
+      "community": 1,
       "norm_label": "spendingbreakdown()"
     },
     {
@@ -1809,7 +1881,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_periodsummary_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "periodsummary.tsx"
     },
     {
@@ -1818,7 +1890,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L9",
       "id": "dashboard_periodsummary_exchangetype",
-      "community": 4,
+      "community": 1,
       "norm_label": "exchangetype"
     },
     {
@@ -1827,7 +1899,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L14",
       "id": "dashboard_periodsummary_incomeexpenseitem",
-      "community": 4,
+      "community": 1,
       "norm_label": "incomeexpenseitem"
     },
     {
@@ -1836,7 +1908,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L20",
       "id": "dashboard_periodsummary_props",
-      "community": 4,
+      "community": 1,
       "norm_label": "props"
     },
     {
@@ -1845,7 +1917,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L22",
       "id": "dashboard_periodsummary_splitincomeexpense",
-      "community": 4,
+      "community": 1,
       "norm_label": "splitincomeexpense()"
     },
     {
@@ -1854,7 +1926,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L40",
       "id": "dashboard_periodsummary_periodsummary",
-      "community": 4,
+      "community": 1,
       "norm_label": "periodsummary()"
     },
     {
@@ -1863,7 +1935,7 @@
       "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_sortablespendingtable_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "sortablespendingtable.tsx"
     },
     {
@@ -1872,7 +1944,7 @@
       "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
       "source_location": "L7",
       "id": "dashboard_sortablespendingtable_sortablespendingtableprops",
-      "community": 4,
+      "community": 1,
       "norm_label": "sortablespendingtableprops"
     },
     {
@@ -1881,7 +1953,7 @@
       "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
       "source_location": "L15",
       "id": "dashboard_sortablespendingtable_sortablespendingtable",
-      "community": 4,
+      "community": 1,
       "norm_label": "sortablespendingtable()"
     },
     {
@@ -1890,7 +1962,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_accountoverview_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "accountoverview.tsx"
     },
     {
@@ -1899,7 +1971,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L14",
       "id": "dashboard_accountoverview_groupbyaccounttype",
-      "community": 4,
+      "community": 1,
       "norm_label": "groupbyaccounttype()"
     },
     {
@@ -1908,7 +1980,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L20",
       "id": "dashboard_accountoverview_formatcurrency",
-      "community": 4,
+      "community": 1,
       "norm_label": "formatcurrency()"
     },
     {
@@ -1917,7 +1989,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L31",
       "id": "dashboard_accountoverview_accountsoverview",
-      "community": 4,
+      "community": 1,
       "norm_label": "accountsoverview()"
     },
     {
@@ -2194,7 +2266,7 @@
       "label": "Props",
       "file_type": "code",
       "source_file": "client/src/scenes/header/index.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "id": "header_index_props",
       "community": 6,
       "norm_label": "props"
@@ -2203,10 +2275,244 @@
       "label": "Header()",
       "file_type": "code",
       "source_file": "client/src/scenes/header/index.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "id": "header_index_header",
       "community": 6,
       "norm_label": "header()"
+    },
+    {
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L1",
+      "id": "client_src_scenes_reports_index_tsx",
+      "community": 7,
+      "norm_label": "index.tsx"
+    },
+    {
+      "label": "PRESETS",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L13",
+      "id": "reports_index_presets",
+      "community": 7,
+      "norm_label": "presets"
+    },
+    {
+      "label": "toIso()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L19",
+      "id": "reports_index_toiso",
+      "community": 7,
+      "norm_label": "toiso()"
+    },
+    {
+      "label": "presetRange()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L23",
+      "id": "reports_index_presetrange",
+      "community": 7,
+      "norm_label": "presetrange()"
+    },
+    {
+      "label": "yearToDate()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L30",
+      "id": "reports_index_yeartodate",
+      "community": 7,
+      "norm_label": "yeartodate()"
+    },
+    {
+      "label": "Reports()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L45",
+      "id": "reports_index_reports",
+      "community": 7,
+      "norm_label": "reports()"
+    },
+    {
+      "label": "NetWorthChart.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L1",
+      "id": "client_src_scenes_reports_networthchart_tsx",
+      "community": 7,
+      "norm_label": "networthchart.tsx"
+    },
+    {
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L16",
+      "id": "reports_networthchart_props",
+      "community": 7,
+      "norm_label": "props"
+    },
+    {
+      "label": "KEY_BY_TYPE",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L21",
+      "id": "reports_networthchart_key_by_type",
+      "community": 7,
+      "norm_label": "key_by_type"
+    },
+    {
+      "label": "NetWorthChart()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L37",
+      "id": "reports_networthchart_networthchart",
+      "community": 7,
+      "norm_label": "networthchart()"
+    },
+    {
+      "label": "ChartTooltip.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L1",
+      "id": "client_src_scenes_reports_charttooltip_tsx",
+      "community": 7,
+      "norm_label": "charttooltip.tsx"
+    },
+    {
+      "label": "Entry",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L5",
+      "id": "reports_charttooltip_entry",
+      "community": 7,
+      "norm_label": "entry"
+    },
+    {
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L12",
+      "id": "reports_charttooltip_props",
+      "community": 7,
+      "norm_label": "props"
+    },
+    {
+      "label": "ChartTooltip()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L27",
+      "id": "reports_charttooltip_charttooltip",
+      "community": 7,
+      "norm_label": "charttooltip()"
+    },
+    {
+      "label": "chartTheme.ts",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L1",
+      "id": "client_src_scenes_reports_charttheme_ts",
+      "community": 7,
+      "norm_label": "charttheme.ts"
+    },
+    {
+      "label": "ACCOUNT_TYPE_COLORS",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L14",
+      "id": "reports_charttheme_account_type_colors",
+      "community": 7,
+      "norm_label": "account_type_colors"
+    },
+    {
+      "label": "ACCOUNT_TYPE_ORDER",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L21",
+      "id": "reports_charttheme_account_type_order",
+      "community": 7,
+      "norm_label": "account_type_order"
+    },
+    {
+      "label": "ACCOUNT_TYPE_LABELS",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L23",
+      "id": "reports_charttheme_account_type_labels",
+      "community": 7,
+      "norm_label": "account_type_labels"
+    },
+    {
+      "label": "formatCurrency()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L29",
+      "id": "reports_charttheme_formatcurrency",
+      "community": 7,
+      "norm_label": "formatcurrency()"
+    },
+    {
+      "label": "formatCompact()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L33",
+      "id": "reports_charttheme_formatcompact",
+      "community": 7,
+      "norm_label": "formatcompact()"
+    },
+    {
+      "label": "formatMonth()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L42",
+      "id": "reports_charttheme_formatmonth",
+      "community": 7,
+      "norm_label": "formatmonth()"
+    },
+    {
+      "label": "formatMonthShort()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L49",
+      "id": "reports_charttheme_formatmonthshort",
+      "community": 7,
+      "norm_label": "formatmonthshort()"
+    },
+    {
+      "label": "monthsBetween()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L55",
+      "id": "reports_charttheme_monthsbetween",
+      "community": 7,
+      "norm_label": "monthsbetween()"
+    },
+    {
+      "label": "CategoryTrendChart.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L1",
+      "id": "client_src_scenes_reports_categorytrendchart_tsx",
+      "community": 7,
+      "norm_label": "categorytrendchart.tsx"
+    },
+    {
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L18",
+      "id": "reports_categorytrendchart_props",
+      "community": 7,
+      "norm_label": "props"
+    },
+    {
+      "label": "CategoryTrendChart()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L41",
+      "id": "reports_categorytrendchart_categorytrendchart",
+      "community": 7,
+      "norm_label": "categorytrendchart()"
     },
     {
       "label": "monthRange.ts",
@@ -2214,7 +2520,7 @@
       "source_file": "client/src/utils/monthRange.ts",
       "source_location": "L1",
       "id": "client_src_utils_monthrange_ts",
-      "community": 8,
+      "community": 1,
       "norm_label": "monthrange.ts"
     },
     {
@@ -2223,7 +2529,7 @@
       "source_file": "client/src/utils/monthRange.ts",
       "source_location": "L10",
       "id": "utils_monthrange_tomonthkey",
-      "community": 8,
+      "community": 1,
       "norm_label": "tomonthkey()"
     },
     {
@@ -2232,7 +2538,7 @@
       "source_file": "client/src/utils/monthRange.ts",
       "source_location": "L21",
       "id": "utils_monthrange_parsemonthkey",
-      "community": 8,
+      "community": 1,
       "norm_label": "parsemonthkey()"
     },
     {
@@ -2241,7 +2547,7 @@
       "source_file": "client/src/utils/monthRange.ts",
       "source_location": "L37",
       "id": "utils_monthrange_shiftmonth",
-      "community": 8,
+      "community": 1,
       "norm_label": "shiftmonth()"
     },
     {
@@ -2250,7 +2556,7 @@
       "source_file": "client/src/utils/monthRange.ts",
       "source_location": "L41",
       "id": "utils_monthrange_monthbounds",
-      "community": 8,
+      "community": 1,
       "norm_label": "monthbounds()"
     },
     {
@@ -2259,7 +2565,7 @@
       "source_file": "client/src/utils/monthRange.ts",
       "source_location": "L47",
       "id": "utils_monthrange_formatdate",
-      "community": 8,
+      "community": 1,
       "norm_label": "formatdate()"
     },
     {
@@ -2367,7 +2673,7 @@
       "source_file": "client/src/components/NetWorthBanner.tsx",
       "source_location": "L1",
       "id": "client_src_components_networthbanner_tsx",
-      "community": 13,
+      "community": 6,
       "norm_label": "networthbanner.tsx"
     },
     {
@@ -2376,7 +2682,7 @@
       "source_file": "client/src/components/NetWorthBanner.tsx",
       "source_location": "L11",
       "id": "components_networthbanner_formatcurrency",
-      "community": 13,
+      "community": 6,
       "norm_label": "formatcurrency()"
     },
     {
@@ -2385,7 +2691,7 @@
       "source_file": "client/src/components/NetWorthBanner.tsx",
       "source_location": "L14",
       "id": "components_networthbanner_type_order",
-      "community": 13,
+      "community": 6,
       "norm_label": "type_order"
     },
     {
@@ -2394,7 +2700,7 @@
       "source_file": "client/src/components/NetWorthBanner.tsx",
       "source_location": "L16",
       "id": "components_networthbanner_groupbytype",
-      "community": 13,
+      "community": 6,
       "norm_label": "groupbytype()"
     },
     {
@@ -2403,7 +2709,7 @@
       "source_file": "client/src/components/NetWorthBanner.tsx",
       "source_location": "L31",
       "id": "components_networthbanner_networthbanner",
-      "community": 13,
+      "community": 6,
       "norm_label": "networthbanner()"
     },
     {
@@ -2430,7 +2736,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L1",
       "id": "client_src_components_uploadinvestbutton_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "uploadinvestbutton.tsx"
     },
     {
@@ -2439,7 +2745,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L10",
       "id": "components_uploadinvestbutton_investment",
-      "community": 7,
+      "community": 8,
       "norm_label": "investment"
     },
     {
@@ -2448,7 +2754,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L17",
       "id": "components_uploadinvestbutton_uploadinvestbuttonprops",
-      "community": 7,
+      "community": 8,
       "norm_label": "uploadinvestbuttonprops"
     },
     {
@@ -2457,7 +2763,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L23",
       "id": "components_uploadinvestbutton_uploadinvestbutton",
-      "community": 7,
+      "community": 8,
       "norm_label": "uploadinvestbutton()"
     },
     {
@@ -2466,7 +2772,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L283",
       "id": "components_uploadinvestbutton_style",
-      "community": 7,
+      "community": 8,
       "norm_label": "style"
     },
     {
@@ -2475,7 +2781,7 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L1",
       "id": "client_src_components_uploadbutton_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "uploadbutton.tsx"
     },
     {
@@ -2484,7 +2790,7 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L10",
       "id": "components_uploadbutton_uploadbuttonprops",
-      "community": 7,
+      "community": 8,
       "norm_label": "uploadbuttonprops"
     },
     {
@@ -2493,7 +2799,7 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L17",
       "id": "components_uploadbutton_uploadbutton",
-      "community": 7,
+      "community": 8,
       "norm_label": "uploadbutton()"
     },
     {
@@ -2502,7 +2808,7 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L189",
       "id": "components_uploadbutton_style",
-      "community": 7,
+      "community": 8,
       "norm_label": "style"
     },
     {
@@ -2529,7 +2835,7 @@
       "source_file": "client/src/components/WidgetHeader.tsx",
       "source_location": "L1",
       "id": "client_src_components_widgetheader_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "widgetheader.tsx"
     },
     {
@@ -2538,7 +2844,7 @@
       "source_file": "client/src/components/WidgetHeader.tsx",
       "source_location": "L4",
       "id": "components_widgetheader_props",
-      "community": 4,
+      "community": 1,
       "norm_label": "props"
     },
     {
@@ -2547,7 +2853,7 @@
       "source_file": "client/src/components/WidgetHeader.tsx",
       "source_location": "L20",
       "id": "components_widgetheader_widgetheader",
-      "community": 4,
+      "community": 1,
       "norm_label": "widgetheader()"
     },
     {
@@ -2556,7 +2862,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/FlexBetween.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_components_flexbetween_tsx",
-      "community": 19,
+      "community": 21,
       "norm_label": "flexbetween.tsx"
     },
     {
@@ -2565,7 +2871,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/FlexBetween.tsx",
       "source_location": "L4",
       "id": "components_flexbetween_flexbetween",
-      "community": 19,
+      "community": 21,
       "norm_label": "flexbetween"
     },
     {
@@ -2610,7 +2916,7 @@
       "source_file": "client/src/components/ArrowButton.tsx",
       "source_location": "L1",
       "id": "client_src_components_arrowbutton_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "arrowbutton.tsx"
     },
     {
@@ -2619,7 +2925,7 @@
       "source_file": "client/src/components/ArrowButton.tsx",
       "source_location": "L4",
       "id": "components_arrowbutton_arrowbutton",
-      "community": 4,
+      "community": 1,
       "norm_label": "arrowbutton"
     },
     {
@@ -2628,7 +2934,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/MultiColorProgress.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_components_multicolorprogress_tsx",
-      "community": 16,
+      "community": 17,
       "norm_label": "multicolorprogress.tsx"
     },
     {
@@ -2637,7 +2943,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/MultiColorProgress.tsx",
       "source_location": "L4",
       "id": "components_multicolorprogress_multicolorprogressprops",
-      "community": 16,
+      "community": 17,
       "norm_label": "multicolorprogressprops"
     },
     {
@@ -2646,7 +2952,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/MultiColorProgress.tsx",
       "source_location": "L9",
       "id": "components_multicolorprogress_multicolorprogress",
-      "community": 16,
+      "community": 17,
       "norm_label": "multicolorprogress()"
     },
     {
@@ -2655,7 +2961,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L1",
       "id": "client_src_tests_monthrange_test_ts",
-      "community": 8,
+      "community": 1,
       "norm_label": "monthrange.test.ts"
     },
     {
@@ -2664,7 +2970,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L22",
       "id": "tests_monthrange_test_march",
-      "community": 8,
+      "community": 1,
       "norm_label": "march"
     },
     {
@@ -2673,7 +2979,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L27",
       "id": "tests_monthrange_test_lastday",
-      "community": 8,
+      "community": 1,
       "norm_label": "{ lastday }"
     },
     {
@@ -2682,7 +2988,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L32",
       "id": "tests_monthrange_test_anchor",
-      "community": 8,
+      "community": 1,
       "norm_label": "anchor"
     },
     {
@@ -2691,7 +2997,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L33",
       "id": "tests_monthrange_test_before",
-      "community": 8,
+      "community": 1,
       "norm_label": "before"
     },
     {
@@ -2700,7 +3006,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L41",
       "id": "tests_monthrange_test_firstday_lastday",
-      "community": 8,
+      "community": 1,
       "norm_label": "{ firstday, lastday }"
     },
     {
@@ -2709,7 +3015,7 @@
       "source_file": "client/src/__tests__/monthRange.test.ts",
       "source_location": "L67",
       "id": "tests_monthrange_test_now",
-      "community": 8,
+      "community": 1,
       "norm_label": "now"
     },
     {
@@ -2848,19 +3154,28 @@
       "norm_label": "database changes"
     },
     {
-      "label": "code:block1 (server/migrations/004_add_something.sql)",
+      "label": "code:bash (docker compose down -v && docker compose up --build)",
       "file_type": "document",
       "source_file": "CONTRIBUTING.md",
-      "source_location": "L55",
+      "source_location": "L52",
       "id": "financeapp_contributing_codeblock_1",
       "community": 9,
-      "norm_label": "code:block1 (server/migrations/004_add_something.sql)"
+      "norm_label": "code:bash (docker compose down -v && docker compose up --build)"
+    },
+    {
+      "label": "code:block2 (server/migrations/001_add_something.sql)",
+      "file_type": "document",
+      "source_file": "CONTRIBUTING.md",
+      "source_location": "L61",
+      "id": "financeapp_contributing_codeblock_2",
+      "community": 9,
+      "norm_label": "code:block2 (server/migrations/001_add_something.sql)"
     },
     {
       "label": "Tests",
       "file_type": "document",
       "source_file": "CONTRIBUTING.md",
-      "source_location": "L75",
+      "source_location": "L81",
       "id": "financeapp_contributing_tests",
       "community": 9,
       "norm_label": "tests"
@@ -2869,8 +3184,8 @@
       "label": "code:bash (cd server && npm test    # 67 tests; the database ones skip )",
       "file_type": "document",
       "source_file": "CONTRIBUTING.md",
-      "source_location": "L77",
-      "id": "financeapp_contributing_codeblock_2",
+      "source_location": "L83",
+      "id": "financeapp_contributing_codeblock_3",
       "community": 9,
       "norm_label": "code:bash (cd server && npm test    # 67 tests; the database ones skip )"
     },
@@ -2878,7 +3193,7 @@
       "label": "Local development",
       "file_type": "document",
       "source_file": "CONTRIBUTING.md",
-      "source_location": "L98",
+      "source_location": "L104",
       "id": "financeapp_contributing_local_development",
       "community": 9,
       "norm_label": "local development"
@@ -2887,8 +3202,8 @@
       "label": "code:bash (cp .env.example .env      # fill in DB_PASSWORD)",
       "file_type": "document",
       "source_file": "CONTRIBUTING.md",
-      "source_location": "L101",
-      "id": "financeapp_contributing_codeblock_3",
+      "source_location": "L107",
+      "id": "financeapp_contributing_codeblock_4",
       "community": 9,
       "norm_label": "code:bash (cp .env.example .env      # fill in db_password)"
     },
@@ -2896,8 +3211,8 @@
       "label": "code:bash (docker compose exec server npm run seed)",
       "file_type": "document",
       "source_file": "CONTRIBUTING.md",
-      "source_location": "L109",
-      "id": "financeapp_contributing_codeblock_4",
+      "source_location": "L115",
+      "id": "financeapp_contributing_codeblock_5",
       "community": 9,
       "norm_label": "code:bash (docker compose exec server npm run seed)"
     },
@@ -2907,7 +3222,7 @@
       "source_file": "CLAUDE.md",
       "source_location": "L1",
       "id": "claude_md",
-      "community": 17,
+      "community": 18,
       "norm_label": "claude.md"
     },
     {
@@ -2916,7 +3231,7 @@
       "source_file": "CLAUDE.md",
       "source_location": "L1",
       "id": "financeapp_claude_graphify",
-      "community": 17,
+      "community": 18,
       "norm_label": "graphify"
     },
     {
@@ -2925,7 +3240,7 @@
       "source_file": "CLAUDE.md",
       "source_location": "L11",
       "id": "financeapp_claude_commit_messages",
-      "community": 17,
+      "community": 18,
       "norm_label": "commit messages"
     },
     {
@@ -2934,7 +3249,7 @@
       "source_file": "database/README.md",
       "source_location": "L1",
       "id": "database_readme_md",
-      "community": 20,
+      "community": 15,
       "norm_label": "readme.md"
     },
     {
@@ -2943,8 +3258,53 @@
       "source_file": "database/README.md",
       "source_location": "L1",
       "id": "database_readme_database",
-      "community": 20,
+      "community": 15,
       "norm_label": "database"
+    },
+    {
+      "label": "Changing the schema",
+      "file_type": "document",
+      "source_file": "database/README.md",
+      "source_location": "L16",
+      "id": "database_readme_changing_the_schema",
+      "community": 15,
+      "norm_label": "changing the schema"
+    },
+    {
+      "label": "code:bash (docker compose down -v && docker compose up --build)",
+      "file_type": "document",
+      "source_file": "database/README.md",
+      "source_location": "L21",
+      "id": "database_readme_codeblock_1",
+      "community": 15,
+      "norm_label": "code:bash (docker compose down -v && docker compose up --build)"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "server/migrations/README.md",
+      "source_location": "L1",
+      "id": "server_migrations_readme_md",
+      "community": 19,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Migrations",
+      "file_type": "document",
+      "source_file": "server/migrations/README.md",
+      "source_location": "L1",
+      "id": "migrations_readme_migrations",
+      "community": 19,
+      "norm_label": "migrations"
+    },
+    {
+      "label": "code:block1 (server/migrations/001_add_something.sql)",
+      "file_type": "document",
+      "source_file": "server/migrations/README.md",
+      "source_location": "L13",
+      "id": "migrations_readme_codeblock_1",
+      "community": 19,
+      "norm_label": "code:block1 (server/migrations/001_add_something.sql)"
     },
     {
       "label": "REVIEW.md",
@@ -3199,10 +3559,19 @@
       "norm_label": "waar op te letten"
     },
     {
-      "label": "Bouwvolgorde",
+      "label": "Status",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
       "source_location": "L380",
+      "id": "docs_review_status",
+      "community": 5,
+      "norm_label": "status"
+    },
+    {
+      "label": "Bouwvolgorde",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L409",
       "id": "docs_review_bouwvolgorde",
       "community": 5,
       "norm_label": "bouwvolgorde"
@@ -3211,7 +3580,7 @@
       "label": "Overboekingen tussen eigen rekeningen",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L390",
+      "source_location": "L419",
       "id": "docs_review_overboekingen_tussen_eigen_rekeningen",
       "community": 5,
       "norm_label": "overboekingen tussen eigen rekeningen"
@@ -3220,7 +3589,7 @@
       "label": "Opruimwerk",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L457",
+      "source_location": "L486",
       "id": "docs_review_opruimwerk",
       "community": 5,
       "norm_label": "opruimwerk"
@@ -3229,7 +3598,7 @@
       "label": "12. Twee formatCurrency-definities, zeven keer gekopieerd",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L459",
+      "source_location": "L488",
       "id": "docs_review_12_twee_formatcurrency_definities_zeven_keer_gekopieerd",
       "community": 5,
       "norm_label": "12. twee formatcurrency-definities, zeven keer gekopieerd"
@@ -3238,7 +3607,7 @@
       "label": "13. Het `Transaction`-type staat vier keer opnieuw gedeclareerd",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L467",
+      "source_location": "L496",
       "id": "docs_review_13_het_transaction_type_staat_vier_keer_opnieuw_gedeclareerd",
       "community": 5,
       "norm_label": "13. het `transaction`-type staat vier keer opnieuw gedeclareerd"
@@ -3247,7 +3616,7 @@
       "label": "14. De `Transactions`-klasse is een lege huls",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L475",
+      "source_location": "L504",
       "id": "docs_review_14_de_transactions_klasse_is_een_lege_huls",
       "community": 5,
       "norm_label": "14. de `transactions`-klasse is een lege huls"
@@ -3256,7 +3625,7 @@
       "label": "15. `getCategorySums` gebruikt vaste parameterindexen",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L482",
+      "source_location": "L511",
       "id": "docs_review_15_getcategorysums_gebruikt_vaste_parameterindexen",
       "community": 5,
       "norm_label": "15. `getcategorysums` gebruikt vaste parameterindexen"
@@ -3265,7 +3634,7 @@
       "label": "16. Ongebruikte parameters en dode routes",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L492",
+      "source_location": "L521",
       "id": "docs_review_16_ongebruikte_parameters_en_dode_routes",
       "community": 5,
       "norm_label": "16. ongebruikte parameters en dode routes"
@@ -3274,7 +3643,7 @@
       "label": "Voorgestelde volgorde",
       "file_type": "document",
       "source_file": "docs/REVIEW.md",
-      "source_location": "L502",
+      "source_location": "L531",
       "id": "docs_review_voorgestelde_volgorde",
       "community": 5,
       "norm_label": "voorgestelde volgorde"
@@ -3285,7 +3654,7 @@
       "source_file": "client/README.md",
       "source_location": "L1",
       "id": "client_readme_md",
-      "community": 15,
+      "community": 16,
       "norm_label": "readme.md"
     },
     {
@@ -3294,7 +3663,7 @@
       "source_file": "client/README.md",
       "source_location": "L1",
       "id": "client_readme_react_typescript_vite",
-      "community": 15,
+      "community": 16,
       "norm_label": "react + typescript + vite"
     },
     {
@@ -3303,7 +3672,7 @@
       "source_file": "client/README.md",
       "source_location": "L10",
       "id": "client_readme_expanding_the_eslint_configuration",
-      "community": 15,
+      "community": 16,
       "norm_label": "expanding the eslint configuration"
     },
     {
@@ -3312,7 +3681,7 @@
       "source_file": "client/README.md",
       "source_location": "L16",
       "id": "client_readme_codeblock_1",
-      "community": 15,
+      "community": 16,
       "norm_label": "code:js (export default {)"
     },
     {
@@ -3320,7 +3689,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L10",
-      "community": 4,
+      "community": 1,
       "norm_label": "accountcategory",
       "id": "dashboard_accountoverview_accountcategory"
     },
@@ -3428,7 +3797,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L1",
-      "community": 4,
+      "community": 1,
       "norm_label": "sortabletransactiontable.tsx",
       "id": "client_src_scenes_dashboard_sortabletransactiontable_tsx"
     },
@@ -3437,7 +3806,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L4",
-      "community": 4,
+      "community": 1,
       "norm_label": "transaction",
       "id": "dashboard_sortabletransactiontable_transaction"
     },
@@ -3446,7 +3815,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L17",
-      "community": 4,
+      "community": 1,
       "norm_label": "sortabletransactiontableprops",
       "id": "dashboard_sortabletransactiontable_sortabletransactiontableprops"
     },
@@ -3455,7 +3824,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L21",
-      "community": 4,
+      "community": 1,
       "norm_label": "sortabletransactiontable()",
       "id": "dashboard_sortabletransactiontable_sortabletransactiontable"
     },
@@ -3464,7 +3833,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L11",
-      "community": 4,
+      "community": 1,
       "norm_label": "transaction",
       "id": "dashboard_transactiondetails_transaction"
     },
@@ -3491,7 +3860,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/context/dbContext.ts",
       "source_location": "L1",
-      "community": 1,
+      "community": 13,
       "norm_label": "dbcontext.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_context_dbcontext_ts"
     },
@@ -3500,7 +3869,7 @@
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L12",
-      "community": 1,
+      "community": 3,
       "norm_label": "reformatdate()",
       "id": "controllers_financecontroller_reformatdate"
     },
@@ -3509,7 +3878,7 @@
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L22",
-      "community": 1,
+      "community": 3,
       "norm_label": "isdayfirstdate()",
       "id": "controllers_financecontroller_isdayfirstdate"
     },
@@ -3518,7 +3887,7 @@
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L23",
-      "community": 1,
+      "community": 3,
       "norm_label": "reformatdayfirstdate()",
       "id": "controllers_financecontroller_reformatdayfirstdate"
     },
@@ -3527,7 +3896,7 @@
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L30",
-      "community": 1,
+      "community": 3,
       "norm_label": "stripwrappingquotes()",
       "id": "controllers_financecontroller_stripwrappingquotes"
     },
@@ -3536,7 +3905,7 @@
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L111",
-      "community": 1,
+      "community": 3,
       "norm_label": "merchant",
       "id": "controllers_financecontroller_merchant"
     },
@@ -3545,7 +3914,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L16",
-      "community": 8,
+      "community": 1,
       "norm_label": "tomonthkey()",
       "id": "daterange_daterangecontext_tomonthkey"
     },
@@ -3554,7 +3923,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L26",
-      "community": 8,
+      "community": 1,
       "norm_label": "parsemonthkey()",
       "id": "daterange_daterangecontext_parsemonthkey"
     },
@@ -3563,7 +3932,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L92",
-      "community": 4,
+      "community": 1,
       "norm_label": "formatdate()",
       "id": "daterange_daterangecontext_formatdate"
     },
@@ -3599,7 +3968,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
       "source_location": "L1",
-      "community": 7,
+      "community": 8,
       "norm_label": "addinvestments.tsx",
       "id": "client_src_scenes_dashboard_addinvestments_tsx"
     },
@@ -3608,7 +3977,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
       "source_location": "L7",
-      "community": 7,
+      "community": 8,
       "norm_label": "addinvestmentsbutton()",
       "id": "dashboard_addinvestments_addinvestmentsbutton"
     },
@@ -3617,7 +3986,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
       "source_location": "L1",
-      "community": 7,
+      "community": 8,
       "norm_label": "addtransactions.tsx",
       "id": "client_src_scenes_dashboard_addtransactions_tsx"
     },
@@ -3626,7 +3995,7 @@
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
       "source_location": "L8",
-      "community": 7,
+      "community": 8,
       "norm_label": "addtransactionsbutton()",
       "id": "dashboard_addtransactions_addtransactionsbutton"
     },
@@ -3635,7 +4004,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/managers/financeManager.ts",
       "source_location": "L1",
-      "community": 1,
+      "community": 13,
       "norm_label": "financemanager.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_managers_financemanager_ts"
     },
@@ -3644,7 +4013,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/bankTransactionModel.ts",
       "source_location": "L1",
-      "community": 1,
+      "community": 3,
       "norm_label": "banktransactionmodel.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_models_banktransactionmodel_ts"
     },
@@ -3653,7 +4022,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L1",
-      "community": 1,
+      "community": 3,
       "norm_label": "categorymodel.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_machinelearningmodels_categorymodel_ts"
     },
@@ -3662,7 +4031,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/controllers/financeController.ts",
       "source_location": "L1",
-      "community": 1,
+      "community": 3,
       "norm_label": "financecontroller.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_controllers_financecontroller_ts"
     },
@@ -3680,7 +4049,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/api.ts",
       "source_location": "L1",
-      "community": 7,
+      "community": 8,
       "norm_label": "api.ts",
       "id": "users_jelle_documents_github_financeapp_1_client_src_api_ts"
     }
@@ -3818,6 +4187,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "server_src_tests_schema_ts",
+      "target": "server_src_context_dbcontext_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "server/src/__tests__/summaries.test.ts",
       "source_location": "L3",
       "weight": 1.0,
@@ -3932,6 +4312,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "server_src_tests_schema_ts",
+      "target": "server_src_context_migrations_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "server/src/__tests__/summaries.test.ts",
       "source_location": "L4",
       "weight": 1.0,
@@ -3971,6 +4362,28 @@
       "confidence_score": 1.0,
       "source": "context_migrations_runmigrations",
       "target": "context_migrations_readmigrationfiles"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "server_src_tests_schema_ts",
+      "target": "context_migrations_runmigrations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "tests_schema_ensureschema",
+      "target": "context_migrations_runmigrations"
     },
     {
       "relation": "imports",
@@ -4226,6 +4639,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L679",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_getcategoryhistory"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L675",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4368,9 +4791,9 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L1196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managers_financemanager_financemanager",
-      "target": "managers_financemanager_financemanager_markcounterpartytransfers",
-      "confidence_score": 1.0
+      "target": "managers_financemanager_financemanager_markcounterpartytransfers"
     },
     {
       "relation": "method",
@@ -4378,9 +4801,9 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L1235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managers_financemanager_financemanager",
-      "target": "managers_financemanager_financemanager_getonesidedtransfers",
-      "confidence_score": 1.0
+      "target": "managers_financemanager_financemanager_getonesidedtransfers"
     },
     {
       "relation": "method",
@@ -4388,9 +4811,9 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L1278",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managers_financemanager_financemanager",
-      "target": "managers_financemanager_financemanager_unmarkinternal",
-      "confidence_score": 1.0
+      "target": "managers_financemanager_financemanager_unmarkinternal"
     },
     {
       "relation": "method",
@@ -4936,6 +5359,70 @@
       "target": "models_banktransactionmodel_bankcategorycolumns"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "server_src_tests_schema_ts",
+      "target": "tests_schema_database_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/schema.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "server_src_tests_schema_ts",
+      "target": "tests_schema_ensureschema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/summaries.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "server_src_tests_summaries_test_ts",
+      "target": "server_src_tests_schema_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/imports.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "server_src_tests_imports_test_ts",
+      "target": "server_src_tests_schema_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/summaries.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "server_src_tests_summaries_test_ts",
+      "target": "tests_schema_ensureschema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/imports.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "server_src_tests_imports_test_ts",
+      "target": "tests_schema_ensureschema",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -5069,6 +5556,26 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/summaries.test.ts",
+      "source_location": "L529",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "server_src_tests_summaries_test_ts",
+      "target": "tests_summaries_test_june"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/__tests__/summaries.test.ts",
+      "source_location": "L530",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "server_src_tests_summaries_test_ts",
+      "target": "tests_summaries_test_july"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "server/src/__tests__/parseBankRow.test.ts",
       "source_location": "L130",
       "weight": 1.0,
@@ -5163,9 +5670,9 @@
       "source_file": "server/src/__tests__/imports.test.ts",
       "source_location": "L558",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_tests_imports_test_ts",
-      "target": "tests_imports_test_checking",
-      "confidence_score": 1.0
+      "target": "tests_imports_test_checking"
     },
     {
       "relation": "contains",
@@ -5173,9 +5680,9 @@
       "source_file": "server/src/__tests__/imports.test.ts",
       "source_location": "L579",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_tests_imports_test_ts",
-      "target": "tests_imports_test_clearmarking",
-      "confidence_score": 1.0
+      "target": "tests_imports_test_clearmarking"
     },
     {
       "relation": "contains",
@@ -5183,9 +5690,9 @@
       "source_file": "server/src/__tests__/imports.test.ts",
       "source_location": "L618",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_tests_imports_test_ts",
-      "target": "tests_imports_test_debitids",
-      "confidence_score": 1.0
+      "target": "tests_imports_test_debitids"
     },
     {
       "relation": "calls",
@@ -5534,6 +6041,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "server/src/controllers/financeController.ts",
+      "source_location": "L225",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "server_src_controllers_financecontroller_ts",
+      "target": "controllers_financecontroller_parselist"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L247",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -5845,6 +6362,17 @@
       "target": "client_src_scenes_categories_index_tsx"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/App.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_app_tsx",
+      "target": "client_src_scenes_reports_index_tsx"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "client/src/App.tsx",
@@ -6017,9 +6545,9 @@
       "source_file": "client/src/api.ts",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_api_ts",
-      "target": "src_api_onesidedtransfer",
-      "confidence_score": 1.0
+      "target": "src_api_onesidedtransfer"
     },
     {
       "relation": "contains",
@@ -6120,6 +6648,16 @@
       "confidence_score": 1.0,
       "source": "client_src_api_ts",
       "target": "src_api_category"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L172",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_api_ts",
+      "target": "src_api_categoryhistorypoint"
     },
     {
       "relation": "contains",
@@ -6248,9 +6786,9 @@
       "source_file": "client/src/scenes/transactions/OneSidedTransfers.tsx",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_scenes_transactions_onesidedtransfers_tsx",
-      "target": "client_src_api_ts",
-      "confidence_score": 1.0
+      "target": "client_src_api_ts"
     },
     {
       "relation": "imports_from",
@@ -6283,6 +6821,39 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "client_src_scenes_header_index_tsx",
+      "target": "client_src_api_ts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "client_src_api_ts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "client_src_api_ts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
       "target": "client_src_api_ts"
     },
     {
@@ -6445,9 +7016,9 @@
       "source_file": "client/src/scenes/transactions/OneSidedTransfers.tsx",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_scenes_transactions_onesidedtransfers_tsx",
-      "target": "src_api_onesidedtransfer",
-      "confidence_score": 1.0
+      "target": "src_api_onesidedtransfer"
     },
     {
       "relation": "imports",
@@ -6547,6 +7118,17 @@
       "confidence_score": 1.0,
       "source": "client_src_components_networthbanner_tsx",
       "target": "src_api_accountbalance"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "src_api_networthpoint"
     },
     {
       "relation": "imports",
@@ -7715,9 +8297,9 @@
       "source_file": "client/src/scenes/transactions/index.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_scenes_transactions_index_tsx",
-      "target": "client_src_scenes_transactions_onesidedtransfers_tsx",
-      "confidence_score": 1.0
+      "target": "client_src_scenes_transactions_onesidedtransfers_tsx"
     },
     {
       "relation": "imports_from",
@@ -7826,9 +8408,9 @@
       "source_file": "client/src/scenes/transactions/OneSidedTransfers.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_scenes_transactions_onesidedtransfers_tsx",
-      "target": "transactions_onesidedtransfers_formatcurrency",
-      "confidence_score": 1.0
+      "target": "transactions_onesidedtransfers_formatcurrency"
     },
     {
       "relation": "contains",
@@ -7836,9 +8418,9 @@
       "source_file": "client/src/scenes/transactions/OneSidedTransfers.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_scenes_transactions_onesidedtransfers_tsx",
-      "target": "transactions_onesidedtransfers_props",
-      "confidence_score": 1.0
+      "target": "transactions_onesidedtransfers_props"
     },
     {
       "relation": "contains",
@@ -7846,9 +8428,9 @@
       "source_file": "client/src/scenes/transactions/OneSidedTransfers.tsx",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_scenes_transactions_onesidedtransfers_tsx",
-      "target": "transactions_onesidedtransfers_onesidedtransfers",
-      "confidence_score": 1.0
+      "target": "transactions_onesidedtransfers_onesidedtransfers"
     },
     {
       "relation": "contains",
@@ -8002,6 +8584,458 @@
       "confidence_score": 1.0,
       "source": "client_src_scenes_header_index_tsx",
       "target": "header_index_header"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "client_src_scenes_reports_networthchart_tsx"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "client_src_scenes_reports_categorytrendchart_tsx"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "reports_index_presets"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "reports_index_toiso"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "reports_index_presetrange"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "reports_index_yeartodate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_index_tsx",
+      "target": "reports_index_reports"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reports_index_presetrange",
+      "target": "reports_index_toiso"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reports_index_yeartodate",
+      "target": "reports_index_toiso"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/index.tsx",
+      "source_location": "L67",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reports_index_reports",
+      "target": "reports_index_toiso"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "client_src_scenes_reports_charttooltip_tsx"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "client_src_scenes_reports_charttheme_ts"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_charttheme_account_type_colors"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_charttheme_account_type_order"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_charttheme_account_type_labels"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_charttheme_formatcurrency"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_charttheme_formatcompact"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_charttheme_formatmonthshort"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_networthchart_props"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_networthchart_key_by_type"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/NetWorthChart.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_networthchart_tsx",
+      "target": "reports_networthchart_networthchart"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttooltip_tsx",
+      "target": "client_src_scenes_reports_charttheme_ts"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttooltip_tsx",
+      "target": "reports_charttheme_formatcurrency"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttooltip_tsx",
+      "target": "reports_charttheme_formatmonth"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttooltip_tsx",
+      "target": "reports_charttooltip_entry"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttooltip_tsx",
+      "target": "reports_charttooltip_props"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/ChartTooltip.tsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttooltip_tsx",
+      "target": "reports_charttooltip_charttooltip"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "client_src_scenes_reports_charttooltip_tsx"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_account_type_colors"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_account_type_order"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_account_type_labels"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_formatcurrency"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_formatcompact"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_formatmonth"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_formatmonthshort"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/chartTheme.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_charttheme_ts",
+      "target": "reports_charttheme_monthsbetween"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "client_src_scenes_reports_charttheme_ts"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "reports_charttheme_formatcurrency"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "reports_charttheme_formatcompact"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "reports_charttheme_formatmonthshort"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "reports_charttheme_monthsbetween"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "reports_categorytrendchart_props"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reports/CategoryTrendChart.tsx",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_reports_categorytrendchart_tsx",
+      "target": "reports_categorytrendchart_categorytrendchart"
     },
     {
       "relation": "contains",
@@ -8785,6 +9819,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CONTRIBUTING.md",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "financeapp_contributing_database_changes",
+      "target": "financeapp_contributing_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CONTRIBUTING.md",
       "source_location": "L77",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -8805,6 +9849,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CONTRIBUTING.md",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "financeapp_contributing_tests",
+      "target": "financeapp_contributing_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CONTRIBUTING.md",
       "source_location": "L85",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -8820,6 +9874,16 @@
       "confidence_score": 1.0,
       "source": "financeapp_contributing_local_development",
       "target": "financeapp_contributing_codeblock_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CONTRIBUTING.md",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "financeapp_contributing_local_development",
+      "target": "financeapp_contributing_codeblock_5",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8850,6 +9914,46 @@
       "confidence_score": 1.0,
       "source": "database_readme_md",
       "target": "database_readme_database"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/README.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "database_readme_database",
+      "target": "database_readme_changing_the_schema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/README.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "database_readme_changing_the_schema",
+      "target": "database_readme_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/migrations/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "server_migrations_readme_md",
+      "target": "migrations_readme_migrations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/migrations/README.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "migrations_readme_migrations",
+      "target": "migrations_readme_codeblock_1",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -9150,6 +10254,16 @@
       "confidence_score": 1.0,
       "source": "docs_review_voorstel_een_rapportagetab_voor_historisch_verloop",
       "target": "docs_review_waar_op_te_letten"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L380",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "docs_review_voorstel_een_rapportagetab_voor_historisch_verloop",
+      "target": "docs_review_status"
     },
     {
       "relation": "contains",
@@ -9501,5 +10615,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "afd8f53c4402f7cb3736e0858cd0752f30bc2252"
+  "built_at_commit": "cda558428dbdf0d86759d98c10174857eeabe118"
 }

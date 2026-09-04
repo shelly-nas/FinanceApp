@@ -210,6 +210,40 @@ router.get('/account-overview', async (req: Request, res: Response, next: NextFu
   }
 });
 
+// Spending per category per month, for the trend chart.
+router.get('/reports/category-history', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate, categories, accounts, includeInternal } = req.query;
+  const isDate = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+  if (!isDate(startDate) || !isDate(endDate)) {
+    return res.status(400).json({ error: 'startDate and endDate are required, in YYYY-MM-DD form' });
+  }
+  if ((startDate as string) > (endDate as string)) {
+    return res.status(400).json({ error: 'startDate must not be after endDate' });
+  }
+
+  const parseList = (value: unknown): string[] | undefined => {
+    if (value === undefined) return undefined;
+    try {
+      const parsed = JSON.parse(value as string);
+      return Array.isArray(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  try {
+    const rows = await FinanceManager.getCategoryHistory(startDate as string, endDate as string, {
+      categories: parseList(categories),
+      accounts: parseList(accounts),
+      includeInternal: includeInternal === 'true',
+    });
+    res.status(200).json(rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Net worth at each month end over a range, for the history chart.
 router.get('/net-worth-history', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;

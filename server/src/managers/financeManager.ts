@@ -666,6 +666,74 @@ class FinanceManager {
   }
 
   /**
+   * Spending per category per month, for the trend chart.
+   *
+   * Returns one row per category-month with a positive figure for spending, so
+   * a category that nets positive over a month (a refund) is visible as such
+   * rather than folded away. Confirmed internal transfers are excluded for the
+   * same reason they are excluded from the summaries - nothing was spent.
+   *
+   * Months with no activity for a category are absent rather than zero; the
+   * chart fills those, because the caller knows the range it asked for.
+   */
+  public async getCategoryHistory(
+    startDate: string,
+    endDate: string,
+    filters: { categories?: string[]; accounts?: string[]; includeInternal?: boolean } = {},
+  ): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [startDate, endDate];
+    const where: string[] = ['t.date_str >= $1', 't.date_str <= $2'];
+
+    const add = (value: any) => {
+      params.push(value);
+      return `$${params.length}`;
+    };
+
+    if (filters.categories && filters.categories.length > 0) {
+      where.push(`t.category = ANY(${add(filters.categories)}::text[])`);
+    }
+    if (filters.accounts && filters.accounts.length > 0) {
+      where.push(`t.account = ANY(${add(filters.accounts)}::text[])`);
+    }
+    if (!filters.includeInternal) {
+      where.push('t.is_internal IS NOT TRUE');
+    }
+
+    // Uncategorised rows are left out: they would all collapse into one unnamed
+    // series that says nothing about where money goes.
+    where.push('t.category IS NOT NULL');
+
+    // Income categories are excluded: this chart answers "what did things cost",
+    // and a salary of a few thousand as a negative series drags the axis below
+    // zero and makes every real cost a sliver by comparison.
+    where.push("c.income_outcome IS DISTINCT FROM 'Inkomsten'");
+
+    const query = `
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', t.date_str), 'YYYY-MM') AS month,
+        t.category,
+        c.color,
+        c.income_outcome,
+        -- Debits positive: this chart answers "what did this cost", so spending
+        -- reads as a positive height and a refund pulls it back down.
+        SUM(CASE WHEN t.debit_credit = 'Debit' THEN t.amount ELSE -t.amount END)::numeric AS total
+      FROM public.${transaction_table} t
+      JOIN public.${category_table} c ON c.category_name = t.category
+      WHERE ${where.join(' AND ')}
+      GROUP BY 1, t.category, c.color, c.income_outcome
+      ORDER BY 1, t.category;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * Net worth at the end of each month over a period.
    *
    * Built for a chart: a running total per account carried forward month by
