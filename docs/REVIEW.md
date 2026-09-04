@@ -286,6 +286,26 @@ in Account Overview: die zitten geabsoluut-gepositioneerd in de widgetkop, wat d
 reden is dat in beide bestanden een identiek blok
 `position:'absolute', right:0, top:'50%', transform:'translateY(-50%)'` staat.
 
+**Opgelost, 4 september 2026.** De tabbalk heeft nu een `⋯`-menu met *Import
+transactions*, *Update investments*, *Manage accounts* en *Manage categories*. De
+drie actie-widgets zijn verdwenen; het dashboard heeft nog twee kolommen in plaats
+van drie. "Review transactions" is een badge op de Transactions-tab geworden, die
+bij aanklikken direct op het filter *needs a category* opent.
+
+Het beheer van categorieën bestond nog niet en is erbij gekomen (`/categories`):
+naam, kleur, vast/variabel en inkomsten/uitgaven zijn nu instelbaar, met het aantal
+transacties per categorie erbij. Verwijderen wordt geweigerd zolang er transacties
+aan hangen.
+
+De gedupliceerde absolute-positionering is vervangen door één `WidgetHeader`.
+
+Twee bugs kwamen daarbij naar boven, beide gevonden doordat de nieuwe beheerschermen
+hernoemen mogelijk maakten: `transactions.category` en `investments.account`
+verwijzen op naam, en hun foreign keys blokkeerden de eerste van de twee benodigde
+UPDATEs. **Een categorie of beleggingsrekening hernoemen was daardoor onmogelijk.**
+Migratie `004_deferrable_name_fks.sql` maakt beide constraints uitstelbaar, zodat de
+twee tabellen samen worden bijgewerkt en pas bij commit gecontroleerd.
+
 ### Voorstel: een rapportagetab voor historisch verloop
 
 *Toegevoegd 4 september 2026, na de beslissing om net worth historisch te maken.*

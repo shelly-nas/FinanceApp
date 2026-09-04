@@ -11,6 +11,7 @@ import { DateRangeProvider } from '@/scenes/dateRange/DateRangeContext';
 import Transactions from '@/scenes/transactions';
 import Tags from '@/scenes/tags';
 import Accounts from '@/scenes/accounts';
+import Categories from '@/scenes/categories';
 
 const ThemedApp: React.FC = () => {
   const { resolvedMode } = useColorMode();
@@ -32,6 +33,7 @@ const ThemedApp: React.FC = () => {
             <Route path="/review-transactions" element={<Transactions />} />
             <Route path="/events" element={<Tags />} />
             <Route path="/accounts" element={<Accounts />} />
+            <Route path="/categories" element={<Categories />} />
             {/* <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} /> */}
           </Routes>
         </Box>

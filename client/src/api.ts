@@ -142,6 +142,17 @@ export interface NetWorthPoint {
   investments: string | null;
 }
 
+export interface Category {
+  id: number;
+  category_name: string;
+  color: string | null;
+  /** 'Vast' or 'Variabel' - splits the period summary. */
+  category_type: string | null;
+  /** 'Inkomsten' or 'Uitgaven' - decides which side of the summary it lands on. */
+  income_outcome: string | null;
+  transaction_count?: number;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
@@ -166,6 +177,7 @@ export const api = createApi({
     "searchTransactions",
     "transactionAccounts",
     "netWorthHistory",
+    "categories",
   ],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
@@ -373,6 +385,36 @@ export const api = createApi({
       }),
       invalidatesTags: ["searchTransactions", "transactionTags", "tags", "tagSummary"],
     }),
+    getCategories: build.query<Category[], void>({
+      query: () => ({ url: `api/categories` }),
+      providesTags: ["categories"],
+    }),
+    createCategory: build.mutation<Category, Partial<Category> & { category_name: string }>({
+      query: (category) => ({
+        url: `api/categories`,
+        method: 'POST',
+        body: category,
+      }),
+      invalidatesTags: ["categories", "categoryList"],
+    }),
+    updateCategory: build.mutation<Category, { id: number; updates: Partial<Category> }>({
+      query: ({ id, updates }) => ({
+        url: `api/categories/${id}`,
+        method: 'PATCH',
+        body: updates,
+      }),
+      // A rename rewrites the category on every transaction that carried it, and
+      // a colour or type change moves figures between the summaries.
+      invalidatesTags: ["categories", "categoryList", "transactions",
+                        "searchTransactions", "categorySums", "incomeExpensesSum"],
+    }),
+    deleteCategory: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["categories", "categoryList"],
+    }),
     getAccounts: build.query<Account[], void>({
       query: () => ({ url: `api/accounts` }),
       providesTags: ["accounts"],
@@ -493,4 +535,8 @@ export const {
   useBulkUpdateTransactionsMutation,
   useBulkSetTagMutation,
   useGetNetWorthHistoryQuery,
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
 } = api;

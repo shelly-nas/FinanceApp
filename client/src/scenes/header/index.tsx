@@ -6,6 +6,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LineAxisIcon from '@mui/icons-material/LineAxis';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LabelIcon from '@mui/icons-material/Label';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeModeToggle from '@/components/ThemeModeToggle';
 import { useGetEmptyCategoryTransactionsQuery } from '@/api';
@@ -112,6 +113,10 @@ const Header = (_props: Props) => {
         <MenuItem onClick={() => go('/accounts')}>
           <ListItemIcon><AccountBalanceIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Manage accounts</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => go('/categories')}>
+          <ListItemIcon><LabelIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Manage categories</ListItemText>
         </MenuItem>
       </Menu>
     </>

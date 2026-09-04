@@ -392,6 +392,91 @@ router.post('/transactions/bulk-tag', async (req: Request, res: Response, next: 
   }
 });
 
+// --- Categories -------------------------------------------------------------
+
+const CATEGORY_TYPES = ['Vast', 'Variabel'];
+const INCOME_OUTCOME = ['Inkomsten', 'Uitgaven'];
+
+router.get('/categories', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getCategories());
+  } catch (error) {
+    next(error);
+  }
+});
+
+const validateCategory = (body: any, requireName: boolean): string | null => {
+  if (requireName && (!body.category_name || typeof body.category_name !== 'string' || !body.category_name.trim())) {
+    return 'category_name is required';
+  }
+  if (body.category_type !== undefined && !CATEGORY_TYPES.includes(body.category_type)) {
+    return `category_type must be one of: ${CATEGORY_TYPES.join(', ')}`;
+  }
+  if (body.income_outcome !== undefined && !INCOME_OUTCOME.includes(body.income_outcome)) {
+    return `income_outcome must be one of: ${INCOME_OUTCOME.join(', ')}`;
+  }
+  // The colour is rendered straight into the breakdown chart.
+  if (body.color !== undefined && body.color !== null && !/^#[0-9a-fA-F]{6}$/.test(body.color)) {
+    return 'color must be a hex value like #8cc2b3';
+  }
+  return null;
+};
+
+router.post('/categories', async (req: Request, res: Response, next: NextFunction) => {
+  const invalid = validateCategory(req.body, true);
+  if (invalid) return res.status(400).json({ error: invalid });
+
+  try {
+    const category = await FinanceManager.createCategory({
+      ...req.body,
+      category_name: req.body.category_name.trim(),
+    });
+    res.status(201).json(category);
+  } catch (error: any) {
+    // 23505 = unique_violation on category_name
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'A category with that name already exists' });
+    }
+    next(error);
+  }
+});
+
+router.patch('/categories/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const invalid = validateCategory(req.body, false);
+  if (invalid) return res.status(400).json({ error: invalid });
+
+  try {
+    const category = await FinanceManager.updateCategory(id, req.body);
+    if (!category) return res.status(404).json({ error: 'Category not found' });
+    res.status(200).json(category);
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'A category with that name already exists' });
+    }
+    next(error);
+  }
+});
+
+router.delete('/categories/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const { deleted, blockedBy } = await FinanceManager.deleteCategory(id);
+
+    if (blockedBy) {
+      return res.status(409).json({
+        error: `${blockedBy} transaction(s) still use this category. Move them to another one first.`,
+      });
+    }
+    if (!deleted) return res.status(404).json({ error: 'Category not found' });
+
+    res.status(200).json({ message: 'Category deleted' });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // --- Accounts ---------------------------------------------------------------
 
 router.get('/accounts', async (_req: Request, res: Response, next: NextFunction) => {

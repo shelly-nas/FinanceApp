@@ -726,6 +726,163 @@ class FinanceManager {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Categories
+  //
+  // Reference data rather than a fixed list: the colour drives the breakdown
+  // chart, category_type splits fixed from variable spending, and income_outcome
+  // decides which side of the period summary a category lands on. All three are
+  // judgement calls that belong to the user, not to the seed.
+  // ---------------------------------------------------------------------------
+
+  /** Categories with everything the management screen needs, plus usage. */
+  public async getCategories(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        c.id,
+        c.category_name,
+        c.color,
+        c.category_type,
+        c.income_outcome,
+        (SELECT COUNT(*)::int FROM public.${transaction_table} t
+         WHERE t.category = c.category_name) AS transaction_count
+      FROM public.${category_table} c
+      ORDER BY c.income_outcome DESC, c.category_name ASC;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async createCategory(category: {
+    category_name: string,
+    color?: string | null,
+    category_type?: string | null,
+    income_outcome?: string | null,
+  }): Promise<any> {
+    const client = await dbContext.connect();
+
+    const query = `
+      INSERT INTO public.${category_table} (category_name, color, category_type, income_outcome)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [
+        category.category_name,
+        category.color ?? null,
+        category.category_type ?? 'Variabel',
+        category.income_outcome ?? 'Uitgaven',
+      ]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  public async updateCategory(id: string, updates: { [key: string]: any }): Promise<any> {
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['category_name', 'color', 'category_type', 'income_outcome']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    try {
+      await client.query('BEGIN');
+
+      // transactions.category references the name, so a rename touches two
+      // tables and neither statement is valid on its own. Deferring the check
+      // to commit lets both run first and validates the result.
+      await client.query('SET CONSTRAINTS public.transactions_category_fkey DEFERRED');
+
+      const before = await client.query(
+        `SELECT category_name FROM public.${category_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (before.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      const result = await client.query(
+        `UPDATE public.${category_table} SET ${setClause} WHERE id = $${values.length + 1} RETURNING *`,
+        [...values, id],
+      );
+
+      // transactions.category is a foreign key on the name, not the id, so a
+      // rename has to carry the transactions with it - otherwise the update is
+      // rejected outright, or the history is orphaned.
+      const oldName = before.rows[0].category_name;
+      const newName = result.rows[0].category_name;
+
+      if (oldName !== newName) {
+        await client.query(
+          `UPDATE public.${transaction_table} SET category = $1 WHERE category = $2`,
+          [newName, oldName],
+        );
+      }
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Remove a category. Refuses while transactions still carry it: those would be
+   * left pointing at a name that no longer exists, and their history would drop
+   * out of every breakdown.
+   */
+  public async deleteCategory(id: string): Promise<{ deleted: any, blockedBy?: number }> {
+    const client = await dbContext.connect();
+
+    try {
+      const existing = await client.query(
+        `SELECT category_name FROM public.${category_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (existing.rows.length === 0) return { deleted: null };
+
+      const inUse = await client.query(
+        `SELECT COUNT(*)::int AS n FROM public.${transaction_table} WHERE category = $1`,
+        [existing.rows[0].category_name],
+      );
+
+      if (inUse.rows[0].n > 0) {
+        return { deleted: null, blockedBy: inUse.rows[0].n };
+      }
+
+      const removed = await client.query(
+        `DELETE FROM public.${category_table} WHERE id = $1 RETURNING *`,
+        [id],
+      );
+      return { deleted: removed.rows[0] };
+    } finally {
+      client.release();
+    }
+  }
+
   public async getCategoryList(): Promise<any[]> {
     const client = await dbContext.connect();
 
@@ -922,6 +1079,11 @@ class FinanceManager {
 
     try {
       await client.query('BEGIN');
+
+      // investments.account references details by value, so a rename touches
+      // two tables and neither statement is valid alone. Deferring the check to
+      // commit lets both run before the constraint is verified.
+      await client.query('SET CONSTRAINTS public.investments_account_fkey DEFERRED');
 
       const before = await client.query(
         `SELECT details FROM public.${account_table} WHERE id = $1`,

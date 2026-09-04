@@ -34,8 +34,9 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
     await runMigrations();
     const client = await dbContext.connect();
     try {
-      // Only this file's own accounts: a database that also holds accounts from
-      // manual testing would otherwise shift every balance assertion.
+      // Only this file's own accounts: anything else - left by manual testing or
+      // by an earlier run - would shift every balance assertion.
+      await client.query('DELETE FROM public.investments');
       await client.query('DELETE FROM public.accounts WHERE details NOT LIKE $1', ['NL00SUMM%']);
       // Categories are a foreign key of transactions, so they have to exist.
       await client.query(`

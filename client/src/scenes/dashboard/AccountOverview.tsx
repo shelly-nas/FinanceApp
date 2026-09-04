@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
   Typography, Divider, Box, List, ListItem, ListItemText, Collapse,
-  useTheme, ListItemButton, Button, Tooltip,
+  useTheme, ListItemButton, IconButton, Tooltip,
 } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
 import { AccountBalance, useGetAccountOverviewQuery } from '@/api';
 import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 
@@ -55,35 +56,19 @@ const AccountsOverview: React.FC = () => {
 
   return (
     <DashboardBox sx={{ mb: 1.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-        <Box sx={{ textAlign: 'center', width: '100%' }}>
-          <Typography variant="h3">Account Overview</Typography>
-          <Typography variant="body3" sx={{ opacity: 0.7 }}>
-            as of {asOfLabel}
-          </Typography>
-        </Box>
-        <Tooltip title={visible ? 'Hide amounts' : 'Show amounts'}>
-          <Button
-            sx={{
-              m: 0.1,
-              p: 0.1,
-              minWidth: 0,
-              position: 'absolute',
-              right: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              '&:hover': { backgroundColor: palette.action.hover },
-            }}
-            onClick={() => setVisible(!visible)}
-          >
-            {visible
-              ? <VisibilityOffIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
-              : <VisibilityIcon sx={{ color: typography.h3.color, fontSize: 18 }} />}
-          </Button>
-        </Tooltip>
-      </Box>
-
-      <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1, mb: 1 }} />
+      <WidgetHeader
+        title="Account Overview"
+        subtitle={`as of ${asOfLabel}`}
+        action={
+          <Tooltip title={visible ? 'Hide amounts' : 'Show amounts'}>
+            <IconButton size="small" onClick={() => setVisible(!visible)}>
+              {visible
+                ? <VisibilityOffIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
+                : <VisibilityIcon sx={{ color: typography.h3.color, fontSize: 18 }} />}
+            </IconButton>
+          </Tooltip>
+        }
+      />
       <List sx={{ ml: -1.5 }}>
         {Object.keys(groupedCategories).map((categoryType) => (
           <div key={categoryType}>
