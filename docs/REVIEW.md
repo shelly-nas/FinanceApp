@@ -410,6 +410,48 @@ Voor rekeningen waar de bank geen tegenrekening meelevert (creditcards vooral) v
 terug te vallen op een tekstregel: een omschrijving die een eigen IBAN of eigen
 rekeningnaam bevat, is ook intern.
 
+**Herzien, 4 september 2026.** Na het bouwen van het rekeningenbeheer en het
+zoekscherm is de detectie opnieuw doorgemeten tegen een echte database. Vier
+zwaktes kwamen naar boven; twee zijn opgelost, twee bewust laten liggen.
+
+**Opgelost — eenzijdige overboekingen.** De matcher zocht uitsluitend naar paren,
+maar een beleggingsrekening levert geen CSV: geld dat daarheen gaat verschijnt
+alleen aan de uitgaande kant en kan per definitie geen tegenboeking hebben.
+Gemeten: een inleg van €1.000 telde als uitgave. Dat is meestal niet een detail
+maar de grootste "uitgave" van de maand.
+
+De oplossing werkt pas sinds het rekeningenbeheer echte IBAN's mogelijk maakt:
+staat de `counterparty` van een transactie in je eigen `accounts`, dan is die
+transactie *aantoonbaar* intern — geen gok, dus wordt hij toegepast in plaats van
+voorgesteld. `markCounterpartyTransfers()` draait bij elke import, de gemarkeerde
+rijen verschijnen op het transactiescherm onder "Moved between your own accounts",
+en per rij is er "Not a transfer" om het terug te draaien. Die afwijzing wordt
+onthouden (`is_internal = FALSE`), zodat een volgende import hem niet opnieuw
+markeert.
+
+**Opgelost — het kruisproduct bij gelijke bedragen.** Elke debit werd gekoppeld
+aan elke passende credit. Twee overboekingen van €500 op opeenvolgende dagen
+leverden vier voorstellen op in plaats van twee, en het bevestigen van een verkeerd
+paar blokkeerde het juiste. De query rangschikt nu per transactie op grondslag en
+datumafstand, en houdt alleen paren over waarin beide kanten elkaar als beste
+keuze zien. Gemeten: 4 → 2 voorstellen, met de juiste datums gekoppeld; een
+maandelijkse vaste inleg levert nog steeds één paar per maand.
+
+**Bewust niet gedaan — het venster van 3 dagen.** Een creditcard-aflossing met vijf
+dagen tussen afschrijving en bijschrijving wordt niet gevonden. Verruimen naar
+zeven dagen vangt dat op, maar levert bij veelvoorkomende bedragen meer zwakke
+suggesties op. Het venster is een parameter (`windowDays`), dus dit is later te
+verhogen zonder codewijziging.
+
+**Bewust niet gedaan — bedragstolerantie.** €500 eruit en €498,50 erin (kosten bij
+een buitenlandse overboeking) wordt niet herkend. Een marge van een paar euro zou
+dat vangen, maar verlaagt de zekerheid van elke match. Alleen zinvol als je dit in
+de praktijk tegenkomt.
+
+**Blijft gelden:** de detectie staat of valt met echte rekeninggegevens. Ontbreekt
+een rekening in `accounts`, dan is er geen bewijs en gebeurt er niets — de rij komt
+dan wel als onbekende rekening op het transactiescherm te staan.
+
 ---
 
 ## Opruimwerk

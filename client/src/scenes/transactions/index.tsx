@@ -10,6 +10,7 @@ import DashboardBox from '@/components/DashboardBox';
 import TransactionTable from '@/components/TransactionTable';
 import FilterBar from '@/scenes/transactions/FilterBar';
 import TransferSuggestions from '@/scenes/transactions/TransferSuggestions';
+import OneSidedTransfers from '@/scenes/transactions/OneSidedTransfers';
 import UnknownAccounts from '@/scenes/transactions/UnknownAccounts';
 import {
   SearchFilters,
@@ -44,6 +45,7 @@ const Transactions: React.FC = () => {
     imported?: number;
     skipped?: number;
     transactionIds?: string;
+    markedInternal?: number;
     presetCategory?: string;
     presetStart?: string;
     presetEnd?: string;
@@ -176,12 +178,16 @@ const Transactions: React.FC = () => {
         <Alert severity={navState.skipped ? 'info' : 'success'} sx={{ mb: 1.5 }}>
           {navState.imported} transactions imported
           {navState.skipped
-            ? `, ${navState.skipped} skipped because they were already stored.`
+            ? `, ${navState.skipped} skipped because they were already stored`
+            : ''}
+          {navState.markedInternal
+            ? `, ${navState.markedInternal} recognised as transfers between your own accounts.`
             : '.'}
         </Alert>
       )}
 
       <UnknownAccounts />
+      <OneSidedTransfers transactionIds={navState.transactionIds} />
       <TransferSuggestions transactionIds={navState.transactionIds} />
 
       <DashboardBox sx={{ p: 1.5, textAlign: 'left' }}>

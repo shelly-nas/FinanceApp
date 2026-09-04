@@ -75,6 +75,12 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         
         const { createdIds, imported, skipped } = await FinanceManager.addTransactions(entries);
 
+        // A row whose counterparty is one of the user's own accounts is an
+        // internal transfer on its own evidence, with no counterpart needed -
+        // which is the only way a deposit into an investment account can be
+        // recognised, since those ship no export of their own.
+        const markedInternal = await FinanceManager.markCounterpartyTransfers(createdIds);
+
         // Rows already present are skipped rather than rejected, so overlapping
         // export periods can be imported without thinking about it. The counts
         // tell the user what actually happened.
@@ -83,6 +89,7 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
           createdIds,
           imported,
           skipped,
+          markedInternal: markedInternal.length,
         });
       } catch (error) {
         // The raw error would otherwise reach the browser carrying the failed
@@ -598,6 +605,44 @@ router.get('/transfer-candidates', async (req: Request, res: Response, next: Nex
   try {
     const candidates = await FinanceManager.getTransferCandidates(idList, days);
     res.status(200).json(candidates);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Transactions marked internal on their counterparty alone, with no counterpart
+// stored. Shown after an import so the automatic marking is visible.
+router.get('/transfers/one-sided', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids } = req.query;
+  let idList: number[] = [];
+
+  if (ids) {
+    try {
+      idList = JSON.parse(ids as string);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid IDs format' });
+    }
+  }
+
+  try {
+    res.status(200).json(await FinanceManager.getOneSidedTransfers(idList));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Revert the automatic marking: the row counts as ordinary spending again.
+router.post('/transfers/unmark/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const row = await FinanceManager.unmarkInternal(id);
+    if (!row) {
+      return res.status(409).json({
+        error: 'This transaction is part of a confirmed transfer. Unlink that first.',
+      });
+    }
+    res.status(200).json(row);
   } catch (error) {
     next(error);
   }

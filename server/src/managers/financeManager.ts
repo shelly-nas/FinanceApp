@@ -1180,6 +1180,126 @@ class FinanceManager {
   // ---------------------------------------------------------------------------
 
   /**
+   * Mark transactions whose counterparty is an account the user owns.
+   *
+   * A pair is only one of the two shapes an internal transfer takes. The other
+   * has no counterpart at all: an investment account ships no CSV, so money paid
+   * into it appears once, on the outgoing side, and counted naively the monthly
+   * deposit into savings or a broker becomes the largest "expense" of the month.
+   *
+   * This is not a guess like an amount match is - the counterparty is literally
+   * one of the user's own accounts - so it is applied rather than proposed. The
+   * rows stay visible under "Include transfers" and can be reverted per row.
+   *
+   * Returns the ids it marked, so an import can report them.
+   */
+  public async markCounterpartyTransfers(ids?: number[]): Promise<number[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+    let scope = '';
+
+    if (ids && ids.length > 0) {
+      scope = `AND t.id = ANY($1::int[])`;
+      params.push(ids);
+    }
+
+    // is_internal IS NULL only: a row the user explicitly rejected (FALSE) or
+    // already confirmed (TRUE) is left exactly as they left it.
+    const query = `
+      UPDATE public.${transaction_table} t
+      SET is_internal = TRUE,
+          category = COALESCE(t.category, 'Overboekingen')
+      FROM public.${account_table} a
+      WHERE a.details = t.counterparty
+        AND t.counterparty IS NOT NULL
+        AND t.account IS DISTINCT FROM t.counterparty
+        AND t.is_internal IS NULL
+        ${scope}
+      RETURNING t.id;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows.map((r: any) => r.id);
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Transactions marked internal on the strength of their counterparty alone,
+   * with no matching counterpart stored.
+   *
+   * Shown after an import so the automatic marking is visible rather than silent.
+   */
+  public async getOneSidedTransfers(ids?: number[]): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+    let scope = '';
+
+    if (ids && ids.length > 0) {
+      scope = `AND t.id = ANY($1::int[])`;
+      params.push(ids);
+    }
+
+    const query = `
+      SELECT
+        t.id,
+        t.date_str,
+        t.name_description,
+        t.account,
+        own.account_name AS account_name,
+        t.counterparty,
+        other.account_name AS counterparty_name,
+        t.debit_credit,
+        t.amount::numeric AS amount
+      FROM public.${transaction_table} t
+      JOIN public.${account_table} other ON other.details = t.counterparty
+      LEFT JOIN public.${account_table} own ON own.details = t.account
+      WHERE t.is_internal IS TRUE
+        AND NOT EXISTS (
+          SELECT 1 FROM public.${transfer_table} tr
+          WHERE tr.from_transaction_id = t.id OR tr.to_transaction_id = t.id
+        )
+        ${scope}
+      ORDER BY t.date_str DESC
+      LIMIT 200;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Undo the automatic marking for one transaction. */
+  public async unmarkInternal(id: string): Promise<any> {
+    const client = await dbContext.connect();
+
+    // FALSE rather than NULL: the row was assessed and rejected, so the next
+    // import must not mark it again.
+    const query = `
+      UPDATE public.${transaction_table}
+      SET is_internal = FALSE
+      WHERE id = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM public.${transfer_table} t
+          WHERE t.from_transaction_id = $1 OR t.to_transaction_id = $1
+        )
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [id]);
+      return result.rows[0] ?? null;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * Candidate transfer pairs: a Debit and a Credit of the same amount, close in
    * time, on two different accounts, neither already part of a confirmed pair.
    *
@@ -1200,51 +1320,76 @@ class FinanceManager {
       params.push(...ids);
     }
 
-    // match_basis records how sure we are. 'iban' means both accounts are known
-    // in the accounts table and reference each other - that is a transfer by
+    // Every debit is paired with every credit that matches, which for a repeated
+    // amount is a cross product: two 500-euro transfers on consecutive days
+    // produce four pairings, of which two are wrong. Ranking each side's options
+    // and keeping only mutual first choices leaves the two real pairs.
+    //
+    // match_basis records how sure we are. 'iban' is reserved for pairs whose
+    // counterparty fields point at each other's account - a transfer by
     // definition. 'amount' means only the figures line up, which is a guess.
     const query = `
+      WITH pairs AS (
+        SELECT
+          d.id                AS from_transaction_id,
+          d.date_str          AS from_date,
+          d.account           AS from_account,
+          da.account_name     AS from_account_name,
+          d.name_description  AS from_description,
+          c.id                AS to_transaction_id,
+          c.date_str          AS to_date,
+          c.account           AS to_account,
+          ca.account_name     AS to_account_name,
+          c.name_description  AS to_description,
+          d.amount::numeric   AS amount,
+          CASE
+            WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 'iban'
+            ELSE 'amount'
+          END AS match_basis,
+          -- Mutually referencing counterparties beat a bare amount match, and a
+          -- smaller gap in time beats a larger one.
+          (CASE WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 0 ELSE 1 END) AS basis_rank,
+          ABS(c.date_str - d.date_str) AS day_gap
+        FROM public.${transaction_table} d
+        JOIN public.${transaction_table} c
+          ON c.amount = d.amount
+         AND c.debit_credit = 'Credit'
+         AND c.account IS DISTINCT FROM d.account
+         AND ABS(c.date_str - d.date_str) <= $1
+        LEFT JOIN public.${account_table} da ON da.details = d.account
+        LEFT JOIN public.${account_table} ca ON ca.details = c.account
+        WHERE d.debit_credit = 'Debit'
+          AND d.is_internal IS DISTINCT FROM FALSE
+          AND c.is_internal IS DISTINCT FROM FALSE
+          AND NOT EXISTS (
+            SELECT 1 FROM public.${transfer_table} t
+            WHERE t.from_transaction_id IN (d.id, c.id)
+               OR t.to_transaction_id IN (d.id, c.id)
+          )
+          ${scope}
+      ),
+      ranked AS (
+        SELECT
+          pairs.*,
+          ROW_NUMBER() OVER (
+            PARTITION BY from_transaction_id
+            ORDER BY basis_rank, day_gap, to_transaction_id
+          ) AS rank_for_debit,
+          ROW_NUMBER() OVER (
+            PARTITION BY to_transaction_id
+            ORDER BY basis_rank, day_gap, from_transaction_id
+          ) AS rank_for_credit
+        FROM pairs
+      )
       SELECT
-        d.id                AS from_transaction_id,
-        d.date_str          AS from_date,
-        d.account           AS from_account,
-        da.account_name     AS from_account_name,
-        d.name_description  AS from_description,
-        c.id                AS to_transaction_id,
-        c.date_str          AS to_date,
-        c.account           AS to_account,
-        ca.account_name     AS to_account_name,
-        c.name_description  AS to_description,
-        d.amount::numeric   AS amount,
-        -- 'iban' is reserved for pairs whose counterparty fields actually point
-        -- at each other's account. Both rows merely sitting on accounts the user
-        -- owns is not enough: two unrelated payments of the same amount on the
-        -- same day would qualify, and be presented as certain when they are not.
-        CASE
-          WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 'iban'
-          ELSE 'amount'
-        END AS match_basis
-      FROM public.${transaction_table} d
-      JOIN public.${transaction_table} c
-        ON c.amount = d.amount
-       AND c.debit_credit = 'Credit'
-       AND c.account IS DISTINCT FROM d.account
-       AND ABS(c.date_str - d.date_str) <= $1
-      LEFT JOIN public.${account_table} da ON da.details = d.account
-      LEFT JOIN public.${account_table} ca ON ca.details = c.account
-      WHERE d.debit_credit = 'Debit'
-        AND d.is_internal IS DISTINCT FROM FALSE
-        AND c.is_internal IS DISTINCT FROM FALSE
-        AND NOT EXISTS (
-          SELECT 1 FROM public.${transfer_table} t
-          WHERE t.from_transaction_id IN (d.id, c.id)
-             OR t.to_transaction_id IN (d.id, c.id)
-        )
-        ${scope}
-      ORDER BY
-        CASE WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 0 ELSE 1 END,
-        ABS(c.date_str - d.date_str),
-        d.date_str DESC
+        from_transaction_id, from_date, from_account, from_account_name, from_description,
+        to_transaction_id, to_date, to_account, to_account_name, to_description,
+        amount, match_basis
+      FROM ranked
+      -- Only where both sides consider each other their best option, so one
+      -- transaction never appears in two competing suggestions.
+      WHERE rank_for_debit = 1 AND rank_for_credit = 1
+      ORDER BY basis_rank, day_gap, from_date DESC
       LIMIT 200;
     `;
 

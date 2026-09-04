@@ -449,3 +449,186 @@ describe('category management', { skip: !hasDatabase && 'no database configured'
     assert.equal(counted.transaction_count, 2);
   });
 });
+
+describe('one-sided transfers', { skip: !hasDatabase && 'no database configured' }, () => {
+  const BROKER = 'NL00TEST0000000003';
+
+  before(async () => {
+    await runMigrations();
+    const client = await dbContext.connect();
+    try {
+      await client.query(
+        `INSERT INTO accounts (account_type, account_name, details, balance_when_created)
+         VALUES ('Investments', 'Import Broker', $1, 0)
+         ON CONFLICT (details) DO NOTHING;`,
+        [BROKER],
+      );
+    } finally {
+      client.release();
+    }
+  });
+
+  beforeEach(async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
+  });
+
+  test('marks a payment into an account the user owns, with no counterpart', async () => {
+    // An investment account ships no export of its own, so this movement can
+    // never have a matching row - yet counted naively the monthly deposit
+    // becomes the largest expense of the month.
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar broker', counterparty: BROKER, category: null, amount: 1000 }),
+    ]);
+
+    const marked = await FinanceManager.markCounterpartyTransfers(createdIds);
+    assert.equal(marked.length, 1);
+
+    const [stored] = await FinanceManager.getTransactions(undefined, undefined, createdIds);
+    assert.equal((stored as any).is_internal, true);
+    assert.equal((stored as any).category, 'Overboekingen');
+  });
+
+  test('leaves an ordinary payment alone', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Albert Heijn', counterparty: 'NL91ABNA0417164300', amount: 40 }),
+    ]);
+
+    assert.equal((await FinanceManager.markCounterpartyTransfers(createdIds)).length, 0);
+  });
+
+  test('leaves a row without a counterparty alone', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Pin', counterparty: null, amount: 20 }),
+    ]);
+
+    assert.equal((await FinanceManager.markCounterpartyTransfers(createdIds)).length, 0);
+  });
+
+  test('does not re-mark a row the user rejected', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar broker', counterparty: BROKER, category: null, amount: 500 }),
+    ]);
+    await FinanceManager.markCounterpartyTransfers(createdIds);
+    await FinanceManager.unmarkInternal(String(createdIds[0]));
+
+    // A second import must not undo that decision.
+    assert.equal((await FinanceManager.markCounterpartyTransfers(createdIds)).length, 0);
+
+    const [stored] = await FinanceManager.getTransactions(undefined, undefined, createdIds);
+    assert.equal((stored as any).is_internal, false);
+  });
+
+  test('lists what it marked, so the change is visible rather than silent', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar broker', counterparty: BROKER, category: null, amount: 750 }),
+    ]);
+    await FinanceManager.markCounterpartyTransfers(createdIds);
+
+    const listed = await FinanceManager.getOneSidedTransfers(createdIds);
+    assert.equal(listed.length, 1);
+    assert.equal(listed[0].counterparty_name, 'Import Broker');
+  });
+
+  test('refuses to unmark a row that is half of a confirmed pair', async () => {
+    // Unmarking one side would leave the pair inconsistent: the transfer record
+    // says they belong together while one of them counts as spending again.
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar spaar', counterparty: SAVINGS, category: null, amount: 300, date_str: '2026-08-05' }),
+      row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 300, date_str: '2026-08-05' }),
+    ]);
+    await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
+
+    assert.equal(await FinanceManager.unmarkInternal(String(createdIds[0])), null);
+  });
+
+  test('keeps the deposit in the account balance', async () => {
+    // It is excluded from income and expenses because nothing was spent, but
+    // the money did leave the account.
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar broker', counterparty: BROKER, category: null, amount: 1000 }),
+    ]);
+    await FinanceManager.markCounterpartyTransfers(createdIds);
+
+    const overview = await FinanceManager.getAccountOverview();
+    const checking = overview.find((a: any) => a.details === CHECKING);
+    assert.equal(Number(checking.current_balance), -1000, 'opening 0 minus the 1000 moved out');
+  });
+});
+
+describe('transfer matching, one best pair per transaction', { skip: !hasDatabase && 'no database configured' }, () => {
+  before(async () => {
+    await runMigrations();
+  });
+
+  beforeEach(async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
+  });
+
+  // The counterparty marking would claim these rows before the matcher sees
+  // them, so it is undone here to test the pairing itself.
+  const clearMarking = async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('UPDATE transactions SET is_internal = NULL');
+    } finally {
+      client.release();
+    }
+  };
+
+  test('pairs two same-amount transfers without crossing them', async () => {
+    // Every debit matching every credit is a cross product: two 500-euro
+    // transfers on consecutive days produced four suggestions, of which two
+    // were wrong, and confirming a wrong one blocked the right pair.
+    await FinanceManager.addTransactions([
+      row({ name_description: 'Naar spaar', counterparty: SAVINGS, category: null, amount: 500, date_str: '2026-08-01' }),
+      row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 500, date_str: '2026-08-01' }),
+      row({ name_description: 'Naar spaar', counterparty: SAVINGS, category: null, amount: 500, date_str: '2026-08-02' }),
+      row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 500, date_str: '2026-08-02' }),
+    ]);
+    await clearMarking();
+
+    const candidates = await FinanceManager.getTransferCandidates();
+    assert.equal(candidates.length, 2);
+
+    // Each pair joins the two rows of the same day, not across days.
+    for (const candidate of candidates) {
+      assert.equal(candidate.from_date, candidate.to_date);
+    }
+  });
+
+  test('never offers the same transaction in two suggestions', async () => {
+    await FinanceManager.addTransactions([
+      row({ name_description: 'Naar spaar', counterparty: SAVINGS, category: null, amount: 250, date_str: '2026-08-01' }),
+      row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 250, date_str: '2026-08-01' }),
+      row({ name_description: 'Van betaal 2', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 250, date_str: '2026-08-02' }),
+    ]);
+    await clearMarking();
+
+    const candidates = await FinanceManager.getTransferCandidates();
+    const debitIds = candidates.map((c: any) => c.from_transaction_id);
+    assert.equal(new Set(debitIds).size, debitIds.length, 'a debit appears at most once');
+    assert.equal(candidates.length, 1, 'the closer credit wins, the other is left over');
+  });
+
+  test('still finds each month of a recurring transfer', async () => {
+    for (const month of ['06', '07', '08']) {
+      await FinanceManager.addTransactions([
+        row({ name_description: 'Naar spaar', counterparty: SAVINGS, category: null, amount: 500, date_str: `2026-${month}-01` }),
+        row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 500, date_str: `2026-${month}-01` }),
+      ]);
+    }
+    await clearMarking();
+
+    assert.equal((await FinanceManager.getTransferCandidates()).length, 3);
+  });
+});

@@ -33,6 +33,8 @@ export interface ImportSummary {
   createdIds: number[];
   imported: number;
   skipped: number;
+  /** Rows recognised as internal on their counterparty alone. */
+  markedInternal: number;
 }
 
 /** A proposed pair of rows that together look like one internal transfer. */
@@ -50,6 +52,19 @@ export interface TransferCandidate {
   amount: string;
   /** 'iban' when both accounts are known and certain, 'amount' when inferred. */
   match_basis: 'iban' | 'amount';
+}
+
+/** A movement marked internal on its counterparty alone, with no counterpart. */
+export interface OneSidedTransfer {
+  id: number;
+  date_str: string;
+  name_description: string | null;
+  account: string | null;
+  account_name: string | null;
+  counterparty: string | null;
+  counterparty_name: string | null;
+  debit_credit: string;
+  amount: string;
 }
 
 export interface Transfer {
@@ -172,6 +187,7 @@ export const api = createApi({
     "transactionTags",
     "transferCandidates",
     "transfers",
+    "oneSidedTransfers",
     "accounts",
     "unknownAccounts",
     "searchTransactions",
@@ -220,8 +236,8 @@ export const api = createApi({
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
                         "accountOverview", "netWorthHistory",
-                        "transferCandidates", "unknownAccounts",
-                        "transactionAccounts"],
+                        "transferCandidates", "oneSidedTransfers",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getEmptyCategoryTransactions: build.query<any, void>({
       query: () => ({
@@ -240,8 +256,8 @@ export const api = createApi({
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
                         "accountOverview", "netWorthHistory",
-                        "transferCandidates", "unknownAccounts",
-                        "transactionAccounts"],
+                        "transferCandidates", "oneSidedTransfers",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getAccountOverview: build.query<AccountBalance[], { asOf?: string } | void>({
       query: (args) => ({
@@ -290,8 +306,8 @@ export const api = createApi({
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
                         "accountOverview", "netWorthHistory",
-                        "transferCandidates", "unknownAccounts",
-                        "transactionAccounts"],
+                        "transferCandidates", "oneSidedTransfers",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getTags: build.query<Tag[], { includeClosed?: boolean } | void>({
       query: (args) => ({
@@ -458,6 +474,22 @@ export const api = createApi({
       }),
       providesTags: ["transferCandidates"],
     }),
+    getOneSidedTransfers: build.query<OneSidedTransfer[], { ids?: string } | void>({
+      query: (args) => ({
+        url: `api/transfers/one-sided`,
+        params: args && args.ids ? { ids: args.ids } : undefined,
+      }),
+      providesTags: ["oneSidedTransfers"],
+    }),
+    unmarkInternal: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/transfers/unmark/${id}`,
+        method: 'POST',
+      }),
+      // The row counts as spending again, so every derived figure shifts.
+      invalidatesTags: ["oneSidedTransfers", "transactions", "searchTransactions",
+                        "categorySums", "incomeExpensesSum", "transferCandidates"],
+    }),
     getTransfers: build.query<Transfer[], void>({
       query: () => ({ url: `api/transfers` }),
       providesTags: ["transfers"],
@@ -522,6 +554,8 @@ export const {
   useSetTransactionTagsMutation,
   useGetTransferCandidatesQuery,
   useGetTransfersQuery,
+  useGetOneSidedTransfersQuery,
+  useUnmarkInternalMutation,
   useConfirmTransferMutation,
   useRejectTransferMutation,
   useUnlinkTransferMutation,

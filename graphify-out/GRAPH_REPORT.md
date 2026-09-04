@@ -1,16 +1,16 @@
 # Graph Report - FinanceApp  (2026-09-04)
 
 ## Corpus Check
-- 67 files · ~40,357 words
+- 68 files · ~43,052 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 398 nodes · 547 edges · 22 communities (15 shown, 7 thin omitted)
+- 409 nodes · 560 edges · 22 communities (16 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a7a5f79e`
+- Built from commit: `afd8f53c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,7 +38,7 @@
 - [[_COMMUNITY_Community 20|Community 20]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `FinanceManager` - 40 edges
+1. `FinanceManager` - 43 edges
 2. `useDateRange()` - 11 edges
 3. `Belangrijk, niet blokkerend` - 8 edges
 4. `formatDate()` - 8 edges
@@ -61,19 +61,19 @@
 - `classifyWith()` --calls--> `matchMerchantRule()`  [EXTRACTED]
   server/src/machineLearningModels/categoryModel.ts → server/src/machineLearningModels/dutchMerchantRules.ts
 
-## Communities (22 total, 7 thin omitted)
+## Communities (22 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (28): ACCOUNT_TYPES, Accounts(), DraftAccount, emptyDraft(), filter, TagOption, TagPickerProps, Column (+20 more)
+Nodes (30): ACCOUNT_TYPES, Accounts(), DraftAccount, emptyDraft(), filter, TagOption, TagPickerProps, Column (+22 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (29): ACCOUNT_TYPES, CATEGORY_TYPES, entries, entry, idList, INCOME_OUTCOME, invalid, merchant (+21 more)
+Cohesion: 0.07
+Nodes (30): ACCOUNT_TYPES, CATEGORY_TYPES, entries, entry, idList, INCOME_OUTCOME, invalid, merchant (+22 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.07
-Nodes (29): ensureMigrationsTable(), MIGRATIONS_DIR, readMigrationFiles(), runMigrations(), ImportResult, errorHandler(), app, start() (+21 more)
+Cohesion: 0.06
+Nodes (32): DbContext, ensureMigrationsTable(), MIGRATIONS_DIR, readMigrationFiles(), runMigrations(), ImportResult, errorHandler(), app (+24 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.08
@@ -84,8 +84,8 @@ Cohesion: 0.05
 Nodes (36): 10. De rekeningtabel is met placeholder-IBAN's gevuld, 11. De transactietabel bouwt kolommen op uit `Object.keys(row)`, 12. Twee formatCurrency-definities, zeven keer gekopieerd, 13. Het `Transaction`-type staat vier keer opnieuw gedeclareerd, 14. De `Transactions`-klasse is een lege huls, 15. `getCategorySums` gebruikt vaste parameterindexen, 16. Ongebruikte parameters en dode routes, 1. Overboekingen tussen eigen rekeningen tellen dubbel mee (+28 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.09
-Nodes (21): formatCurrency(), groupByType(), NetWorthBanner(), TYPE_ORDER, ThemeModeToggle(), DateRangeProvider(), Props, TABS (+13 more)
+Cohesion: 0.11
+Nodes (16): ThemeModeToggle(), DateRangeProvider(), Props, TABS, App(), ThemedApp(), darkBackground, darkGrey (+8 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.1
@@ -111,6 +111,10 @@ Nodes (5): formatCurrency(), TagProgress(), formatCurrency(), formatMonth(), Tag
 Cohesion: 0.22
 Nodes (4): DashboardBox, DeletePopupProps, style, Props
 
+### Community 13 - "Community 13"
+Cohesion: 0.47
+Nodes (5): formatCurrency(), groupByType(), NetWorthBanner(), TYPE_ORDER, AccountBalance
+
 ### Community 14 - "Community 14"
 Cohesion: 0.4
 Nodes (5): Categories(), CATEGORY_TYPES, emptyDraft(), INCOME_OUTCOME, Category
@@ -120,24 +124,24 @@ Cohesion: 0.5
 Nodes (3): code:js (export default {), Expanding the ESLint configuration, React + TypeScript + Vite
 
 ## Knowledge Gaps
-- **136 isolated node(s):** `app`, `MIGRATIONS_DIR`, `ImportResult`, `ParsedRow`, `hasDatabase` (+131 more)
+- **139 isolated node(s):** `app`, `MIGRATIONS_DIR`, `ImportResult`, `ParsedRow`, `hasDatabase` (+134 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FinanceManager` connect `Community 3` to `Community 2`, `Community 13`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
+- **Why does `FinanceManager` connect `Community 3` to `Community 1`, `Community 2`?**
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **Why does `useDateRange()` connect `Community 4` to `Community 8`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `app`, `MIGRATIONS_DIR`, `ImportResult` to the rest of the system?**
-  _136 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _139 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._

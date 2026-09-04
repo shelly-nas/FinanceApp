@@ -55,6 +55,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({
                         transactionIds: JSON.stringify(response.data.createdIds),
                         imported: response.data.imported,
                         skipped: response.data.skipped,
+                        markedInternal: response.data.markedInternal,
                     },
                 });
             } else {
