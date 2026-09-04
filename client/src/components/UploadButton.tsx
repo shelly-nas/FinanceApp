@@ -36,7 +36,16 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
             if ('data' in response && response.data?.message === "Entries imported successfully") {
                 setLoading(false);
                 onUploadSuccess();
-                navigate('/review-transactions', { state: { transactionIds: JSON.stringify(response.data.createdIds) } });
+                // Rows already stored are skipped, so overlapping export periods
+                // are harmless - but say so, otherwise a partial import looks
+                // like the file was wrong.
+                navigate('/review-transactions', {
+                    state: {
+                        transactionIds: JSON.stringify(response.data.createdIds),
+                        imported: response.data.imported,
+                        skipped: response.data.skipped,
+                    },
+                });
             } else {
                 setLoading(false);
                 const failure = 'error' in response ? response.error : undefined;

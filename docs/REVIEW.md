@@ -1,0 +1,372 @@
+# FinanceApp — doorlichting
+
+Doorloop van 42 bronbestanden (~4.510 regels) op commit `97cf4da`, 3 september 2026.
+Bevindingen zijn genummerd op prioriteit, niet op vindplaats.
+
+## Waar het staat
+
+De architectuur is gezond: een duidelijke driedeling controller → manager → database,
+RTK Query voor alle client-calls, en een classificatie-pipeline die in lagen is
+opgezet (merchant-regels → Bayes → bankcategorie). Het ASN-werk uit de laatste
+commits is zorgvuldig gedaan, inclusief de datum-valkuil en de losse aanhalingstekens.
+
+De zwakke plek zit in het *model*, niet in de code-kwaliteit. De app kent één weg
+naar binnen (CSV-upload) en één weg naar de data (het reviewscherm, dat alleen
+opent vanuit een upload of vanuit een categorieselectie). Er is geen plek waar je
+zomaar door alles heen kunt lopen. En de twee dingen die dubbeltellen —
+overboekingen tussen eigen rekeningen, en dubbel geïmporteerde regels — worden
+op geen enkel punt afgevangen.
+
+---
+
+## Blokkerend
+
+### 1. Overboekingen tussen eigen rekeningen tellen dubbel mee
+
+`server/src/managers/financeManager.ts:118` · `server/src/machineLearningModels/dutchMerchantRules.ts:61`
+
+Er zit geen transfer-, dedup- of tegenboekingslogica in de code. Wat er wel is, is
+de categorie `Overboekingen`, in `initProd.sql` als `income_outcome = 'Uitgaven'`
+geclassificeerd.
+
+Gevolg: €500 van de Rabobank-betaalrekening naar de ING-spaarrekening, beide CSV's
+geïmporteerd, geeft twee regels — één Debit van €500, één Credit van €500. In
+`getIncomeExpensesSum()` wordt de Rabobank-regel als €500 uitgave geteld en de
+ING-regel als €500 inkomen. Het maandoverzicht laat €500 méér inkomen en €500 méér
+uitgaven zien dan er werkelijk was, en de spaarquote is vertekend.
+
+De `account_type`-verdeling in de accountstabel (Checking / Savings / Investments)
+geeft wat nodig is om dit te herkennen: een transactie waarbij zowel `account` als
+`counterparty` in `accounts.details` voorkomen, is per definitie intern.
+
+### 2. Dubbele import wordt niet tegengehouden
+
+`server/src/managers/financeManager.ts:12` · `database/initProd.sql:39`
+
+`addTransactions()` doet een blinde `INSERT` per regel. Er is geen unieke constraint
+op de transactietabel behalve de serial `id`. Bij een tweede import van hetzelfde
+bestand — makkelijk gedaan bij overlappende exportperiodes — staat alles er twee
+keer in en klopt elke som.
+
+Banken leveren geen stabiel transactie-ID in deze CSV-formaten, dus een natuurlijke
+sleutel is de praktische oplossing: een hash over datum + rekening + bedrag +
+debit/credit + omschrijving.
+
+```sql
+ALTER TABLE public.transactions ADD COLUMN import_hash VARCHAR(64);
+
+CREATE UNIQUE INDEX idx_transactions_import_hash
+  ON public.transactions(import_hash)
+  WHERE import_hash IS NOT NULL;
+```
+
+Randgeval: twee identieke pinbetalingen op dezelfde dag bij dezelfde zaak zijn
+legitiem. Neem daarom een volgnummer per (datum, rekening, bedrag, omschrijving)
+mee in de hash.
+
+### 3. De twee schemabestanden zijn uit elkaar gelopen
+
+`database/initTables.sql` · `database/initProd.sql`
+
+`initProd.sql` heeft de kolom `income_outcome`, de tabellen `tags` en
+`transaction_tags`, en de bijbehorende indexen. `initTables.sql` heeft dat niet.
+Wie de app lokaal opzet met `initTables.sql` krijgt een database waarop
+`getIncomeExpensesSum()` faalt en de tags-functionaliteit stukloopt.
+
+In `initTables.sql` staan bovendien hardgecodeerde credentials (`financier / m0n3y`
+en een superuser `admin / Buvpe_74`). Die staan in de git-historie en zijn dus hoe
+dan ook verbrand.
+
+`initProd.sql` draait alleen bij een lege volume. Een bestaande productiedatabase
+krijgt nieuwe kolommen nooit te zien — er zijn migraties nodig, geen bootstrapscript.
+
+### 4. De maandnavigatie muteert de Date in plaats van hem te vervangen
+
+`client/src/scenes/dateRange/DateRangeContext.tsx:26`
+
+`incrementMonth()` roept `dateOneMonthAgo.setMonth(...)` aan — dat wijzigt het
+bestaande Date-object *in place* en zet vervolgens een andere state-variabele
+(`setCurrentDate`). De state die het component uitleest, `dateOneMonthAgo`, wordt
+nooit via zijn eigen setter bijgewerkt.
+
+Twee gevolgen. De 31-daagse bug: vanuit 31 maart teruggaan geeft via `setMonth(1)`
+geen 28 februari maar 3 maart — februari wordt overgeslagen. En het breekt zodra
+React in StrictMode of met concurrent rendering dubbel rendert.
+
+```ts
+const [anchor, setAnchor] = useState(() => new Date());
+
+const shiftMonth = (delta: number) =>
+  setAnchor(prev => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
+```
+
+Anker op dag 1 van de maand laat het overloopprobleem verdwijnen.
+
+---
+
+## Belangrijk, niet blokkerend
+
+### 5. De RTK Query cache-tags kloppen niet
+
+`client/src/api.ts:98` · `client/src/scenes/reviewTransactions/index.tsx:160`
+
+Elke mutatie invalideert een eigen, unieke tag: `updateTransaction` invalideert
+`"transaction"`, terwijl `getTransactions` de tag `"transactions"` aanbiedt. Die
+twee raken elkaar nooit. Hetzelfde geldt voor `uploadTransactions` →
+`"uploadTransactions"` en `deleteTransaction` → `"deleteTransactions"` — tags die
+geen enkele query aanbiedt.
+
+Netto-effect: na een wijziging ververst er niets, en dat is opgelost met
+`window.location.reload()` op drie plekken (`subHeader/index.tsx:17`,
+`reviewTransactions/index.tsx:160`). Dat gooit de React-state, de cache en de
+scrollpositie weg.
+
+```ts
+updateTransaction: build.mutation({
+  invalidatesTags: ["transactions", "categorySums",
+                    "incomeExpensesSum", "emptyCategoryTransactions",
+                    "accountOverview"],
+})
+```
+
+### 6. Foutafhandeling lekt database-interne informatie
+
+`server/src/controllers/financeController.ts` (12×)
+
+Vrijwel elke route eindigt op `res.status(500).json({ error })` met het rauwe
+pg-foutobject: de mislukte query, kolomnamen, constraint-namen. De upload-route
+gaat verder en stuurt de stringificatie van de databasefout terug.
+
+Eén error-middleware onderaan de router: log volledig serverside, stuur een vaste
+boodschap plus correlatie-id naar de client. Ook `fs.unlinkSync()` vervangen door
+de async variant — die staat in een `finally` en blokkeert de event loop.
+
+### 7. Geen paginering: `/transactions` haalt alles op
+
+`server/src/managers/financeManager.ts:41`
+
+`getTransactions()` zonder datumfilter heeft geen `LIMIT`. `trainModel()` roept
+precies die functie aan bij elke upload en laadt de volledige historie in geheugen.
+
+Twee verbeteringen: `LIMIT`/`OFFSET` op de query, en `trainModel()` alleen de
+kolommen laten ophalen die het gebruikt (`name_description`, `notifications`,
+`category`) met `WHERE category IS NOT NULL`.
+
+### 8. Geen migratiepad voor het schema
+
+`docker-compose.prod.yml`
+
+Het schema komt uitsluitend via `/docker-entrypoint-initdb.d` binnen, wat alleen
+gebeurt bij een lege volume. De tags-tabellen zijn nooit in een draaiende
+productiedatabase terechtgekomen tenzij handmatig aangemaakt — en de laatste commit
+koppelt een bind mount aan de PostgreSQL-data, dus die volume blijft bestaan.
+
+`node-pg-migrate` past bij deze stack. Alles hierna (transfer-detectie,
+import-hash, `is_internal`) vereist schemawijzigingen op bestaande data.
+
+### 9. Nul tests
+
+Drie plekken waar een fout stil verkeerde cijfers oplevert:
+
+- De CSV-parsing per bank. Vijf mappings, drie datumformaten, twee bedragconventies,
+  ASN's aanhalingstekens. Vijf fixtures en vijf assertions dekken dit af.
+- `getIncomeExpensesSum()` en `getCategorySums()`. De debit/credit-tekenlogica zit
+  op drie plekken los van elkaar in SQL.
+- De datumreken in de DateRange-context, met name de maandgrenzen.
+
+### 10. De rekeningtabel is met placeholder-IBAN's gevuld
+
+`database/initProd.sql:63`
+
+Negen van de tien rekeningen hebben `details` = `unique1` t/m `unique9`; alleen de
+Rabobank-rekening heeft een echt IBAN. De koppeling transactie → rekening loopt via
+`transactions.account = accounts.details`, dus een geïmporteerde transactie matcht
+alleen bij die ene rekening. Bij alle andere valt het saldo terug op
+`balance_when_created`, wat nul is.
+
+Het net worth-cijfer weerspiegelt daarmee alleen de Rabobank-rekening. Dit is ook
+de blokkade voor transfer-detectie, die echte IBAN's aan beide kanten nodig heeft.
+
+### 11. De transactietabel bouwt kolommen op uit `Object.keys(row)`
+
+`client/src/scenes/reviewTransactions/index.tsx:212`
+
+De header is een vaste array van negen kolomnamen, de body rendert
+`Object.keys(row).map(...)`. Die lopen alleen synchroon zolang Postgres de kolommen
+in exact die volgorde teruggeeft. Bij een nieuwe kolom (`import_hash`,
+`is_internal`) verschuift de tabel: waarden onder de verkeerde kop.
+
+Ook: `SortableTransactionTable` gebruikt `key={date_str + name_description}`, wat
+botst bij twee identieke pinbetalingen op één dag — gebruik `row.id`.
+
+---
+
+## Functioneel
+
+### Hoe data binnenkomt, en of je er altijd bij kunt
+
+Er is één ingang: CSV-upload. Om bij bestaande transacties te komen zijn er drie
+indirecte routes:
+
+- Direct na een upload, met de zojuist aangemaakte id's via router-state.
+- Het reviewscherm zonder id's — toont uitsluitend transacties *zonder* categorie.
+- Een categorie aanklikken in Spending Breakdown en op het potloodje drukken —
+  filtert op één categorie binnen één maand.
+
+Er is geen plek waar je door al je transacties kunt lopen. Zoeken kan niet.
+Handmatig een transactie toevoegen kan niet — contant geld, een tikkie, een
+correctie: er is geen weg naar binnen dan een CSV.
+
+Voorstel:
+
+1. **Eén zoek-endpoint.** `getTransactions()` uitbreiden met vrije tekst (ILIKE over
+   `name_description`, `notifications`, `counterparty`) en filters op categorie,
+   rekening, tag, bedragrange, debit/credit en datumrange. Met `LIMIT`/`OFFSET` en
+   `total_count`. Dit endpoint bedient meteen het reviewscherm — dat wordt "zoeken
+   met filter *categorie is leeg*".
+2. **Eén transactietabel-component.** Nu bestaan `SortableTransactionTable` (lezen)
+   en de inline tabel in `reviewTransactions` (bewerken) naast elkaar. Samenvoegen
+   tot één component met een `editable`-vlag. De inline-editing (enkele klik, Enter
+   opslaat, Escape annuleert, optimistische update met rollback) verdient het om
+   overal te gelden.
+3. **Handmatig toevoegen.** Een knop bovenaan het zoekscherm met dezelfde velden.
+   Serverzijde is dat `addTransactions()` met één entry.
+4. **Bulkacties.** Met filters wil je "selecteer alles" → categorie of tag toekennen.
+   Eén extra endpoint (`PATCH /transactions/bulk`).
+
+### Totaal-widgets en maand-widgets op één scherm
+
+| Widget | Afhankelijk van maandselectie? | Data |
+|---|---|---|
+| Account Overview | Nee — altijd het saldo van nu | `/account-overview` |
+| Period Summary | Ja | `/income-expenses-sum` |
+| Spending Breakdown | Ja | `/category-sums` |
+| Transaction Details | Ja | `/transactions` |
+| Add / Review / Investments | Nee — acties | — |
+
+Het probleem is niet alleen dat ze door elkaar staan; de datumkiezer staat *onder*
+de header en lijkt visueel voor alles te gelden, inclusief het accountoverzicht dat
+er niets mee doet. Een maand terug verandert Account Overview niet — dat leest als
+een bug, ook al is het correct.
+
+Voorstel: totaalstanden in een vaste banner boven de tabs (net worth plus de drie
+subtotalen per rekeningtype, wat `/account-overview` al teruggeeft via
+`groupByAccountType()`). De blur-toggle hoort dan bij de banner. Het uitklapbare
+detail per rekening verhuist naar een eigen tab "Rekeningen", waar ook het beheer
+van `details`/IBAN thuishoort.
+
+Te beslissen: als de banner altijd "nu" toont terwijl je in maart 2024 staat, is
+dat verwarrend. Of de banner labelt expliciet "vandaag", of het net worth wordt
+historisch (saldo per einde geselecteerde maand). Dat laatste is berekenbaar met de
+bestaande data maar is een andere query.
+
+### Acties uit de widgetkolom naar een menu
+
+De rechterkolom bevat drie widgets die geen data tonen: Add Transactions, Review
+Transactions, Add Investments. Ze nemen 1,5 van de 12 kolommen in beslag en zien er
+hetzelfde uit als de widgets die wél data tonen — dezelfde `DashboardBox` met
+dezelfde rand, radius en achtergrond. Visueel zeggen ze "ik ben een overzicht",
+terwijl het knoppen zijn.
+
+Naar een `⋯`-menu in de tabbalk: *Transacties importeren*, *Beleggingen bijwerken*,
+*Categorieën beheren*, *Rekeningen beheren*. "Review transactions" is geen actie
+maar een filterstand van het transactiescherm, dus dat wordt een badge op de
+Transacties-tab: `Transacties (12)`. Informatiever dan de huidige knop, die niet
+laat zien of er iets te doen valt.
+
+Hetzelfde geldt voor het potlood-icoontje in Transaction Details en het oog-icoontje
+in Account Overview: die zitten geabsoluut-gepositioneerd in de widgetkop, wat de
+reden is dat in beide bestanden een identiek blok
+`position:'absolute', right:0, top:'50%', transform:'translateY(-50%)'` staat.
+
+### Overboekingen tussen eigen rekeningen
+
+Drie niveaus, oplopend in werk:
+
+| # | Aanpak | Wat het oplost | Werk |
+|---|---|---|---|
+| 1 | **Markeer intern bij import.** Kolom `is_internal BOOLEAN`. Bij het inlezen: als `counterparty` voorkomt in `accounts.details`, zet op true. | Beide zijden vallen uit de inkomsten/uitgaven-sommen. Maandcijfers kloppen weer. | klein |
+| 2 | **Zonder intern uit in de sommaties.** `getIncomeExpensesSum()`, `getCategorySums()` en Spending Breakdown krijgen `AND NOT is_internal`. `getAccountOverview()` juist *niet* — daar moeten ze meetellen. | Het onderscheid tussen "geld verplaatst" en "geld uitgegeven" wordt consistent. | klein |
+| 3 | **Koppel de twee kanten.** Tabel `transfers(from_transaction_id, to_transaction_id)`, gevuld door een matcher: zelfde bedrag, tegengesteld teken, datums binnen 3 dagen, rekeningen wederzijds elkaars tegenrekening. | Je ziet "€500 van Rabobank naar ING-spaar" als één regel, en merkt het als één helft ontbreekt. | middel |
+
+Randgeval om nu al te beslissen: een overboeking naar de beleggingsrekening is
+intern (geld verplaatst), maar de waardegroei daarna niet. De investments-tabel
+houdt saldi bij, niet transacties, dus die twee bijten elkaar nog niet — maar zodra
+je rendement wilt zien moet je onderscheiden tussen inleg en groei. De inleg is
+precies wat een intern gemarkeerde overboeking geeft.
+
+Praktische blokkade: dit werkt alleen met echte IBAN's in `accounts.details`.
+Zolang daar `unique1` t/m `unique9` staat, matcht er niets.
+
+Voor rekeningen waar de bank geen tegenrekening meelevert (creditcards vooral) valt
+terug te vallen op een tekstregel: een omschrijving die een eigen IBAN of eigen
+rekeningnaam bevat, is ook intern.
+
+---
+
+## Opruimwerk
+
+### 12. Twee formatCurrency-definities, zeven keer gekopieerd
+
+Dezelfde `Intl.NumberFormat('nl-NL', …)`-helper staat identiek in
+`AccountOverview`, `PeriodSummary`, `SpendingBreakdown`, `SortableTransactionTable`,
+`SortableSpendingTable`, `tags/index` en `TagDetails`. Eén `utils/format.ts` met
+`formatCurrency`, `formatDate` en `formatMonth`. De knowledge graph markeert deze
+cluster ook als eigen community (nr. 8).
+
+### 13. Het `Transaction`-type staat vier keer opnieuw gedeclareerd
+
+In `TransactionDetails`, `SortableTransactionTable`, `reviewTransactions` en
+serverzijde in `financeModel.ts` — en ze verschillen onderling. De servervariant
+heeft `account: number` en een veld `transaction_type` dat nergens in het schema
+bestaat; de clientvarianten hebben `account: string`. Eén gedeeld type zou de
+kolomvolgorde-bug uit bevinding 11 ook onmogelijk maken.
+
+### 14. De `Transactions`-klasse is een lege huls
+
+`server/src/models/financeModel.ts`
+
+De klasse wordt nergens geïnstantieerd — `getTransactions()` geeft `result.rows`
+terug, gewone objecten. Hij dient alleen als returntype. Een `interface` volstaat.
+
+### 15. `getCategorySums` gebruikt vaste parameterindexen
+
+`server/src/managers/financeManager.ts:95`
+
+De query hardcodeert `$1` voor startDate en `$2` voor endDate. Bij een aanroep met
+alleen `endDate` staat er `$2` in de SQL terwijl er één parameter meegaat — dat
+gooit een fout. `getTransactions()` doet het een paar regels hoger wél goed met een
+oplopende `paramIndex`. Dezelfde fout staat in `getIncomeExpensesSum()`. Nu
+onbereikbaar omdat de client altijd beide meestuurt, maar het zoekscherm verandert dat.
+
+### 16. Ongebruikte parameters en dode routes
+
+`classifyWith()` en `predictCategory()` nemen allebei een `account`-parameter aan
+die in geen enkele codepad wordt gebruikt. `predictCategory()` wordt nergens
+aangeroepen sinds de controller op `trainModel` + `classifyWith` is overgestapt —
+maar traint wel een compleet nieuw model per aanroep. `morgan` wordt in `index.ts`
+ná de router geregistreerd en logt daardoor niets van de API-calls.
+
+---
+
+## Voorgestelde volgorde
+
+De afhankelijkheden lopen één kant op: zonder echte IBAN's geen transfer-detectie,
+zonder migraties geen schemawijziging op een draaiende database, zonder correcte
+cache-tags blijft elk nieuw scherm hangen aan `window.location.reload()`.
+
+1. **Migraties opzetten en de twee schemabestanden samenvoegen.** Alles daarna hangt
+   hieraan. Meteen de credentials uit `initTables.sql` halen.
+2. **Cache-tags rechttrekken, alle drie de `reload()`-aanroepen verwijderen.**
+   Kleinste diff, grootste merkbare verbetering.
+3. **Echte rekeninggegevens invullen** — handmatig of via een beheerscherm.
+4. **`is_internal` toevoegen en uitzonderen in de sommaties.** Vanaf hier kloppen de
+   maandcijfers.
+5. **`import_hash` met unieke index.** Beschermt alles wat hierna wordt geïmporteerd.
+6. **Zoek-endpoint plus zoekscherm**, met het reviewscherm als filterstand daarvan.
+7. **Herindeling: banner, tabs, actiemenu.** Puur frontend, leunt op stap 6.
+8. **DateRange herbouwen** met een onveranderlijk anker en de maand in de URL.
+
+Wat kan blijven liggen: de transfer-koppelingstabel (niveau 3), tests voorbij de drie
+genoemde plekken, en het historisch maken van het net worth. Alle drie nuttig, geen
+van drieën blokkerend.

@@ -10,6 +10,9 @@ RUN npm install
 # Copy the source code
 COPY src ./src
 
+# Migrations are read at runtime, not compiled - they have to ship as files.
+COPY migrations ./migrations
+
 # Compile TypeScript to JavaScript
 RUN npm run build
 

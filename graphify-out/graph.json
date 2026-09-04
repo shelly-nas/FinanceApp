@@ -9,17 +9,44 @@
       "source_file": "server/src/index.ts",
       "source_location": "L1",
       "id": "server_src_index_ts",
-      "community": 4,
+      "community": 6,
       "norm_label": "index.ts"
     },
     {
       "label": "app",
       "file_type": "code",
       "source_file": "server/src/index.ts",
-      "source_location": "L8",
+      "source_location": "L10",
       "id": "src_index_app",
-      "community": 4,
+      "community": 6,
       "norm_label": "app"
+    },
+    {
+      "label": "start()",
+      "file_type": "code",
+      "source_file": "server/src/index.ts",
+      "source_location": "L13",
+      "id": "src_index_start",
+      "community": 6,
+      "norm_label": "start()"
+    },
+    {
+      "label": "errorHandler.ts",
+      "file_type": "code",
+      "source_file": "server/src/middleware/errorHandler.ts",
+      "source_location": "L1",
+      "id": "server_src_middleware_errorhandler_ts",
+      "community": 6,
+      "norm_label": "errorhandler.ts"
+    },
+    {
+      "label": "errorHandler()",
+      "file_type": "code",
+      "source_file": "server/src/middleware/errorHandler.ts",
+      "source_location": "L12",
+      "id": "middleware_errorhandler_errorhandler",
+      "community": 6,
+      "norm_label": "errorhandler()"
     },
     {
       "label": "dbContext.ts",
@@ -27,7 +54,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/context/dbContext.ts",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_server_src_context_dbcontext_ts",
-      "community": 10,
+      "community": 11,
       "norm_label": "dbcontext.ts"
     },
     {
@@ -36,7 +63,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/context/dbContext.ts",
       "source_location": "L6",
       "id": "context_dbcontext_dbcontext",
-      "community": 10,
+      "community": 11,
       "norm_label": "dbcontext"
     },
     {
@@ -45,7 +72,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/context/dbContext.ts",
       "source_location": "L9",
       "id": "context_dbcontext_dbcontext_constructor",
-      "community": 10,
+      "community": 11,
       "norm_label": ".constructor()"
     },
     {
@@ -54,8 +81,53 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/context/dbContext.ts",
       "source_location": "L19",
       "id": "context_dbcontext_dbcontext_connect",
-      "community": 10,
+      "community": 11,
       "norm_label": ".connect()"
+    },
+    {
+      "label": "migrations.ts",
+      "file_type": "code",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L1",
+      "id": "server_src_context_migrations_ts",
+      "community": 6,
+      "norm_label": "migrations.ts"
+    },
+    {
+      "label": "MIGRATIONS_DIR",
+      "file_type": "code",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L13",
+      "id": "context_migrations_migrations_dir",
+      "community": 6,
+      "norm_label": "migrations_dir"
+    },
+    {
+      "label": "ensureMigrationsTable()",
+      "file_type": "code",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L15",
+      "id": "context_migrations_ensuremigrationstable",
+      "community": 6,
+      "norm_label": "ensuremigrationstable()"
+    },
+    {
+      "label": "readMigrationFiles()",
+      "file_type": "code",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L29",
+      "id": "context_migrations_readmigrationfiles",
+      "community": 6,
+      "norm_label": "readmigrationfiles()"
+    },
+    {
+      "label": "runMigrations()",
+      "file_type": "code",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L42",
+      "id": "context_migrations_runmigrations",
+      "community": 6,
+      "norm_label": "runmigrations()"
     },
     {
       "label": "financeManager.ts",
@@ -63,179 +135,278 @@
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L1",
       "id": "server_src_managers_financemanager_ts",
-      "community": 5,
+      "community": 12,
       "norm_label": "financemanager.ts"
+    },
+    {
+      "label": "ImportResult",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L13",
+      "id": "managers_financemanager_importresult",
+      "community": 12,
+      "norm_label": "importresult"
     },
     {
       "label": "FinanceManager",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L11",
+      "source_location": "L19",
       "id": "managers_financemanager_financemanager",
-      "community": 3,
+      "community": 4,
       "norm_label": "financemanager"
     },
     {
       "label": ".addTransactions()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L12",
+      "source_location": "L28",
       "id": "managers_financemanager_financemanager_addtransactions",
-      "community": 3,
+      "community": 12,
       "norm_label": ".addtransactions()"
     },
     {
       "label": ".getTransactions()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L42",
+      "source_location": "L117",
       "id": "managers_financemanager_financemanager_gettransactions",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettransactions()"
     },
     {
       "label": ".getCategorySums()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L74",
+      "source_location": "L149",
       "id": "managers_financemanager_financemanager_getcategorysums",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getcategorysums()"
     },
     {
       "label": ".getIncomeExpensesSum()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L121",
+      "source_location": "L203",
       "id": "managers_financemanager_financemanager_getincomeexpensessum",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getincomeexpensessum()"
     },
     {
       "label": ".getEmptyCategoryTransactions()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L186",
+      "source_location": "L276",
       "id": "managers_financemanager_financemanager_getemptycategorytransactions",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getemptycategorytransactions()"
     },
     {
       "label": ".updateTransaction()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L203",
+      "source_location": "L293",
       "id": "managers_financemanager_financemanager_updatetransaction",
-      "community": 3,
+      "community": 4,
       "norm_label": ".updatetransaction()"
     },
     {
       "label": ".getAccountOverview()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L247",
+      "source_location": "L337",
       "id": "managers_financemanager_financemanager_getaccountoverview",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getaccountoverview()"
     },
     {
       "label": ".getCategoryList()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L289",
+      "source_location": "L379",
       "id": "managers_financemanager_financemanager_getcategorylist",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getcategorylist()"
     },
     {
       "label": ".getInvestmentAccounts()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L306",
+      "source_location": "L396",
       "id": "managers_financemanager_financemanager_getinvestmentaccounts",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getinvestmentaccounts()"
     },
     {
       "label": ".addInvestments()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L323",
+      "source_location": "L413",
       "id": "managers_financemanager_financemanager_addinvestments",
-      "community": 3,
+      "community": 4,
       "norm_label": ".addinvestments()"
     },
     {
       "label": ".deleteTransaction()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L352",
+      "source_location": "L442",
       "id": "managers_financemanager_financemanager_deletetransaction",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deletetransaction()"
+    },
+    {
+      "label": ".getTransferCandidates()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L480",
+      "id": "managers_financemanager_financemanager_gettransfercandidates",
+      "community": 4,
+      "norm_label": ".gettransfercandidates()"
+    },
+    {
+      "label": ".confirmTransfer()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L557",
+      "id": "managers_financemanager_financemanager_confirmtransfer",
+      "community": 4,
+      "norm_label": ".confirmtransfer()"
+    },
+    {
+      "label": ".rejectTransfer()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L603",
+      "id": "managers_financemanager_financemanager_rejecttransfer",
+      "community": 4,
+      "norm_label": ".rejecttransfer()"
+    },
+    {
+      "label": ".unlinkTransfer()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L619",
+      "id": "managers_financemanager_financemanager_unlinktransfer",
+      "community": 4,
+      "norm_label": ".unlinktransfer()"
+    },
+    {
+      "label": ".getTransfers()",
+      "file_type": "code",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L652",
+      "id": "managers_financemanager_financemanager_gettransfers",
+      "community": 4,
+      "norm_label": ".gettransfers()"
     },
     {
       "label": ".getTags()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L376",
+      "source_location": "L688",
       "id": "managers_financemanager_financemanager_gettags",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettags()"
     },
     {
       "label": ".createTag()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L403",
+      "source_location": "L715",
       "id": "managers_financemanager_financemanager_createtag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createtag()"
     },
     {
       "label": ".updateTag()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L425",
+      "source_location": "L737",
       "id": "managers_financemanager_financemanager_updatetag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".updatetag()"
     },
     {
       "label": ".deleteTag()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L455",
+      "source_location": "L767",
       "id": "managers_financemanager_financemanager_deletetag",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deletetag()"
     },
     {
       "label": ".setTransactionTags()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L474",
+      "source_location": "L786",
       "id": "managers_financemanager_financemanager_settransactiontags",
-      "community": 3,
+      "community": 4,
       "norm_label": ".settransactiontags()"
     },
     {
       "label": ".getTagsForTransaction()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L504",
+      "source_location": "L816",
       "id": "managers_financemanager_financemanager_gettagsfortransaction",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettagsfortransaction()"
     },
     {
       "label": ".getTagSummary()",
       "file_type": "code",
       "source_file": "server/src/managers/financeManager.ts",
-      "source_location": "L524",
+      "source_location": "L836",
       "id": "managers_financemanager_financemanager_gettagsummary",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettagsummary()"
+    },
+    {
+      "label": "importHash.ts",
+      "file_type": "code",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L1",
+      "id": "server_src_utils_importhash_ts",
+      "community": 12,
+      "norm_label": "importhash.ts"
+    },
+    {
+      "label": "HashableEntry",
+      "file_type": "code",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L11",
+      "id": "utils_importhash_hashableentry",
+      "community": 12,
+      "norm_label": "hashableentry"
+    },
+    {
+      "label": "normalise()",
+      "file_type": "code",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L20",
+      "id": "utils_importhash_normalise",
+      "community": 12,
+      "norm_label": "normalise()"
+    },
+    {
+      "label": "identityKey()",
+      "file_type": "code",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L25",
+      "id": "utils_importhash_identitykey",
+      "community": 12,
+      "norm_label": "identitykey()"
+    },
+    {
+      "label": "computeImportHash()",
+      "file_type": "code",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L45",
+      "id": "utils_importhash_computeimporthash",
+      "community": 12,
+      "norm_label": "computeimporthash()"
     },
     {
       "label": "financeModel.ts",
@@ -243,7 +414,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/financeModel.ts",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_server_src_models_financemodel_ts",
-      "community": 10,
+      "community": 11,
       "norm_label": "financemodel.ts"
     },
     {
@@ -252,7 +423,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/financeModel.ts",
       "source_location": "L1",
       "id": "models_financemodel_transactions",
-      "community": 10,
+      "community": 11,
       "norm_label": "transactions"
     },
     {
@@ -261,7 +432,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/financeModel.ts",
       "source_location": "L13",
       "id": "models_financemodel_transactions_constructor",
-      "community": 10,
+      "community": 11,
       "norm_label": ".constructor()"
     },
     {
@@ -270,7 +441,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L1",
       "id": "server_src_models_banktransactionmodel_ts",
-      "community": 4,
+      "community": 2,
       "norm_label": "banktransactionmodel.ts"
     },
     {
@@ -279,7 +450,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L1",
       "id": "models_banktransactionmodel_bankmappings",
-      "community": 4,
+      "community": 2,
       "norm_label": "bankmappings"
     },
     {
@@ -288,7 +459,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L50",
       "id": "models_banktransactionmodel_asncategorymap",
-      "community": 4,
+      "community": 2,
       "norm_label": "asncategorymap"
     },
     {
@@ -297,7 +468,7 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L71",
       "id": "models_banktransactionmodel_bankcategorycolumns",
-      "community": 4,
+      "community": 2,
       "norm_label": "bankcategorycolumns"
     },
     {
@@ -306,7 +477,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L1",
       "id": "server_src_machinelearningmodels_categorymodel_ts",
-      "community": 5,
+      "community": 2,
       "norm_label": "categorymodel.ts"
     },
     {
@@ -315,7 +486,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L8",
       "id": "machinelearningmodels_categorymodel_dutch_stop_words",
-      "community": 5,
+      "community": 2,
       "norm_label": "dutch_stop_words"
     },
     {
@@ -324,7 +495,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L22",
       "id": "machinelearningmodels_categorymodel_isnoisetoken",
-      "community": 5,
+      "community": 2,
       "norm_label": "isnoisetoken()"
     },
     {
@@ -333,7 +504,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L33",
       "id": "machinelearningmodels_categorymodel_extractmerchantsegment",
-      "community": 5,
+      "community": 2,
       "norm_label": "extractmerchantsegment()"
     },
     {
@@ -342,7 +513,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L37",
       "id": "machinelearningmodels_categorymodel_preprocesstext",
-      "community": 5,
+      "community": 2,
       "norm_label": "preprocesstext()"
     },
     {
@@ -351,7 +522,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L60",
       "id": "machinelearningmodels_categorymodel_trainmodel",
-      "community": 5,
+      "community": 2,
       "norm_label": "trainmodel()"
     },
     {
@@ -360,7 +531,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L102",
       "id": "machinelearningmodels_categorymodel_classifywith",
-      "community": 5,
+      "community": 2,
       "norm_label": "classifywith()"
     },
     {
@@ -369,7 +540,7 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L162",
       "id": "machinelearningmodels_categorymodel_predictcategory",
-      "community": 5,
+      "community": 2,
       "norm_label": "predictcategory()"
     },
     {
@@ -378,7 +549,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L1",
       "id": "server_src_machinelearningmodels_dutchmerchantrules_ts",
-      "community": 5,
+      "community": 2,
       "norm_label": "dutchmerchantrules.ts"
     },
     {
@@ -387,7 +558,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L13",
       "id": "machinelearningmodels_dutchmerchantrules_merchantrule",
-      "community": 5,
+      "community": 2,
       "norm_label": "merchantrule"
     },
     {
@@ -396,7 +567,7 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L19",
       "id": "machinelearningmodels_dutchmerchantrules_dutchmerchantrules",
-      "community": 5,
+      "community": 2,
       "norm_label": "dutchmerchantrules"
     },
     {
@@ -405,8 +576,26 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L71",
       "id": "machinelearningmodels_dutchmerchantrules_matchmerchantrule",
-      "community": 5,
+      "community": 2,
       "norm_label": "matchmerchantrule()"
+    },
+    {
+      "label": "seed.ts",
+      "file_type": "code",
+      "source_file": "server/src/scripts/seed.ts",
+      "source_location": "L1",
+      "id": "server_src_scripts_seed_ts",
+      "community": 16,
+      "norm_label": "seed.ts"
+    },
+    {
+      "label": "seed()",
+      "file_type": "code",
+      "source_file": "server/src/scripts/seed.ts",
+      "source_location": "L9",
+      "id": "scripts_seed_seed",
+      "community": 16,
+      "norm_label": "seed()"
     },
     {
       "label": "financeController.ts",
@@ -414,7 +603,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L1",
       "id": "server_src_controllers_financecontroller_ts",
-      "community": 4,
+      "community": 2,
       "norm_label": "financecontroller.ts"
     },
     {
@@ -423,7 +612,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L10",
       "id": "controllers_financecontroller_router",
-      "community": 4,
+      "community": 2,
       "norm_label": "router"
     },
     {
@@ -432,7 +621,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L11",
       "id": "controllers_financecontroller_upload",
-      "community": 4,
+      "community": 2,
       "norm_label": "upload"
     },
     {
@@ -441,7 +630,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L12",
       "id": "controllers_financecontroller_reformatdate",
-      "community": 4,
+      "community": 2,
       "norm_label": "reformatdate()"
     },
     {
@@ -450,7 +639,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L22",
       "id": "controllers_financecontroller_isdayfirstdate",
-      "community": 4,
+      "community": 2,
       "norm_label": "isdayfirstdate()"
     },
     {
@@ -459,7 +648,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L23",
       "id": "controllers_financecontroller_reformatdayfirstdate",
-      "community": 4,
+      "community": 2,
       "norm_label": "reformatdayfirstdate()"
     },
     {
@@ -468,7 +657,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L30",
       "id": "controllers_financecontroller_stripwrappingquotes",
-      "community": 4,
+      "community": 2,
       "norm_label": "stripwrappingquotes()"
     },
     {
@@ -477,7 +666,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L51",
       "id": "controllers_financecontroller_entries",
-      "community": 4,
+      "community": 2,
       "norm_label": "entries"
     },
     {
@@ -486,7 +675,7 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L56",
       "id": "controllers_financecontroller_entry",
-      "community": 4,
+      "community": 2,
       "norm_label": "entry"
     },
     {
@@ -495,16 +684,16 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L111",
       "id": "controllers_financecontroller_merchant",
-      "community": 4,
+      "community": 2,
       "norm_label": "merchant"
     },
     {
       "label": "idList",
       "file_type": "code",
       "source_file": "server/src/controllers/financeController.ts",
-      "source_location": "L175",
+      "source_location": "L184",
       "id": "controllers_financecontroller_idlist",
-      "community": 4,
+      "community": 2,
       "norm_label": "idlist"
     },
     {
@@ -513,7 +702,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/vite.config.ts",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_vite_config_ts",
-      "community": 16,
+      "community": 21,
       "norm_label": "vite.config.ts"
     },
     {
@@ -522,7 +711,7 @@
       "source_file": "client/src/App.tsx",
       "source_location": "L1",
       "id": "client_src_app_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "app.tsx"
     },
     {
@@ -531,7 +720,7 @@
       "source_file": "client/src/App.tsx",
       "source_location": "L13",
       "id": "src_app_themedapp",
-      "community": 1,
+      "community": 3,
       "norm_label": "themedapp()"
     },
     {
@@ -540,7 +729,7 @@
       "source_file": "client/src/App.tsx",
       "source_location": "L35",
       "id": "src_app_app",
-      "community": 1,
+      "community": 3,
       "norm_label": "app()"
     },
     {
@@ -549,7 +738,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/main.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_main_tsx",
-      "community": 2,
+      "community": 0,
       "norm_label": "main.tsx"
     },
     {
@@ -558,7 +747,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/main.tsx",
       "source_location": "L10",
       "id": "src_main_store",
-      "community": 2,
+      "community": 0,
       "norm_label": "store"
     },
     {
@@ -567,7 +756,7 @@
       "source_file": "client/src/api.ts",
       "source_location": "L1",
       "id": "client_src_api_ts",
-      "community": 2,
+      "community": 0,
       "norm_label": "api.ts"
     },
     {
@@ -576,7 +765,7 @@
       "source_file": "client/src/api.ts",
       "source_location": "L5",
       "id": "src_api_transactionsqueryparams",
-      "community": 2,
+      "community": 0,
       "norm_label": "transactionsqueryparams"
     },
     {
@@ -585,7 +774,7 @@
       "source_file": "client/src/api.ts",
       "source_location": "L11",
       "id": "src_api_tag",
-      "community": 2,
+      "community": 0,
       "norm_label": "tag"
     },
     {
@@ -594,16 +783,43 @@
       "source_file": "client/src/api.ts",
       "source_location": "L21",
       "id": "src_api_tagsummary",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagsummary"
+    },
+    {
+      "label": "ImportSummary",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L31",
+      "id": "src_api_importsummary",
+      "community": 0,
+      "norm_label": "importsummary"
+    },
+    {
+      "label": "TransferCandidate",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L39",
+      "id": "src_api_transfercandidate",
+      "community": 0,
+      "norm_label": "transfercandidate"
+    },
+    {
+      "label": "Transfer",
+      "file_type": "code",
+      "source_file": "client/src/api.ts",
+      "source_location": "L55",
+      "id": "src_api_transfer",
+      "community": 0,
+      "norm_label": "transfer"
     },
     {
       "label": "api",
       "file_type": "code",
       "source_file": "client/src/api.ts",
-      "source_location": "L31",
+      "source_location": "L68",
       "id": "src_api_api",
-      "community": 2,
+      "community": 0,
       "norm_label": "api"
     },
     {
@@ -693,7 +909,7 @@
       "source_file": "client/src/theme.ts",
       "source_location": "L1",
       "id": "client_src_theme_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "theme.ts"
     },
     {
@@ -702,7 +918,7 @@
       "source_file": "client/src/theme.ts",
       "source_location": "L5",
       "id": "src_theme_tokens",
-      "community": 1,
+      "community": 3,
       "norm_label": "tokens"
     },
     {
@@ -711,7 +927,7 @@
       "source_file": "client/src/theme.ts",
       "source_location": "L50",
       "id": "src_theme_darkgrey",
-      "community": 1,
+      "community": 3,
       "norm_label": "darkgrey"
     },
     {
@@ -720,7 +936,7 @@
       "source_file": "client/src/theme.ts",
       "source_location": "L62",
       "id": "src_theme_darkbackground",
-      "community": 1,
+      "community": 3,
       "norm_label": "darkbackground"
     },
     {
@@ -729,7 +945,7 @@
       "source_file": "client/src/theme.ts",
       "source_location": "L68",
       "id": "src_theme_themesettings",
-      "community": 1,
+      "community": 3,
       "norm_label": "themesettings()"
     },
     {
@@ -738,26 +954,71 @@
       "source_file": "client/src/scenes/reviewTransactions/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_reviewtransactions_index_tsx",
-      "community": 2,
+      "community": 0,
       "norm_label": "index.tsx"
     },
     {
       "label": "Transaction",
       "file_type": "code",
       "source_file": "client/src/scenes/reviewTransactions/index.tsx",
-      "source_location": "L16",
+      "source_location": "L17",
       "id": "reviewtransactions_index_transaction",
-      "community": 2,
+      "community": 0,
       "norm_label": "transaction"
     },
     {
       "label": "ReviewTransactions()",
       "file_type": "code",
       "source_file": "client/src/scenes/reviewTransactions/index.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "id": "reviewtransactions_index_reviewtransactions",
-      "community": 2,
+      "community": 0,
       "norm_label": "reviewtransactions()"
+    },
+    {
+      "label": "TransferSuggestions.tsx",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L1",
+      "id": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "community": 0,
+      "norm_label": "transfersuggestions.tsx"
+    },
+    {
+      "label": "formatCurrency()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L15",
+      "id": "reviewtransactions_transfersuggestions_formatcurrency",
+      "community": 0,
+      "norm_label": "formatcurrency()"
+    },
+    {
+      "label": "formatDate()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L18",
+      "id": "reviewtransactions_transfersuggestions_formatdate",
+      "community": 0,
+      "norm_label": "formatdate()"
+    },
+    {
+      "label": "Props",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L20",
+      "id": "reviewtransactions_transfersuggestions_props",
+      "community": 0,
+      "norm_label": "props"
+    },
+    {
+      "label": "TransferSuggestions()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L37",
+      "id": "reviewtransactions_transfersuggestions_transfersuggestions",
+      "community": 0,
+      "norm_label": "transfersuggestions()"
     },
     {
       "label": "index.tsx",
@@ -765,7 +1026,7 @@
       "source_file": "client/src/scenes/dateRange/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_daterange_index_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "index.tsx"
     },
     {
@@ -774,7 +1035,7 @@
       "source_file": "client/src/scenes/dateRange/index.tsx",
       "source_location": "L12",
       "id": "daterange_index_daterange",
-      "community": 0,
+      "community": 1,
       "norm_label": "daterange()"
     },
     {
@@ -783,52 +1044,70 @@
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_daterange_daterangecontext_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "daterangecontext.tsx"
     },
     {
       "label": "DateRangeContextProps",
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "id": "daterange_daterangecontext_daterangecontextprops",
-      "community": 0,
+      "community": 1,
       "norm_label": "daterangecontextprops"
     },
     {
       "label": "DateRangeContext",
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "id": "daterange_daterangecontext_daterangecontext",
-      "community": 0,
+      "community": 1,
       "norm_label": "daterangecontext"
+    },
+    {
+      "label": "toMonthKey()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L16",
+      "id": "daterange_daterangecontext_tomonthkey",
+      "community": 1,
+      "norm_label": "tomonthkey()"
+    },
+    {
+      "label": "parseMonthKey()",
+      "file_type": "code",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L26",
+      "id": "daterange_daterangecontext_parsemonthkey",
+      "community": 1,
+      "norm_label": "parsemonthkey()"
     },
     {
       "label": "DateRangeProvider()",
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
-      "source_location": "L12",
+      "source_location": "L50",
       "id": "daterange_daterangecontext_daterangeprovider",
-      "community": 1,
+      "community": 3,
       "norm_label": "daterangeprovider()"
     },
     {
       "label": "useDateRange()",
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
-      "source_location": "L52",
+      "source_location": "L84",
       "id": "daterange_daterangecontext_usedaterange",
-      "community": 0,
+      "community": 1,
       "norm_label": "usedaterange()"
     },
     {
       "label": "formatDate()",
       "file_type": "code",
       "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
-      "source_location": "L60",
+      "source_location": "L92",
       "id": "daterange_daterangecontext_formatdate",
-      "community": 0,
+      "community": 1,
       "norm_label": "formatdate()"
     },
     {
@@ -837,7 +1116,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/scenes/dateRange/DateRangeBox.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_scenes_daterange_daterangebox_tsx",
-      "community": 13,
+      "community": 17,
       "norm_label": "daterangebox.tsx"
     },
     {
@@ -846,7 +1125,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/scenes/dateRange/DateRangeBox.tsx",
       "source_location": "L4",
       "id": "daterange_daterangebox_daterangebox",
-      "community": 13,
+      "community": 17,
       "norm_label": "daterangebox"
     },
     {
@@ -936,7 +1215,7 @@
       "source_file": "client/src/scenes/dashboard/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_index_tsx",
-      "community": 6,
+      "community": 1,
       "norm_label": "index.tsx"
     },
     {
@@ -945,7 +1224,7 @@
       "source_file": "client/src/scenes/dashboard/index.tsx",
       "source_location": "L12",
       "id": "dashboard_index_dashboard",
-      "community": 6,
+      "community": 1,
       "norm_label": "dashboard()"
     },
     {
@@ -981,7 +1260,7 @@
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_sortabletransactiontable_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "sortabletransactiontable.tsx"
     },
     {
@@ -990,7 +1269,7 @@
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L4",
       "id": "dashboard_sortabletransactiontable_transaction",
-      "community": 0,
+      "community": 1,
       "norm_label": "transaction"
     },
     {
@@ -999,7 +1278,7 @@
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L16",
       "id": "dashboard_sortabletransactiontable_sortabletransactiontableprops",
-      "community": 0,
+      "community": 1,
       "norm_label": "sortabletransactiontableprops"
     },
     {
@@ -1008,7 +1287,7 @@
       "source_file": "client/src/scenes/dashboard/SortableTransactionTable.tsx",
       "source_location": "L20",
       "id": "dashboard_sortabletransactiontable_sortabletransactiontable",
-      "community": 0,
+      "community": 1,
       "norm_label": "sortabletransactiontable()"
     },
     {
@@ -1017,7 +1296,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_transactiondetails_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "transactiondetails.tsx"
     },
     {
@@ -1026,7 +1305,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L11",
       "id": "dashboard_transactiondetails_transaction",
-      "community": 0,
+      "community": 1,
       "norm_label": "transaction"
     },
     {
@@ -1035,7 +1314,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L24",
       "id": "dashboard_transactiondetails_transactiondetailsprops",
-      "community": 0,
+      "community": 1,
       "norm_label": "transactiondetailsprops"
     },
     {
@@ -1044,7 +1323,7 @@
       "source_file": "client/src/scenes/dashboard/TransactionDetails.tsx",
       "source_location": "L28",
       "id": "dashboard_transactiondetails_transactiondetails",
-      "community": 0,
+      "community": 1,
       "norm_label": "transactiondetails()"
     },
     {
@@ -1053,7 +1332,7 @@
       "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_addinvestments_tsx",
-      "community": 6,
+      "community": 0,
       "norm_label": "addinvestments.tsx"
     },
     {
@@ -1062,7 +1341,7 @@
       "source_file": "client/src/scenes/dashboard/AddInvestments.tsx",
       "source_location": "L7",
       "id": "dashboard_addinvestments_addinvestmentsbutton",
-      "community": 6,
+      "community": 0,
       "norm_label": "addinvestmentsbutton()"
     },
     {
@@ -1071,7 +1350,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_spendingbreakdown_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "spendingbreakdown.tsx"
     },
     {
@@ -1080,7 +1359,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L9",
       "id": "dashboard_spendingbreakdown_categorysums",
-      "community": 0,
+      "community": 1,
       "norm_label": "categorysums"
     },
     {
@@ -1089,7 +1368,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L15",
       "id": "dashboard_spendingbreakdown_spendingbreakdownprops",
-      "community": 0,
+      "community": 1,
       "norm_label": "spendingbreakdownprops"
     },
     {
@@ -1098,7 +1377,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L19",
       "id": "dashboard_spendingbreakdown_categorizeitems",
-      "community": 0,
+      "community": 1,
       "norm_label": "categorizeitems()"
     },
     {
@@ -1107,7 +1386,7 @@
       "source_file": "client/src/scenes/dashboard/SpendingBreakdown.tsx",
       "source_location": "L36",
       "id": "dashboard_spendingbreakdown_spendingbreakdown",
-      "community": 0,
+      "community": 1,
       "norm_label": "spendingbreakdown()"
     },
     {
@@ -1116,7 +1395,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_periodsummary_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "periodsummary.tsx"
     },
     {
@@ -1125,7 +1404,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L9",
       "id": "dashboard_periodsummary_exchangetype",
-      "community": 0,
+      "community": 1,
       "norm_label": "exchangetype"
     },
     {
@@ -1134,7 +1413,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L14",
       "id": "dashboard_periodsummary_incomeexpenseitem",
-      "community": 0,
+      "community": 1,
       "norm_label": "incomeexpenseitem"
     },
     {
@@ -1143,7 +1422,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L20",
       "id": "dashboard_periodsummary_props",
-      "community": 0,
+      "community": 1,
       "norm_label": "props"
     },
     {
@@ -1152,7 +1431,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L22",
       "id": "dashboard_periodsummary_splitincomeexpense",
-      "community": 0,
+      "community": 1,
       "norm_label": "splitincomeexpense()"
     },
     {
@@ -1161,7 +1440,7 @@
       "source_file": "client/src/scenes/dashboard/PeriodSummary.tsx",
       "source_location": "L40",
       "id": "dashboard_periodsummary_periodsummary",
-      "community": 0,
+      "community": 1,
       "norm_label": "periodsummary()"
     },
     {
@@ -1170,7 +1449,7 @@
       "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_sortablespendingtable_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "sortablespendingtable.tsx"
     },
     {
@@ -1179,7 +1458,7 @@
       "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
       "source_location": "L7",
       "id": "dashboard_sortablespendingtable_sortablespendingtableprops",
-      "community": 0,
+      "community": 1,
       "norm_label": "sortablespendingtableprops"
     },
     {
@@ -1188,7 +1467,7 @@
       "source_file": "client/src/scenes/dashboard/SortableSpendingTable.tsx",
       "source_location": "L15",
       "id": "dashboard_sortablespendingtable_sortablespendingtable",
-      "community": 0,
+      "community": 1,
       "norm_label": "sortablespendingtable()"
     },
     {
@@ -1197,16 +1476,16 @@
       "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_addtransactions_tsx",
-      "community": 6,
+      "community": 0,
       "norm_label": "addtransactions.tsx"
     },
     {
       "label": "AddTransactionsButton()",
       "file_type": "code",
       "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "id": "dashboard_addtransactions_addtransactionsbutton",
-      "community": 6,
+      "community": 0,
       "norm_label": "addtransactionsbutton()"
     },
     {
@@ -1215,7 +1494,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_dashboard_accountoverview_tsx",
-      "community": 6,
+      "community": 13,
       "norm_label": "accountoverview.tsx"
     },
     {
@@ -1224,7 +1503,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L10",
       "id": "dashboard_accountoverview_accountcategory",
-      "community": 6,
+      "community": 13,
       "norm_label": "accountcategory"
     },
     {
@@ -1233,7 +1512,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L16",
       "id": "dashboard_accountoverview_groupbyaccounttype",
-      "community": 6,
+      "community": 13,
       "norm_label": "groupbyaccounttype()"
     },
     {
@@ -1242,7 +1521,7 @@
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L26",
       "id": "dashboard_accountoverview_accountsoverview",
-      "community": 6,
+      "community": 13,
       "norm_label": "accountsoverview()"
     },
     {
@@ -1251,16 +1530,16 @@
       "source_file": "client/src/scenes/subHeader/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_subheader_index_tsx",
-      "community": 2,
+      "community": 0,
       "norm_label": "index.tsx"
     },
     {
       "label": "ActionButtons()",
       "file_type": "code",
       "source_file": "client/src/scenes/subHeader/index.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "id": "subheader_index_actionbuttons",
-      "community": 2,
+      "community": 0,
       "norm_label": "actionbuttons()"
     },
     {
@@ -1269,7 +1548,7 @@
       "source_file": "client/src/scenes/header/index.tsx",
       "source_location": "L1",
       "id": "client_src_scenes_header_index_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -1278,7 +1557,7 @@
       "source_file": "client/src/scenes/header/index.tsx",
       "source_location": "L8",
       "id": "header_index_props",
-      "community": 1,
+      "community": 3,
       "norm_label": "props"
     },
     {
@@ -1287,7 +1566,7 @@
       "source_file": "client/src/scenes/header/index.tsx",
       "source_location": "L10",
       "id": "header_index_header",
-      "community": 1,
+      "community": 3,
       "norm_label": "header()"
     },
     {
@@ -1296,7 +1575,7 @@
       "source_file": "client/src/components/TagPicker.tsx",
       "source_location": "L1",
       "id": "client_src_components_tagpicker_tsx",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagpicker.tsx"
     },
     {
@@ -1305,7 +1584,7 @@
       "source_file": "client/src/components/TagPicker.tsx",
       "source_location": "L13",
       "id": "components_tagpicker_filter",
-      "community": 2,
+      "community": 0,
       "norm_label": "filter"
     },
     {
@@ -1314,7 +1593,7 @@
       "source_file": "client/src/components/TagPicker.tsx",
       "source_location": "L15",
       "id": "components_tagpicker_tagoption",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagoption"
     },
     {
@@ -1323,7 +1602,7 @@
       "source_file": "client/src/components/TagPicker.tsx",
       "source_location": "L20",
       "id": "components_tagpicker_tagpickerprops",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagpickerprops"
     },
     {
@@ -1332,7 +1611,7 @@
       "source_file": "client/src/components/TagPicker.tsx",
       "source_location": "L30",
       "id": "components_tagpicker_tagpicker",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagpicker()"
     },
     {
@@ -1359,7 +1638,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L1",
       "id": "client_src_components_uploadinvestbutton_tsx",
-      "community": 2,
+      "community": 0,
       "norm_label": "uploadinvestbutton.tsx"
     },
     {
@@ -1368,7 +1647,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L9",
       "id": "components_uploadinvestbutton_investment",
-      "community": 2,
+      "community": 0,
       "norm_label": "investment"
     },
     {
@@ -1377,7 +1656,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L16",
       "id": "components_uploadinvestbutton_uploadinvestbutton",
-      "community": 2,
+      "community": 0,
       "norm_label": "uploadinvestbutton()"
     },
     {
@@ -1386,7 +1665,7 @@
       "source_file": "client/src/components/UploadInvestButton.tsx",
       "source_location": "L252",
       "id": "components_uploadinvestbutton_style",
-      "community": 2,
+      "community": 0,
       "norm_label": "style"
     },
     {
@@ -1395,7 +1674,7 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L1",
       "id": "client_src_components_uploadbutton_tsx",
-      "community": 6,
+      "community": 0,
       "norm_label": "uploadbutton.tsx"
     },
     {
@@ -1404,7 +1683,7 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L10",
       "id": "components_uploadbutton_uploadbuttonprops",
-      "community": 6,
+      "community": 0,
       "norm_label": "uploadbuttonprops"
     },
     {
@@ -1413,16 +1692,16 @@
       "source_file": "client/src/components/UploadButton.tsx",
       "source_location": "L14",
       "id": "components_uploadbutton_uploadbutton",
-      "community": 6,
+      "community": 0,
       "norm_label": "uploadbutton()"
     },
     {
       "label": "style",
       "file_type": "code",
       "source_file": "client/src/components/UploadButton.tsx",
-      "source_location": "L163",
+      "source_location": "L172",
       "id": "components_uploadbutton_style",
-      "community": 6,
+      "community": 0,
       "norm_label": "style"
     },
     {
@@ -1431,7 +1710,7 @@
       "source_file": "client/src/components/ThemeModeToggle.tsx",
       "source_location": "L1",
       "id": "client_src_components_thememodetoggle_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "thememodetoggle.tsx"
     },
     {
@@ -1440,7 +1719,7 @@
       "source_file": "client/src/components/ThemeModeToggle.tsx",
       "source_location": "L7",
       "id": "components_thememodetoggle_thememodetoggle",
-      "community": 1,
+      "community": 3,
       "norm_label": "thememodetoggle()"
     },
     {
@@ -1449,7 +1728,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/FlexBetween.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_components_flexbetween_tsx",
-      "community": 14,
+      "community": 18,
       "norm_label": "flexbetween.tsx"
     },
     {
@@ -1458,7 +1737,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/FlexBetween.tsx",
       "source_location": "L4",
       "id": "components_flexbetween_flexbetween",
-      "community": 14,
+      "community": 18,
       "norm_label": "flexbetween"
     },
     {
@@ -1503,7 +1782,7 @@
       "source_file": "client/src/components/ArrowButton.tsx",
       "source_location": "L1",
       "id": "client_src_components_arrowbutton_tsx",
-      "community": 0,
+      "community": 1,
       "norm_label": "arrowbutton.tsx"
     },
     {
@@ -1512,7 +1791,7 @@
       "source_file": "client/src/components/ArrowButton.tsx",
       "source_location": "L4",
       "id": "components_arrowbutton_arrowbutton",
-      "community": 0,
+      "community": 1,
       "norm_label": "arrowbutton"
     },
     {
@@ -1521,7 +1800,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/MultiColorProgress.tsx",
       "source_location": "L1",
       "id": "users_jelle_documents_github_financeapp_1_client_src_components_multicolorprogress_tsx",
-      "community": 12,
+      "community": 15,
       "norm_label": "multicolorprogress.tsx"
     },
     {
@@ -1530,7 +1809,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/MultiColorProgress.tsx",
       "source_location": "L4",
       "id": "components_multicolorprogress_multicolorprogressprops",
-      "community": 12,
+      "community": 15,
       "norm_label": "multicolorprogressprops"
     },
     {
@@ -1539,7 +1818,7 @@
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/components/MultiColorProgress.tsx",
       "source_location": "L9",
       "id": "components_multicolorprogress_multicolorprogress",
-      "community": 12,
+      "community": 15,
       "norm_label": "multicolorprogress()"
     },
     {
@@ -1548,7 +1827,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L1",
       "id": "client_src_theme_colormodecontext_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "colormodecontext.tsx"
     },
     {
@@ -1557,7 +1836,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L4",
       "id": "theme_colormodecontext_thememode",
-      "community": 1,
+      "community": 3,
       "norm_label": "thememode"
     },
     {
@@ -1566,7 +1845,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L9",
       "id": "theme_colormodecontext_mode_order",
-      "community": 1,
+      "community": 3,
       "norm_label": "mode_order"
     },
     {
@@ -1575,7 +1854,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L11",
       "id": "theme_colormodecontext_colormodecontexttype",
-      "community": 1,
+      "community": 3,
       "norm_label": "colormodecontexttype"
     },
     {
@@ -1584,7 +1863,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L21",
       "id": "theme_colormodecontext_colormodecontext",
-      "community": 1,
+      "community": 3,
       "norm_label": "colormodecontext"
     },
     {
@@ -1593,7 +1872,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L23",
       "id": "theme_colormodecontext_readstoredmode",
-      "community": 1,
+      "community": 3,
       "norm_label": "readstoredmode()"
     },
     {
@@ -1602,7 +1881,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L33",
       "id": "theme_colormodecontext_getsystemmode",
-      "community": 1,
+      "community": 3,
       "norm_label": "getsystemmode()"
     },
     {
@@ -1611,7 +1890,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L38",
       "id": "theme_colormodecontext_colormodeprovider",
-      "community": 1,
+      "community": 3,
       "norm_label": "colormodeprovider()"
     },
     {
@@ -1620,7 +1899,7 @@
       "source_file": "client/src/theme/ColorModeContext.tsx",
       "source_location": "L74",
       "id": "theme_colormodecontext_usecolormode",
-      "community": 1,
+      "community": 3,
       "norm_label": "usecolormode()"
     },
     {
@@ -1629,7 +1908,7 @@
       "source_file": "CLAUDE.md",
       "source_location": "L1",
       "id": "claude_md",
-      "community": 15,
+      "community": 19,
       "norm_label": "claude.md"
     },
     {
@@ -1638,8 +1917,305 @@
       "source_file": "CLAUDE.md",
       "source_location": "L1",
       "id": "financeapp_claude_graphify",
-      "community": 15,
+      "community": 19,
       "norm_label": "graphify"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "database/README.md",
+      "source_location": "L1",
+      "id": "database_readme_md",
+      "community": 20,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Database",
+      "file_type": "document",
+      "source_file": "database/README.md",
+      "source_location": "L1",
+      "id": "database_readme_database",
+      "community": 20,
+      "norm_label": "database"
+    },
+    {
+      "label": "REVIEW.md",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L1",
+      "id": "docs_review_md",
+      "community": 5,
+      "norm_label": "review.md"
+    },
+    {
+      "label": "FinanceApp \u2014 doorlichting",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L1",
+      "id": "docs_review_financeapp_doorlichting",
+      "community": 5,
+      "norm_label": "financeapp \u2014 doorlichting"
+    },
+    {
+      "label": "Waar het staat",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L6",
+      "id": "docs_review_waar_het_staat",
+      "community": 5,
+      "norm_label": "waar het staat"
+    },
+    {
+      "label": "Blokkerend",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L22",
+      "id": "docs_review_blokkerend",
+      "community": 5,
+      "norm_label": "blokkerend"
+    },
+    {
+      "label": "1. Overboekingen tussen eigen rekeningen tellen dubbel mee",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L24",
+      "id": "docs_review_1_overboekingen_tussen_eigen_rekeningen_tellen_dubbel_mee",
+      "community": 5,
+      "norm_label": "1. overboekingen tussen eigen rekeningen tellen dubbel mee"
+    },
+    {
+      "label": "2. Dubbele import wordt niet tegengehouden",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L42",
+      "id": "docs_review_2_dubbele_import_wordt_niet_tegengehouden",
+      "community": 5,
+      "norm_label": "2. dubbele import wordt niet tegengehouden"
+    },
+    {
+      "label": "code:sql (ALTER TABLE public.transactions ADD COLUMN import_hash VARCH)",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L55",
+      "id": "docs_review_codeblock_1",
+      "community": 5,
+      "norm_label": "code:sql (alter table public.transactions add column import_hash varch)"
+    },
+    {
+      "label": "3. De twee schemabestanden zijn uit elkaar gelopen",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L67",
+      "id": "docs_review_3_de_twee_schemabestanden_zijn_uit_elkaar_gelopen",
+      "community": 5,
+      "norm_label": "3. de twee schemabestanden zijn uit elkaar gelopen"
+    },
+    {
+      "label": "4. De maandnavigatie muteert de Date in plaats van hem te vervangen",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L83",
+      "id": "docs_review_4_de_maandnavigatie_muteert_de_date_in_plaats_van_hem_te_vervangen",
+      "community": 5,
+      "norm_label": "4. de maandnavigatie muteert de date in plaats van hem te vervangen"
+    },
+    {
+      "label": "code:ts (const [anchor, setAnchor] = useState(() => new Date());)",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L96",
+      "id": "docs_review_codeblock_2",
+      "community": 5,
+      "norm_label": "code:ts (const [anchor, setanchor] = usestate(() => new date());)"
+    },
+    {
+      "label": "Belangrijk, niet blokkerend",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L107",
+      "id": "docs_review_belangrijk_niet_blokkerend",
+      "community": 10,
+      "norm_label": "belangrijk, niet blokkerend"
+    },
+    {
+      "label": "5. De RTK Query cache-tags kloppen niet",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L109",
+      "id": "docs_review_5_de_rtk_query_cache_tags_kloppen_niet",
+      "community": 10,
+      "norm_label": "5. de rtk query cache-tags kloppen niet"
+    },
+    {
+      "label": "code:ts (updateTransaction: build.mutation({)",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L124",
+      "id": "docs_review_codeblock_3",
+      "community": 10,
+      "norm_label": "code:ts (updatetransaction: build.mutation({)"
+    },
+    {
+      "label": "6. Foutafhandeling lekt database-interne informatie",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L132",
+      "id": "docs_review_6_foutafhandeling_lekt_database_interne_informatie",
+      "community": 10,
+      "norm_label": "6. foutafhandeling lekt database-interne informatie"
+    },
+    {
+      "label": "7. Geen paginering: `/transactions` haalt alles op",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L144",
+      "id": "docs_review_7_geen_paginering_transactions_haalt_alles_op",
+      "community": 10,
+      "norm_label": "7. geen paginering: `/transactions` haalt alles op"
+    },
+    {
+      "label": "8. Geen migratiepad voor het schema",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L155",
+      "id": "docs_review_8_geen_migratiepad_voor_het_schema",
+      "community": 10,
+      "norm_label": "8. geen migratiepad voor het schema"
+    },
+    {
+      "label": "9. Nul tests",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L167",
+      "id": "docs_review_9_nul_tests",
+      "community": 10,
+      "norm_label": "9. nul tests"
+    },
+    {
+      "label": "10. De rekeningtabel is met placeholder-IBAN's gevuld",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L177",
+      "id": "docs_review_10_de_rekeningtabel_is_met_placeholder_iban_s_gevuld",
+      "community": 10,
+      "norm_label": "10. de rekeningtabel is met placeholder-iban's gevuld"
+    },
+    {
+      "label": "11. De transactietabel bouwt kolommen op uit `Object.keys(row)`",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L190",
+      "id": "docs_review_11_de_transactietabel_bouwt_kolommen_op_uit_object_keys_row",
+      "community": 10,
+      "norm_label": "11. de transactietabel bouwt kolommen op uit `object.keys(row)`"
+    },
+    {
+      "label": "Functioneel",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L204",
+      "id": "docs_review_functioneel",
+      "community": 5,
+      "norm_label": "functioneel"
+    },
+    {
+      "label": "Hoe data binnenkomt, en of je er altijd bij kunt",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L206",
+      "id": "docs_review_hoe_data_binnenkomt_en_of_je_er_altijd_bij_kunt",
+      "community": 5,
+      "norm_label": "hoe data binnenkomt, en of je er altijd bij kunt"
+    },
+    {
+      "label": "Totaal-widgets en maand-widgets op \u00e9\u00e9n scherm",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L237",
+      "id": "docs_review_totaal_widgets_en_maand_widgets_op_n_scherm",
+      "community": 5,
+      "norm_label": "totaal-widgets en maand-widgets op een scherm"
+    },
+    {
+      "label": "Acties uit de widgetkolom naar een menu",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L263",
+      "id": "docs_review_acties_uit_de_widgetkolom_naar_een_menu",
+      "community": 5,
+      "norm_label": "acties uit de widgetkolom naar een menu"
+    },
+    {
+      "label": "Overboekingen tussen eigen rekeningen",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L282",
+      "id": "docs_review_overboekingen_tussen_eigen_rekeningen",
+      "community": 5,
+      "norm_label": "overboekingen tussen eigen rekeningen"
+    },
+    {
+      "label": "Opruimwerk",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L307",
+      "id": "docs_review_opruimwerk",
+      "community": 5,
+      "norm_label": "opruimwerk"
+    },
+    {
+      "label": "12. Twee formatCurrency-definities, zeven keer gekopieerd",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L309",
+      "id": "docs_review_12_twee_formatcurrency_definities_zeven_keer_gekopieerd",
+      "community": 5,
+      "norm_label": "12. twee formatcurrency-definities, zeven keer gekopieerd"
+    },
+    {
+      "label": "13. Het `Transaction`-type staat vier keer opnieuw gedeclareerd",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L317",
+      "id": "docs_review_13_het_transaction_type_staat_vier_keer_opnieuw_gedeclareerd",
+      "community": 5,
+      "norm_label": "13. het `transaction`-type staat vier keer opnieuw gedeclareerd"
+    },
+    {
+      "label": "14. De `Transactions`-klasse is een lege huls",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L325",
+      "id": "docs_review_14_de_transactions_klasse_is_een_lege_huls",
+      "community": 5,
+      "norm_label": "14. de `transactions`-klasse is een lege huls"
+    },
+    {
+      "label": "15. `getCategorySums` gebruikt vaste parameterindexen",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L332",
+      "id": "docs_review_15_getcategorysums_gebruikt_vaste_parameterindexen",
+      "community": 5,
+      "norm_label": "15. `getcategorysums` gebruikt vaste parameterindexen"
+    },
+    {
+      "label": "16. Ongebruikte parameters en dode routes",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L342",
+      "id": "docs_review_16_ongebruikte_parameters_en_dode_routes",
+      "community": 5,
+      "norm_label": "16. ongebruikte parameters en dode routes"
+    },
+    {
+      "label": "Voorgestelde volgorde",
+      "file_type": "document",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L352",
+      "id": "docs_review_voorgestelde_volgorde",
+      "community": 5,
+      "norm_label": "voorgestelde volgorde"
     },
     {
       "label": "README.md",
@@ -1647,7 +2223,7 @@
       "source_file": "client/README.md",
       "source_location": "L1",
       "id": "client_readme_md",
-      "community": 11,
+      "community": 14,
       "norm_label": "readme.md"
     },
     {
@@ -1656,7 +2232,7 @@
       "source_file": "client/README.md",
       "source_location": "L1",
       "id": "client_readme_react_typescript_vite",
-      "community": 11,
+      "community": 14,
       "norm_label": "react + typescript + vite"
     },
     {
@@ -1665,7 +2241,7 @@
       "source_file": "client/README.md",
       "source_location": "L10",
       "id": "client_readme_expanding_the_eslint_configuration",
-      "community": 11,
+      "community": 14,
       "norm_label": "expanding the eslint configuration"
     },
     {
@@ -1674,7 +2250,7 @@
       "source_file": "client/README.md",
       "source_location": "L16",
       "id": "client_readme_codeblock_1",
-      "community": 11,
+      "community": 14,
       "norm_label": "code:js (export default {)"
     },
     {
@@ -1682,7 +2258,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/managers/financeManager.ts",
       "source_location": "L1",
-      "community": 10,
+      "community": 11,
       "norm_label": "financemanager.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_managers_financemanager_ts"
     },
@@ -1691,7 +2267,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/models/bankTransactionModel.ts",
       "source_location": "L1",
-      "community": 4,
+      "community": 2,
       "norm_label": "banktransactionmodel.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_models_banktransactionmodel_ts"
     },
@@ -1700,7 +2276,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L1",
-      "community": 5,
+      "community": 2,
       "norm_label": "categorymodel.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_machinelearningmodels_categorymodel_ts"
     },
@@ -1709,7 +2285,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/server/src/controllers/financeController.ts",
       "source_location": "L1",
-      "community": 4,
+      "community": 2,
       "norm_label": "financecontroller.ts",
       "id": "users_jelle_documents_github_financeapp_1_server_src_controllers_financecontroller_ts"
     },
@@ -1718,7 +2294,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/App.tsx",
       "source_location": "L1",
-      "community": 1,
+      "community": 3,
       "norm_label": "app.tsx",
       "id": "users_jelle_documents_github_financeapp_1_client_src_app_tsx"
     },
@@ -1727,7 +2303,7 @@
       "file_type": "code",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/api.ts",
       "source_location": "L1",
-      "community": 2,
+      "community": 0,
       "norm_label": "api.ts",
       "id": "users_jelle_documents_github_financeapp_1_client_src_api_ts"
     }
@@ -1745,6 +2321,50 @@
       "target": "server_src_controllers_financecontroller_ts"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "server_src_index_ts",
+      "target": "server_src_context_migrations_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "server_src_index_ts",
+      "target": "context_migrations_runmigrations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "server_src_index_ts",
+      "target": "server_src_middleware_errorhandler_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "server_src_index_ts",
+      "target": "middleware_errorhandler_errorhandler",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "server/src/index.ts",
@@ -1753,6 +2373,37 @@
       "confidence_score": 1.0,
       "source": "server_src_index_ts",
       "target": "src_index_app"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/index.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "server_src_index_ts",
+      "target": "src_index_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/index.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "src_index_start",
+      "target": "context_migrations_runmigrations"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/middleware/errorHandler.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "server_src_middleware_errorhandler_ts",
+      "target": "middleware_errorhandler_errorhandler",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -1794,6 +2445,122 @@
       "confidence_score": 1.0,
       "source": "context_dbcontext_dbcontext",
       "target": "context_dbcontext_dbcontext_connect"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "server_src_context_migrations_ts",
+      "target": "context_migrations_migrations_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "server_src_context_migrations_ts",
+      "target": "context_migrations_ensuremigrationstable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "server_src_context_migrations_ts",
+      "target": "context_migrations_readmigrationfiles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "server_src_context_migrations_ts",
+      "target": "context_migrations_runmigrations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "context_migrations_runmigrations",
+      "target": "context_migrations_ensuremigrationstable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/context/migrations.ts",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "context_migrations_runmigrations",
+      "target": "context_migrations_readmigrationfiles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "server_src_managers_financemanager_ts",
+      "target": "server_src_utils_importhash_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "server_src_managers_financemanager_ts",
+      "target": "utils_importhash_computeimporthash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "server_src_managers_financemanager_ts",
+      "target": "utils_importhash_identitykey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "server_src_managers_financemanager_ts",
+      "target": "utils_importhash_hashableentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "server_src_managers_financemanager_ts",
+      "target": "managers_financemanager_importresult",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -1941,6 +2708,56 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L480",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_gettransfercandidates",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L557",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_confirmtransfer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L603",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_rejecttransfer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L619",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_unlinktransfer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L652",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager",
+      "target": "managers_financemanager_financemanager_gettransfers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L376",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -2021,12 +2838,96 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager_addtransactions",
+      "target": "utils_importhash_identitykey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/managers/financeManager.ts",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "managers_financemanager_financemanager_addtransactions",
+      "target": "utils_importhash_computeimporthash"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "source_file": "server/src/managers/financeManager.ts",
       "source_location": "L501",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "managers_financemanager_financemanager_settransactiontags",
       "target": "managers_financemanager_financemanager_gettagsfortransaction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "server_src_utils_importhash_ts",
+      "target": "utils_importhash_hashableentry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "server_src_utils_importhash_ts",
+      "target": "utils_importhash_normalise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "server_src_utils_importhash_ts",
+      "target": "utils_importhash_identitykey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "server_src_utils_importhash_ts",
+      "target": "utils_importhash_computeimporthash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "utils_importhash_identitykey",
+      "target": "utils_importhash_normalise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/utils/importHash.ts",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "utils_importhash_computeimporthash",
+      "target": "utils_importhash_identitykey",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -2075,9 +2976,9 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_models_banktransactionmodel_ts",
-      "target": "models_banktransactionmodel_asncategorymap",
-      "confidence_score": 1.0
+      "target": "models_banktransactionmodel_asncategorymap"
     },
     {
       "relation": "contains",
@@ -2085,9 +2986,9 @@
       "source_file": "server/src/models/bankTransactionModel.ts",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_models_banktransactionmodel_ts",
-      "target": "models_banktransactionmodel_bankcategorycolumns",
-      "confidence_score": 1.0
+      "target": "models_banktransactionmodel_bankcategorycolumns"
     },
     {
       "relation": "imports_from",
@@ -2139,9 +3040,9 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_controllers_financecontroller_ts",
-      "target": "models_banktransactionmodel_asncategorymap",
-      "confidence_score": 1.0
+      "target": "models_banktransactionmodel_asncategorymap"
     },
     {
       "relation": "imports",
@@ -2150,9 +3051,9 @@
       "source_file": "server/src/controllers/financeController.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_controllers_financecontroller_ts",
-      "target": "models_banktransactionmodel_bankcategorycolumns",
-      "confidence_score": 1.0
+      "target": "models_banktransactionmodel_bankcategorycolumns"
     },
     {
       "relation": "imports_from",
@@ -2161,9 +3062,9 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_categorymodel_ts",
-      "target": "server_src_machinelearningmodels_dutchmerchantrules_ts",
-      "confidence_score": 1.0
+      "target": "server_src_machinelearningmodels_dutchmerchantrules_ts"
     },
     {
       "relation": "imports",
@@ -2172,9 +3073,9 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_categorymodel_ts",
-      "target": "machinelearningmodels_dutchmerchantrules_matchmerchantrule",
-      "confidence_score": 1.0
+      "target": "machinelearningmodels_dutchmerchantrules_matchmerchantrule"
     },
     {
       "relation": "contains",
@@ -2182,9 +3083,9 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_categorymodel_ts",
-      "target": "machinelearningmodels_categorymodel_dutch_stop_words",
-      "confidence_score": 1.0
+      "target": "machinelearningmodels_categorymodel_dutch_stop_words"
     },
     {
       "relation": "contains",
@@ -2192,9 +3093,9 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_categorymodel_ts",
-      "target": "machinelearningmodels_categorymodel_isnoisetoken",
-      "confidence_score": 1.0
+      "target": "machinelearningmodels_categorymodel_isnoisetoken"
     },
     {
       "relation": "contains",
@@ -2202,9 +3103,9 @@
       "source_file": "server/src/machineLearningModels/categoryModel.ts",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_categorymodel_ts",
-      "target": "machinelearningmodels_categorymodel_extractmerchantsegment",
-      "confidence_score": 1.0
+      "target": "machinelearningmodels_categorymodel_extractmerchantsegment"
     },
     {
       "relation": "contains",
@@ -2392,9 +3293,9 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_dutchmerchantrules_ts",
-      "target": "machinelearningmodels_dutchmerchantrules_merchantrule",
-      "confidence_score": 1.0
+      "target": "machinelearningmodels_dutchmerchantrules_merchantrule"
     },
     {
       "relation": "contains",
@@ -2402,9 +3303,9 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_dutchmerchantrules_ts",
-      "target": "machinelearningmodels_dutchmerchantrules_dutchmerchantrules",
-      "confidence_score": 1.0
+      "target": "machinelearningmodels_dutchmerchantrules_dutchmerchantrules"
     },
     {
       "relation": "contains",
@@ -2412,8 +3313,18 @@
       "source_file": "server/src/machineLearningModels/dutchMerchantRules.ts",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_src_machinelearningmodels_dutchmerchantrules_ts",
-      "target": "machinelearningmodels_dutchmerchantrules_matchmerchantrule",
+      "target": "machinelearningmodels_dutchmerchantrules_matchmerchantrule"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server/src/scripts/seed.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "server_src_scripts_seed_ts",
+      "target": "scripts_seed_seed",
       "confidence_score": 1.0
     },
     {
@@ -2839,6 +3750,36 @@
       "source_file": "client/src/api.ts",
       "source_location": "L31",
       "weight": 1.0,
+      "source": "client_src_api_ts",
+      "target": "src_api_importsummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "client_src_api_ts",
+      "target": "src_api_transfercandidate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "client_src_api_ts",
+      "target": "src_api_transfer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/api.ts",
+      "source_location": "L31",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "client_src_api_ts",
       "target": "src_api_api"
@@ -2853,6 +3794,17 @@
       "confidence_score": 1.0,
       "source": "client_src_scenes_reviewtransactions_index_tsx",
       "target": "client_src_api_ts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "target": "client_src_api_ts",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -2913,33 +3865,11 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "client_src_scenes_dashboard_addtransactions_tsx",
-      "target": "client_src_api_ts"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
       "source_file": "client/src/scenes/dashboard/AccountOverview.tsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "client_src_scenes_dashboard_accountoverview_tsx",
-      "target": "client_src_api_ts"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "client/src/scenes/subHeader/index.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "client_src_scenes_subheader_index_tsx",
       "target": "client_src_api_ts"
     },
     {
@@ -2965,6 +3895,28 @@
       "target": "client_src_api_ts"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dashboard/AddTransactions.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_dashboard_addtransactions_tsx",
+      "target": "client_src_api_ts"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/subHeader/index.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "client_src_scenes_subheader_index_tsx",
+      "target": "client_src_api_ts"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/Users/jelle/Documents/GitHub/FinanceApp-1/client/src/api.ts",
@@ -2984,6 +3936,17 @@
       "confidence_score": 1.0,
       "source": "client_src_components_tagpicker_tsx",
       "target": "src_api_tag"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "target": "src_api_transfercandidate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3160,6 +4123,17 @@
       "target": "client_src_components_tagpicker_tsx"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/index.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_index_tsx",
+      "target": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "client/src/scenes/reviewTransactions/index.tsx",
@@ -3178,6 +4152,46 @@
       "confidence_score": 1.0,
       "source": "client_src_scenes_reviewtransactions_index_tsx",
       "target": "reviewtransactions_index_reviewtransactions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "target": "reviewtransactions_transfersuggestions_formatcurrency",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "target": "reviewtransactions_transfersuggestions_formatdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "target": "reviewtransactions_transfersuggestions_props",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/reviewTransactions/TransferSuggestions.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "client_src_scenes_reviewtransactions_transfersuggestions_tsx",
+      "target": "reviewtransactions_transfersuggestions_transfersuggestions",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3263,6 +4277,26 @@
       "confidence_score": 1.0,
       "source": "client_src_scenes_daterange_daterangecontext_tsx",
       "target": "daterange_daterangecontext_daterangecontext"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_tomonthkey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "client/src/scenes/dateRange/DateRangeContext.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "client_src_scenes_daterange_daterangecontext_tsx",
+      "target": "daterange_daterangecontext_parsemonthkey",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4388,6 +5422,316 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "database/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "database_readme_md",
+      "target": "database_readme_database",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "docs_review_md",
+      "target": "docs_review_financeapp_doorlichting",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "docs_review_financeapp_doorlichting",
+      "target": "docs_review_waar_het_staat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "docs_review_financeapp_doorlichting",
+      "target": "docs_review_blokkerend",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "docs_review_financeapp_doorlichting",
+      "target": "docs_review_belangrijk_niet_blokkerend",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L204",
+      "weight": 1.0,
+      "source": "docs_review_financeapp_doorlichting",
+      "target": "docs_review_functioneel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L307",
+      "weight": 1.0,
+      "source": "docs_review_financeapp_doorlichting",
+      "target": "docs_review_opruimwerk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L352",
+      "weight": 1.0,
+      "source": "docs_review_financeapp_doorlichting",
+      "target": "docs_review_voorgestelde_volgorde",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "docs_review_blokkerend",
+      "target": "docs_review_1_overboekingen_tussen_eigen_rekeningen_tellen_dubbel_mee",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "docs_review_blokkerend",
+      "target": "docs_review_2_dubbele_import_wordt_niet_tegengehouden",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "docs_review_blokkerend",
+      "target": "docs_review_3_de_twee_schemabestanden_zijn_uit_elkaar_gelopen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "docs_review_blokkerend",
+      "target": "docs_review_4_de_maandnavigatie_muteert_de_date_in_plaats_van_hem_te_vervangen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "docs_review_2_dubbele_import_wordt_niet_tegengehouden",
+      "target": "docs_review_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "docs_review_4_de_maandnavigatie_muteert_de_date_in_plaats_van_hem_te_vervangen",
+      "target": "docs_review_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_5_de_rtk_query_cache_tags_kloppen_niet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L132",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_6_foutafhandeling_lekt_database_interne_informatie",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L144",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_7_geen_paginering_transactions_haalt_alles_op",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_8_geen_migratiepad_voor_het_schema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L167",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_9_nul_tests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L177",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_10_de_rekeningtabel_is_met_placeholder_iban_s_gevuld",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L190",
+      "weight": 1.0,
+      "source": "docs_review_belangrijk_niet_blokkerend",
+      "target": "docs_review_11_de_transactietabel_bouwt_kolommen_op_uit_object_keys_row",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "docs_review_5_de_rtk_query_cache_tags_kloppen_niet",
+      "target": "docs_review_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L206",
+      "weight": 1.0,
+      "source": "docs_review_functioneel",
+      "target": "docs_review_hoe_data_binnenkomt_en_of_je_er_altijd_bij_kunt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L237",
+      "weight": 1.0,
+      "source": "docs_review_functioneel",
+      "target": "docs_review_totaal_widgets_en_maand_widgets_op_n_scherm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L263",
+      "weight": 1.0,
+      "source": "docs_review_functioneel",
+      "target": "docs_review_acties_uit_de_widgetkolom_naar_een_menu",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L282",
+      "weight": 1.0,
+      "source": "docs_review_functioneel",
+      "target": "docs_review_overboekingen_tussen_eigen_rekeningen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L309",
+      "weight": 1.0,
+      "source": "docs_review_opruimwerk",
+      "target": "docs_review_12_twee_formatcurrency_definities_zeven_keer_gekopieerd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L317",
+      "weight": 1.0,
+      "source": "docs_review_opruimwerk",
+      "target": "docs_review_13_het_transaction_type_staat_vier_keer_opnieuw_gedeclareerd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L325",
+      "weight": 1.0,
+      "source": "docs_review_opruimwerk",
+      "target": "docs_review_14_de_transactions_klasse_is_een_lege_huls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L332",
+      "weight": 1.0,
+      "source": "docs_review_opruimwerk",
+      "target": "docs_review_15_getcategorysums_gebruikt_vaste_parameterindexen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/REVIEW.md",
+      "source_location": "L342",
+      "weight": 1.0,
+      "source": "docs_review_opruimwerk",
+      "target": "docs_review_16_ongebruikte_parameters_en_dode_routes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "client/README.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -4461,5 +5805,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9181e0283b7a07383d8f0cfeb9635ffef078e36d"
+  "built_at_commit": "97cf4da97cbff4167e304954cc6fcd5f8153c904"
 }

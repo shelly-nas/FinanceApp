@@ -12,6 +12,7 @@ import ActionButtons from '../subHeader';
 import DashboardBox from '@/components/DashboardBox';
 import DeletePopup from '@/components/DeletePopup';
 import TagPicker from '@/components/TagPicker';
+import TransferSuggestions from '@/scenes/reviewTransactions/TransferSuggestions';
 
 interface Transaction {
   id: number;
@@ -30,6 +31,8 @@ const ReviewTransactions: React.FC = () => {
   const { palette, typography } = useTheme();
   const location = useLocation();
   const transactionIds = location.state?.transactionIds || null;
+  // Set by UploadButton after an import, so the counts can be reported here.
+  const importSummary: { imported?: number; skipped?: number } = location.state ?? {};
 
   const { data: uploadedResults, error: uploadError, isLoading: isLoadingUpload } = useGetTransactionsQuery({ ids: transactionIds }, {
     skip: !transactionIds
@@ -162,11 +165,15 @@ const ReviewTransactions: React.FC = () => {
 
     try {
       await deleteTransaction(deleteId).unwrap();
+      // The row is gone from the server; drop it here too rather than reloading
+      // the page, which would discard the sort order and scroll position.
+      setData((prev) => prev.filter((r) => r.id !== deleteId));
       setOpenDialog(false);
       setDeleteId(null);
-      window.location.reload(); // Reload the page
+      setToast({ message: 'Transaction deleted', severity: 'success' });
     } catch (error) {
       console.error('Error deleting transaction:', error);
+      setToast({ message: 'Could not delete the transaction, please try again.', severity: 'error' });
     }
   };
 
@@ -195,6 +202,18 @@ const ReviewTransactions: React.FC = () => {
   return (
     <div>
       <ActionButtons />
+      {typeof importSummary.imported === 'number' && (
+        <Alert
+          severity={importSummary.skipped ? 'info' : 'success'}
+          sx={{ mb: 1.5 }}
+        >
+          {importSummary.imported} transactions imported
+          {importSummary.skipped
+            ? `, ${importSummary.skipped} skipped because they were already stored.`
+            : '.'}
+        </Alert>
+      )}
+      <TransferSuggestions transactionIds={transactionIds} />
       {reviewTransactions.length > 0 && (
         <Typography variant="body2" sx={{ px: 1, py: 0.5, opacity: 0.7 }}>
           Click any cell to edit. Enter saves, Escape cancels, clicking away saves.

@@ -4,17 +4,16 @@ import { useTheme } from '@mui/material/styles';
 import DashboardBox from '@/components/DashboardBox';
 import UploadButton from '@/components/UploadButton';
 import { useNavigate } from 'react-router-dom';
-import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 
 const AddTransactionsButton: React.FC = () => {
   const { palette } = useTheme();
   const spacing: number = 1.5;
   const navigate = useNavigate();
-  const { refetch } = useGetEmptyCategoryTransactionsQuery();
 
+  // The upload mutation invalidates the review list itself; UploadButton does
+  // the navigating, with the imported ids in tow.
   const handleUploadSuccess = () => {
-    refetch();
-    navigate('/review-transactions')
+    navigate('/review-transactions');
   };
 
   return (

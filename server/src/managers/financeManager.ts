@@ -1,5 +1,6 @@
 import dbContext from '@/context/dbContext';
 import Transactions from '@/models/financeModel';
+import { computeImportHash, identityKey, HashableEntry } from '@/utils/importHash';
 
 const category_table = "categories"
 const transaction_table = "transactions";
@@ -7,27 +8,101 @@ const account_table = "accounts";
 const investment_table = "investments";
 const tag_table = "tags";
 const transaction_tag_table = "transaction_tags";
+const transfer_table = "transfers";
+
+export interface ImportResult {
+  createdIds: number[];
+  imported: number;
+  skipped: number;
+}
 
 class FinanceManager {
-  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
+  /**
+   * Import a batch of transactions, skipping rows already stored.
+   *
+   * Bank exports overlap: asking for "the last three months" twice delivers the
+   * same rows again. Each row therefore carries an import_hash over its
+   * identifying fields, and a unique index turns a repeat into a no-op instead
+   * of a second copy that silently doubles every total.
+   */
+  public async addTransactions(entries: {
+    date_str: string,
+    name_description: string,
+    account: string,
+    counterparty: string | null,
+    category: string | null,
+    debit_credit: string | undefined,
+    amount: number,
+    notifications: string | null,
+  }[]): Promise<ImportResult> {
     const client = await dbContext.connect();
     const createdIds: number[] = [];
+    let skipped = 0;
 
     try {
       await client.query('BEGIN');
-  
+
+      // Two identical payments on one day are both genuine, so a row's hash
+      // includes how many identical rows precede it. The count starts at what
+      // is already stored, which makes the numbering stable across re-imports
+      // of the same file.
+      const occurrences = new Map<string, number>();
+
       for (const entry of entries) {
         entry.category = entry.category === 'null' ? null : entry.category;
-        const result = await client.query(
-          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, category, debit_credit, amount, notifications)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.category, entry.debit_credit, entry.amount, entry.notifications]
+
+        const hashable: HashableEntry = {
+          date_str: entry.date_str,
+          account: entry.account,
+          amount: entry.amount,
+          debit_credit: entry.debit_credit ?? null,
+          name_description: entry.name_description,
+          notifications: entry.notifications,
+        };
+        const key = identityKey(hashable);
+
+        const occurrence = occurrences.get(key) ?? 0;
+        occurrences.set(key, occurrence + 1);
+
+        // Rows stored before import_hash existed carry none, so the unique
+        // index cannot catch them. Match those on their identifying fields
+        // instead, counting how many the file has already claimed, so a genuine
+        // pair of identical payments still imports both halves.
+        const legacy = await client.query(
+          `SELECT COUNT(*)::int AS n FROM public.${transaction_table}
+           WHERE import_hash IS NULL
+             AND date_str = $1 AND account IS NOT DISTINCT FROM $2
+             AND amount = $3 AND debit_credit IS NOT DISTINCT FROM $4
+             AND name_description IS NOT DISTINCT FROM $5`,
+          [entry.date_str, entry.account, entry.amount, entry.debit_credit ?? null, entry.name_description],
         );
 
-        const insertedId = result.rows[0].id;
-        createdIds.push(insertedId);
+        if (legacy.rows[0].n > occurrence) {
+          skipped++;
+          continue;
+        }
+
+        const importHash = computeImportHash(hashable, occurrence);
+
+        const result = await client.query(
+          // The unique index is partial (rows predating the column have a NULL
+          // hash and must not collide), and Postgres only accepts a partial
+          // index as a conflict target when the predicate is restated here.
+          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, category, debit_credit, amount, notifications, import_hash)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT (import_hash) WHERE import_hash IS NOT NULL DO NOTHING
+          RETURNING id`,
+          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.category, entry.debit_credit, entry.amount, entry.notifications, importHash]
+        );
+
+        if (result.rows.length === 0) {
+          skipped++;
+          continue;
+        }
+
+        createdIds.push(result.rows[0].id);
       }
-  
+
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
@@ -35,10 +110,10 @@ class FinanceManager {
     } finally {
       client.release();
     }
-  
-    return createdIds;
+
+    return { createdIds, imported: createdIds.length, skipped };
   }
-  
+
   public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM public.${transaction_table} WHERE 1=1`;
@@ -92,16 +167,23 @@ class FinanceManager {
         public.${category_table} c ON ja.category = c.category_name
       WHERE 
         1=1
+        -- Confirmed transfers between the user's own accounts are money moved,
+        -- not money spent or earned, so they must not reach a breakdown.
+        AND ja.is_internal IS NOT TRUE
     `;
 
+    let paramIndex = 1;
+
     if (startDate) {
-      query += " AND ja.date_str >= $1";
+      query += ` AND ja.date_str >= $${paramIndex}`;
       params.push(startDate);
+      paramIndex++;
     }
 
     if (endDate) {
-      query += " AND ja.date_str <= $2";
+      query += ` AND ja.date_str <= $${paramIndex}`;
       params.push(endDate);
+      paramIndex++;
     }
 
     query += `
@@ -148,16 +230,24 @@ class FinanceManager {
           public.categories c ON ja.category = c.category_name
         WHERE
           c.category_type IN ('Vast', 'Variabel')
+          -- See getCategorySums: an internal transfer is neither income nor
+          -- expense, and counting both its sides inflates each by the amount
+          -- moved and distorts the savings rate.
+          AND ja.is_internal IS NOT TRUE
     `;
 
+    let paramIndex = 1;
+
     if (startDate) {
-      query += " AND ja.date_str >= $1";
+      query += ` AND ja.date_str >= $${paramIndex}`;
       params.push(startDate);
+      paramIndex++;
     }
 
     if (endDate) {
-      query += " AND ja.date_str <= $2";
+      query += ` AND ja.date_str <= $${paramIndex}`;
       params.push(endDate);
+      paramIndex++;
     }
 
     query += `
@@ -364,6 +454,228 @@ class FinanceManager {
     }
 }
 
+
+  // ---------------------------------------------------------------------------
+  // Internal transfers
+  //
+  // Moving money between the user's own accounts produces two rows: a Debit on
+  // one and a Credit on the other. Counted naively both land in the monthly
+  // totals, inflating income and expenses by the same amount and skewing the
+  // savings rate - yet nothing was earned or spent.
+  //
+  // Matching is a suggestion, never a silent rewrite. Two unrelated payments of
+  // the same amount on the same day are indistinguishable from a transfer to
+  // any matcher, so the pairs surface on the review screen and only take effect
+  // once confirmed.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Candidate transfer pairs: a Debit and a Credit of the same amount, close in
+   * time, on two different accounts, neither already part of a confirmed pair.
+   *
+   * Restricted to the supplied transaction ids when given, so a fresh import
+   * proposes pairs involving the rows just added rather than re-proposing the
+   * user's whole history.
+   */
+  public async getTransferCandidates(ids?: number[], windowDays = 3): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [windowDays];
+    let scope = '';
+
+    if (ids && ids.length > 0) {
+      // Either side may be the new row: the counterpart often came in with an
+      // earlier import of the other bank's export.
+      const placeholders = ids.map((_, i) => `$${i + 2}`).join(', ');
+      scope = `AND (d.id IN (${placeholders}) OR c.id IN (${placeholders}))`;
+      params.push(...ids);
+    }
+
+    // match_basis records how sure we are. 'iban' means both accounts are known
+    // in the accounts table and reference each other - that is a transfer by
+    // definition. 'amount' means only the figures line up, which is a guess.
+    const query = `
+      SELECT
+        d.id                AS from_transaction_id,
+        d.date_str          AS from_date,
+        d.account           AS from_account,
+        da.account_name     AS from_account_name,
+        d.name_description  AS from_description,
+        c.id                AS to_transaction_id,
+        c.date_str          AS to_date,
+        c.account           AS to_account,
+        ca.account_name     AS to_account_name,
+        c.name_description  AS to_description,
+        d.amount::numeric   AS amount,
+        -- 'iban' is reserved for pairs whose counterparty fields actually point
+        -- at each other's account. Both rows merely sitting on accounts the user
+        -- owns is not enough: two unrelated payments of the same amount on the
+        -- same day would qualify, and be presented as certain when they are not.
+        CASE
+          WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 'iban'
+          ELSE 'amount'
+        END AS match_basis
+      FROM public.${transaction_table} d
+      JOIN public.${transaction_table} c
+        ON c.amount = d.amount
+       AND c.debit_credit = 'Credit'
+       AND c.account IS DISTINCT FROM d.account
+       AND ABS(c.date_str - d.date_str) <= $1
+      LEFT JOIN public.${account_table} da ON da.details = d.account
+      LEFT JOIN public.${account_table} ca ON ca.details = c.account
+      WHERE d.debit_credit = 'Debit'
+        AND d.is_internal IS DISTINCT FROM FALSE
+        AND c.is_internal IS DISTINCT FROM FALSE
+        AND NOT EXISTS (
+          SELECT 1 FROM public.${transfer_table} t
+          WHERE t.from_transaction_id IN (d.id, c.id)
+             OR t.to_transaction_id IN (d.id, c.id)
+        )
+        ${scope}
+      ORDER BY
+        CASE WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 0 ELSE 1 END,
+        ABS(c.date_str - d.date_str),
+        d.date_str DESC
+      LIMIT 200;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Confirm one pair as an internal transfer.
+   *
+   * Both rows are marked internal so the summaries drop them, and both are put
+   * in the transfer category - which is also what takes them off the review
+   * screen's uncategorised list, so confirming a transfer resolves the same row
+   * the user was there to categorise.
+   */
+  public async confirmTransfer(
+    fromId: number,
+    toId: number,
+    matchBasis: string,
+    category = 'Overboekingen',
+  ): Promise<any> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const inserted = await client.query(
+        `INSERT INTO public.${transfer_table} (from_transaction_id, to_transaction_id, match_basis)
+         VALUES ($1, $2, $3)
+         ON CONFLICT DO NOTHING
+         RETURNING *`,
+        [fromId, toId, matchBasis],
+      );
+
+      if (inserted.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      await client.query(
+        `UPDATE public.${transaction_table}
+         SET is_internal = TRUE,
+             category = COALESCE(category, $2)
+         WHERE id = ANY($1::int[])`,
+        [[fromId, toId], category],
+      );
+
+      await client.query('COMMIT');
+      return inserted.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Reject a suggested pair. Marking both sides FALSE rather than leaving them
+   * NULL is what stops the same pair being proposed again after every import.
+   */
+  public async rejectTransfer(fromId: number, toId: number): Promise<void> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query(
+        `UPDATE public.${transaction_table}
+         SET is_internal = FALSE
+         WHERE id = ANY($1::int[]) AND is_internal IS NULL`,
+        [[fromId, toId]],
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Undo a confirmation: the pair is removed and both rows count again. */
+  public async unlinkTransfer(transferId: string): Promise<any> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const removed = await client.query(
+        `DELETE FROM public.${transfer_table} WHERE id = $1 RETURNING *`,
+        [transferId],
+      );
+
+      if (removed.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      const { from_transaction_id, to_transaction_id } = removed.rows[0];
+      await client.query(
+        `UPDATE public.${transaction_table} SET is_internal = NULL WHERE id = ANY($1::int[])`,
+        [[from_transaction_id, to_transaction_id]],
+      );
+
+      await client.query('COMMIT');
+      return removed.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Confirmed transfers, most recent first. */
+  public async getTransfers(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.id,
+        t.match_basis,
+        t.confirmed_at,
+        d.date_str AS from_date, d.account AS from_account, da.account_name AS from_account_name,
+        c.date_str AS to_date,   c.account AS to_account,   ca.account_name AS to_account_name,
+        d.amount::numeric AS amount
+      FROM public.${transfer_table} t
+      JOIN public.${transaction_table} d ON d.id = t.from_transaction_id
+      JOIN public.${transaction_table} c ON c.id = t.to_transaction_id
+      LEFT JOIN public.${account_table} da ON da.details = d.account
+      LEFT JOIN public.${account_table} ca ON ca.details = c.account
+      ORDER BY t.confirmed_at DESC
+      LIMIT 500;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Tags

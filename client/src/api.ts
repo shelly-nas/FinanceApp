@@ -28,10 +28,63 @@ export interface TagSummary extends Tag {
   by_month: { month: string; total_amount: string }[];
 }
 
+export interface ImportSummary {
+  message: string;
+  createdIds: number[];
+  imported: number;
+  skipped: number;
+}
+
+/** A proposed pair of rows that together look like one internal transfer. */
+export interface TransferCandidate {
+  from_transaction_id: number;
+  from_date: string;
+  from_account: string | null;
+  from_account_name: string | null;
+  from_description: string | null;
+  to_transaction_id: number;
+  to_date: string;
+  to_account: string | null;
+  to_account_name: string | null;
+  to_description: string | null;
+  amount: string;
+  /** 'iban' when both accounts are known and certain, 'amount' when inferred. */
+  match_basis: 'iban' | 'amount';
+}
+
+export interface Transfer {
+  id: number;
+  match_basis: 'iban' | 'amount';
+  confirmed_at: string;
+  from_date: string;
+  from_account: string | null;
+  from_account_name: string | null;
+  to_date: string;
+  to_account: string | null;
+  to_account_name: string | null;
+  amount: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments", "deleteTransactions", "tags", "tagSummary", "transactionTags"],
+  // Only tags a query actually provides belong here. A mutation invalidating a
+  // tag nothing provides refetches nothing, which is what left the app relying
+  // on full page reloads to show a change.
+  tagTypes: [
+    "transactions",
+    "categorySums",
+    "incomeExpensesSum",
+    "emptyCategoryTransactions",
+    "accountOverview",
+    "categoryList",
+    "investmentAccounts",
+    "tags",
+    "tagSummary",
+    "transactionTags",
+    "transferCandidates",
+    "transfers",
+  ],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -62,14 +115,17 @@ export const api = createApi({
       }),
       providesTags: ["incomeExpensesSum"],
     }),
-    uploadTransactions: build.mutation<any, { formData: FormData, bankType: string }>({
+    uploadTransactions: build.mutation<ImportSummary, { formData: FormData, bankType: string }>({
       query: ({ formData, bankType }) => ({
         url: `api/upload-transactions`,
         method: 'POST',
         body: formData,
         params: {bankType}
       }),
-      invalidatesTags: ["uploadTransactions"],
+      // An import changes every derived figure at once.
+      invalidatesTags: ["transactions", "categorySums", "incomeExpensesSum",
+                        "emptyCategoryTransactions", "accountOverview",
+                        "transferCandidates"],
     }),
     getEmptyCategoryTransactions: build.query<any, void>({
       query: () => ({
@@ -83,7 +139,11 @@ export const api = createApi({
         method: 'PATCH',
         body: patch,
       }),
-      invalidatesTags: ["transaction"],
+      // Editing a category moves money between breakdowns, so the sums and the
+      // review list are stale too - not just the transaction itself.
+      invalidatesTags: ["transactions", "categorySums", "incomeExpensesSum",
+                        "emptyCategoryTransactions", "accountOverview",
+                        "transferCandidates"],
     }),
     getAccountOverview: build.query<any, void>({
       query: () => ({
@@ -112,14 +172,16 @@ export const api = createApi({
         },
         body: investments,
       }),
-      invalidatesTags: ['uploadInvestments'],
+      invalidatesTags: ["accountOverview"],
     }),
     deleteTransaction: build.mutation<void, number>({
       query: (id) => ({
         url: `api/remove-transaction/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ["deleteTransactions"],
+      invalidatesTags: ["transactions", "categorySums", "incomeExpensesSum",
+                        "emptyCategoryTransactions", "accountOverview",
+                        "transferCandidates"],
     }),
     getTags: build.query<Tag[], { includeClosed?: boolean } | void>({
       query: (args) => ({
@@ -163,6 +225,45 @@ export const api = createApi({
       }),
       providesTags: ["transactionTags"],
     }),
+    getTransferCandidates: build.query<TransferCandidate[], { ids?: string } | void>({
+      query: (args) => ({
+        url: `api/transfer-candidates`,
+        params: args && args.ids ? { ids: args.ids } : undefined,
+      }),
+      providesTags: ["transferCandidates"],
+    }),
+    getTransfers: build.query<Transfer[], void>({
+      query: () => ({ url: `api/transfers` }),
+      providesTags: ["transfers"],
+    }),
+    confirmTransfer: build.mutation<Transfer, { fromTransactionId: number; toTransactionId: number; matchBasis: 'iban' | 'amount' }>({
+      query: (body) => ({
+        url: `api/transfers`,
+        method: 'POST',
+        body,
+      }),
+      // Confirming removes both rows from the summaries and categorises them,
+      // so every derived figure and the review list change with it.
+      invalidatesTags: ["transferCandidates", "transfers", "transactions",
+                        "categorySums", "incomeExpensesSum",
+                        "emptyCategoryTransactions"],
+    }),
+    rejectTransfer: build.mutation<void, { fromTransactionId: number; toTransactionId: number }>({
+      query: (body) => ({
+        url: `api/transfers/reject`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["transferCandidates"],
+    }),
+    unlinkTransfer: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/transfers/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["transfers", "transferCandidates", "transactions",
+                        "categorySums", "incomeExpensesSum"],
+    }),
     setTransactionTags: build.mutation<Tag[], { id: number; tagIds: number[] }>({
       query: ({ id, tagIds }) => ({
         url: `api/transactions/${id}/tags`,
@@ -193,4 +294,9 @@ export const {
   useGetTagSummaryQuery,
   useGetTransactionTagsQuery,
   useSetTransactionTagsMutation,
+  useGetTransferCandidatesQuery,
+  useGetTransfersQuery,
+  useConfirmTransferMutation,
+  useRejectTransferMutation,
+  useUnlinkTransferMutation,
 } = api;

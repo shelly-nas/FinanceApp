@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import FinanceManager from '@/managers/financeManager';
 import { bankMappings, asnCategoryMap, bankCategoryColumns } from '@/models/bankTransactionModel'
 import multer from 'multer';
@@ -157,8 +157,17 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
           }
         }
         
-        const createdIds = await FinanceManager.addTransactions(entries);
-        res.status(200).json({ message: 'Entries imported successfully', createdIds });
+        const { createdIds, imported, skipped } = await FinanceManager.addTransactions(entries);
+
+        // Rows already present are skipped rather than rejected, so overlapping
+        // export periods can be imported without thinking about it. The counts
+        // tell the user what actually happened.
+        res.status(200).json({
+          message: 'Entries imported successfully',
+          createdIds,
+          imported,
+          skipped,
+        });
       } catch (error) {
         res.status(500).send(`Error importing entries: ${error}`);
       } finally {
@@ -288,6 +297,99 @@ router.delete('/remove-transaction/:id', async (req: Request, res: Response) => 
     res.status(200).json({ message: 'Transaction deleted successfully' });
   } catch (error) {
     res.status(500).json({ error });
+  }
+});
+
+// --- Internal transfers -----------------------------------------------------
+
+// Candidate pairs for review. ?ids=[..] narrows it to a fresh import, so the
+// review screen proposes pairs for the rows just added instead of the whole
+// history.
+router.get('/transfer-candidates', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, windowDays } = req.query;
+  let idList: number[] = [];
+
+  if (ids) {
+    try {
+      idList = JSON.parse(ids as string);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid IDs format' });
+    }
+  }
+
+  const days = windowDays ? Number(windowDays) : 3;
+  if (!Number.isFinite(days) || days < 0 || days > 31) {
+    return res.status(400).json({ error: 'windowDays must be between 0 and 31' });
+  }
+
+  try {
+    const candidates = await FinanceManager.getTransferCandidates(idList, days);
+    res.status(200).json(candidates);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/transfers', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const transfers = await FinanceManager.getTransfers();
+    res.status(200).json(transfers);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Confirm a suggested pair: both rows drop out of the income/expense summaries
+// and are categorised as a transfer, which also clears them off the review list.
+router.post('/transfers', async (req: Request, res: Response, next: NextFunction) => {
+  const { fromTransactionId, toTransactionId, matchBasis } = req.body;
+
+  if (!Number.isInteger(fromTransactionId) || !Number.isInteger(toTransactionId)) {
+    return res.status(400).json({ error: 'fromTransactionId and toTransactionId must be integers' });
+  }
+  if (fromTransactionId === toTransactionId) {
+    return res.status(400).json({ error: 'A transfer needs two different transactions' });
+  }
+  if (matchBasis !== 'iban' && matchBasis !== 'amount') {
+    return res.status(400).json({ error: "matchBasis must be 'iban' or 'amount'" });
+  }
+
+  try {
+    const transfer = await FinanceManager.confirmTransfer(fromTransactionId, toTransactionId, matchBasis);
+    if (!transfer) {
+      return res.status(409).json({ error: 'One of these transactions is already part of a transfer' });
+    }
+    res.status(201).json(transfer);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Reject a suggestion, so it is not proposed again after the next import.
+router.post('/transfers/reject', async (req: Request, res: Response, next: NextFunction) => {
+  const { fromTransactionId, toTransactionId } = req.body;
+
+  if (!Number.isInteger(fromTransactionId) || !Number.isInteger(toTransactionId)) {
+    return res.status(400).json({ error: 'fromTransactionId and toTransactionId must be integers' });
+  }
+
+  try {
+    await FinanceManager.rejectTransfer(fromTransactionId, toTransactionId);
+    res.status(200).json({ message: 'Suggestion dismissed' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/transfers/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const removed = await FinanceManager.unlinkTransfer(id);
+    if (!removed) return res.status(404).json({ error: 'Transfer not found' });
+    res.status(200).json({ message: 'Transfer unlinked' });
+  } catch (error) {
+    next(error);
   }
 });
 
