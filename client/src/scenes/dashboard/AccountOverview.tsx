@@ -1,86 +1,88 @@
-import React from 'react';
-import { Typography, Divider, Box, List, ListItem, ListItemText, Collapse, useTheme, ListItemButton, Button } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Typography, Divider, Box, List, ListItem, ListItemText, Collapse,
+  useTheme, ListItemButton, Button, Tooltip,
+} from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { useState } from 'react';
-import DashboardBox from '@/components/DashboardBox';
-import { useGetAccountOverviewQuery } from '@/api';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import DashboardBox from '@/components/DashboardBox';
+import { AccountBalance, useGetAccountOverviewQuery } from '@/api';
+import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 
-interface AccountCategory {
-  account_type: string;
-  account_name: string;
-  current_balance: string;
-}
-
-const groupByAccountType = (accounts: AccountCategory[]) => {
-  return accounts.reduce((acc, account) => {
-    if (!acc[account.account_type]) {
-      acc[account.account_type] = [];
-    }
-    acc[account.account_type].push(account);
+const groupByAccountType = (accounts: AccountBalance[]) =>
+  accounts.reduce((acc, account) => {
+    (acc[account.account_type] ||= []).push(account);
     return acc;
-  }, {} as Record<string, AccountCategory[]>);
-};
+  }, {} as Record<string, AccountBalance[]>);
 
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+
+/**
+ * Balances at the end of the selected month.
+ *
+ * Unlike the banner, this follows the month filter: with August selected it
+ * answers "where did this stand at the end of August", so it lines up with the
+ * income, expenses and breakdown beside it. The banner above stays on today, as
+ * the fixed reference.
+ */
 const AccountsOverview: React.FC = () => {
   const { palette, typography } = useTheme();
   const [open, setOpen] = useState<Record<string, boolean>>({});
-  const [visible, setVisible] = useState(false); // State to toggle visibility
-  
-  const visibilityStyle = visible ? "" : "blur-text";
+  const [visible, setVisible] = useState(false);
+  const { lastDay } = useDateRange();
 
-  const { data: results } = useGetAccountOverviewQuery();
-  const categories = results as unknown[] as AccountCategory[] || [];
+  const asOf = formatDate(lastDay);
+  const { data: results } = useGetAccountOverviewQuery({ asOf });
+  const categories = results ?? [];
   const groupedCategories = groupByAccountType(categories);
+
+  const visibilityStyle = visible ? '' : 'blur-text';
 
   const handleToggle = (category: string) => {
     setOpen((prev) => ({ ...prev, [category]: !prev[category] }));
   };
 
-  const calculateNetWorth = () => {
-    return categories.reduce((total, category) => total + parseFloat(category.current_balance), 0);
-  };
+  const netWorth = categories.reduce((total, c) => total + parseFloat(c.current_balance), 0);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
-  };
-  
+  // A month that has not finished yet has no meaningful "end of month" balance,
+  // so say what the figure actually is.
+  const isCurrentMonth = asOf >= formatDate(new Date());
+  const asOfLabel = isCurrentMonth
+    ? 'today'
+    : lastDay.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
   return (
     <DashboardBox sx={{ mb: 1.5 }}>
-      <Box sx={{         
-        display: 'flex',
-        alignItems: 'center',
-        position: 'relative',             
-      }}>
-        <Box sx={{
-          textAlign: 'center',
-          width: '100%',
-        }}>
-          <Typography variant="h3">
-            Account Overview
+      <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+        <Box sx={{ textAlign: 'center', width: '100%' }}>
+          <Typography variant="h3">Account Overview</Typography>
+          <Typography variant="body3" sx={{ opacity: 0.7 }}>
+            as of {asOfLabel}
           </Typography>
         </Box>
-        <Button sx={{ 
-          m: 0.1, 
-          p: 0.1, 
-          minWidth: 0, 
-          position: 'absolute', 
-          right: 0, // Align to the right inside the relative parent
-          top: '50%', // Center vertically with respect to the parent box
-          transform: 'translateY(-50%)', // Adjust the button's center to the middle
-          '&:hover': {
-            backgroundColor: palette.action.hover, // Hover background color, change as needed
-          },
-        }} 
-        onClick={() => setVisible(!visible)}
-        >
-          {visible 
-            ? <VisibilityOffIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
-            : <VisibilityIcon sx={{ color: typography.h3.color, fontSize: 18 }} />}
-        </Button>
+        <Tooltip title={visible ? 'Hide amounts' : 'Show amounts'}>
+          <Button
+            sx={{
+              m: 0.1,
+              p: 0.1,
+              minWidth: 0,
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              '&:hover': { backgroundColor: palette.action.hover },
+            }}
+            onClick={() => setVisible(!visible)}
+          >
+            {visible
+              ? <VisibilityOffIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
+              : <VisibilityIcon sx={{ color: typography.h3.color, fontSize: 18 }} />}
+          </Button>
+        </Tooltip>
       </Box>
-      
+
       <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1, mb: 1 }} />
       <List sx={{ ml: -1.5 }}>
         {Object.keys(groupedCategories).map((categoryType) => (
@@ -92,18 +94,22 @@ const AccountsOverview: React.FC = () => {
                 primaryTypographyProps={{ variant: 'body2' }}
               />
               <Typography variant="body2" className={visibilityStyle}>
-                {formatCurrency(groupedCategories[categoryType].reduce((sum, item) => sum + parseFloat(item.current_balance), 0))}
+                {formatCurrency(
+                  groupedCategories[categoryType].reduce((sum, item) => sum + parseFloat(item.current_balance), 0),
+                )}
               </Typography>
             </ListItemButton>
             <Collapse in={open[categoryType]} timeout="auto" unmountOnExit>
               <List disablePadding>
                 {groupedCategories[categoryType].map((item) => (
-                  <ListItem key={item.account_name} sx={{ pl: 3, py: 0 }}>
+                  <ListItem key={item.details ?? item.account_name} sx={{ pl: 3, py: 0 }}>
                     <ListItemText
-                      primary={"└ " + item.account_name}
+                      primary={'└ ' + item.account_name}
                       primaryTypographyProps={{ variant: 'body3' }}
                     />
-                    <Typography variant="body3" className={visibilityStyle} >{formatCurrency(parseFloat(item.current_balance))}</Typography>
+                    <Typography variant="body3" className={visibilityStyle}>
+                      {formatCurrency(parseFloat(item.current_balance))}
+                    </Typography>
                   </ListItem>
                 ))}
               </List>
@@ -117,7 +123,7 @@ const AccountsOverview: React.FC = () => {
           Estd. Net Worth
         </Typography>
         <Typography variant="body1" className={visibilityStyle} fontWeight="bold">
-          {formatCurrency(calculateNetWorth())}
+          {formatCurrency(netWorth)}
         </Typography>
       </Box>
     </DashboardBox>

@@ -249,16 +249,23 @@ de header en lijkt visueel voor alles te gelden, inclusief het accountoverzicht 
 er niets mee doet. Een maand terug verandert Account Overview niet — dat leest als
 een bug, ook al is het correct.
 
-Voorstel: totaalstanden in een vaste banner boven de tabs (net worth plus de drie
-subtotalen per rekeningtype, wat `/account-overview` al teruggeeft via
-`groupByAccountType()`). De blur-toggle hoort dan bij de banner. Het uitklapbare
-detail per rekening verhuist naar een eigen tab "Rekeningen", waar ook het beheer
-van `details`/IBAN thuishoort.
+**Opgelost, 4 september 2026.** De twee vragen zijn uit elkaar getrokken in plaats
+van er één te kiezen:
 
-Te beslissen: als de banner altijd "nu" toont terwijl je in maart 2024 staat, is
-dat verwarrend. Of de banner labelt expliciet "vandaag", of het net worth wordt
-historisch (saldo per einde geselecteerde maand). Dat laatste is berekenbaar met de
-bestaande data maar is een andere query.
+- **De banner** staat boven elke tab en toont altijd *vandaag*, expliciet gelabeld
+  "Net worth today". Uitklapbaar naar het detail per rekening. Dit is het vaste
+  referentiepunt waartegen de rest gelezen wordt.
+- **De widget op het dashboard** volgt wél de maandkiezer en toont het saldo per
+  einde van die maand, met "as of 31 Aug 2026" eronder. Daarmee sluit hij aan op
+  de inkomsten, uitgaven en breakdown ernaast.
+
+`getAccountOverview()` accepteert nu een optionele `asOf`, waarbij transacties na
+die datum wegvallen en een beleggingsrekening het laatst bekende saldo op of vóór
+die datum aanneemt. Zonder `asOf` is het antwoord "nu".
+
+Voor het historische verloop is er `GET /api/net-worth-history`, dat het vermogen
+per maandeinde teruggeeft, opgesplitst naar rekeningtype. Zie het voorstel voor de
+rapportagetab hieronder.
 
 ### Acties uit de widgetkolom naar een menu
 
@@ -278,6 +285,87 @@ Hetzelfde geldt voor het potlood-icoontje in Transaction Details en het oog-icoo
 in Account Overview: die zitten geabsoluut-gepositioneerd in de widgetkop, wat de
 reden is dat in beide bestanden een identiek blok
 `position:'absolute', right:0, top:'50%', transform:'translateY(-50%)'` staat.
+
+### Voorstel: een rapportagetab voor historisch verloop
+
+*Toegevoegd 4 september 2026, na de beslissing om net worth historisch te maken.*
+
+De banner beantwoordt "waar sta ik nu", het dashboard "wat deed deze maand".
+Wat geen van beide kan is "hoe heeft dit zich ontwikkeld" — en dat is precies de
+vraag waarvoor je een jaar aan geïmporteerde data hebt. Een derde scherm dus, met
+een eigen tijdas in plaats van de maandkiezer van het dashboard.
+
+#### Wat het scherm beantwoordt
+
+Vier vragen, in deze volgorde van waarde:
+
+1. **Groeit mijn vermogen?** Net worth per maandeinde, gestapeld naar
+   rekeningtype, zodat zichtbaar is of groei uit sparen komt of uit koersstijging.
+   De data hiervoor bestaat al: `GET /api/net-worth-history`.
+2. **Waar gaat het heen, over tijd?** Uitgaven per categorie per maand — als
+   gestapelde staven voor de verhouding, of als lijnen per categorie om er één te
+   volgen. Beantwoordt "geven we structureel meer uit aan boodschappen".
+3. **Hoeveel houd ik over?** Inkomsten, uitgaven en spaarquote per maand, met een
+   voortschrijdend gemiddelde over drie maanden — één dure maand zegt niets,
+   een dalende trend van zes maanden wel.
+4. **Wat is er veranderd?** Deze periode tegenover de vorige, per categorie, met
+   het verschil in euro's en procenten. Dit is waar een abonnement dat verdubbeld
+   is naar boven komt.
+
+#### Filters
+
+De tijdas is de hoofdcontrole en werkt anders dan op het dashboard: geen enkele
+maand maar een **bereik** — snelknoppen voor 6 / 12 / 24 maanden en dit jaar,
+plus een vrije van-tot. Daarnaast dezelfde filters als het transactiescherm
+(categorie, rekening, event), zodat "wat kostte de verbouwing per maand" te
+beantwoorden is door op dat event te filteren.
+
+Twee schakelaars die inhoudelijk verschil maken:
+
+- **Interne overboekingen meetellen** — standaard uit, net als overal. Aan zetten
+  laat zien hoeveel er structureel naar de spaarrekening gaat.
+- **Vaste versus variabele lasten** — de kolom `category_type` bestaat al maar
+  wordt buiten de Period Summary nergens gebruikt. Splitsen laat zien welk deel
+  van je uitgaven je op korte termijn kunt beïnvloeden.
+
+#### Wat de server nog mist
+
+`getNetWorthHistory()` dekt vraag 1. Voor de rest zijn drie queries nodig, alle
+drie varianten op wat er al staat:
+
+| Endpoint | Geeft | Bouwt voort op |
+|---|---|---|
+| `GET /api/reports/category-history` | Categorie × maand, met dezelfde filters als het zoekscherm | `getCategorySums()` plus een `GROUP BY` op maand |
+| `GET /api/reports/cashflow` | Inkomsten, uitgaven, netto en spaarquote per maand | `getIncomeExpensesSum()` per maand in plaats van per periode |
+| `GET /api/reports/comparison` | Twee periodes naast elkaar per categorie, met het verschil | Twee keer `getCategorySums()`, in SQL verschild |
+
+Alle drie moeten `is_internal IS NOT TRUE` respecteren, tenzij de schakelaar aan
+staat — dezelfde regel als de bestaande sommaties.
+
+#### Waar op te letten
+
+- **Een lege maand is geen nul.** Bij net worth wordt het vorige saldo
+  doorgedragen (dat doet `getNetWorthHistory()` al); bij uitgaven per categorie is
+  een maand zonder uitgaven wél een echte nul. Die twee door elkaar halen levert
+  grafieken op die naar nul duiken op plekken waar niets gebeurde.
+- **De eerste maanden zijn onvolledig.** Als je historie in maart begint, is
+  maart geen normale maand. Markeer het begin van de reeks, of laat de eerste
+  onvolledige maand weg uit trendberekeningen.
+- **De huidige maand loopt nog.** Toon hem gestippeld of sluit hem uit van
+  vergelijkingen, anders lijkt elke maand halverwege een daling.
+- **Categorieën die je hernoemt breken de historie**, want `transactions.category`
+  verwijst op naam. Hetzelfde probleem als bij `accounts.details`, met dezelfde
+  oplossing: bij hernoemen meeschrijven.
+
+#### Bouwvolgorde
+
+Net worth-grafiek eerst — de data staat er al, dus dat is puur frontend en levert
+meteen het antwoord op de vraag die je stelde. Daarna cashflow per maand, dan
+categorie-historie, en de periodevergelijking als laatste; die is het meeste werk
+en het minst dagelijks nuttig.
+
+Voor de grafieken zelf: de app heeft nog geen grafiekbibliotheek. Recharts past
+bij de MUI-stack en kan alle vier de visualisaties aan.
 
 ### Overboekingen tussen eigen rekeningen
 

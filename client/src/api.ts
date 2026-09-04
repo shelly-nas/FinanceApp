@@ -127,6 +127,21 @@ export interface TransactionAccount {
   transaction_count: number;
 }
 
+export interface AccountBalance {
+  account_type: string;
+  account_name: string;
+  details: string;
+  current_balance: string;
+}
+
+export interface NetWorthPoint {
+  month: string;
+  net_worth: string;
+  checking: string | null;
+  savings: string | null;
+  investments: string | null;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
@@ -150,6 +165,7 @@ export const api = createApi({
     "unknownAccounts",
     "searchTransactions",
     "transactionAccounts",
+    "netWorthHistory",
   ],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
@@ -191,8 +207,9 @@ export const api = createApi({
       // An import changes every derived figure at once.
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
-                        "accountOverview", "transferCandidates",
-                        "unknownAccounts", "transactionAccounts"],
+                        "accountOverview", "netWorthHistory",
+                        "transferCandidates", "unknownAccounts",
+                        "transactionAccounts"],
     }),
     getEmptyCategoryTransactions: build.query<any, void>({
       query: () => ({
@@ -210,14 +227,25 @@ export const api = createApi({
       // review list are stale too - not just the transaction itself.
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
-                        "accountOverview", "transferCandidates",
-                        "unknownAccounts", "transactionAccounts"],
+                        "accountOverview", "netWorthHistory",
+                        "transferCandidates", "unknownAccounts",
+                        "transactionAccounts"],
     }),
-    getAccountOverview: build.query<any, void>({
-      query: () => ({
+    getAccountOverview: build.query<AccountBalance[], { asOf?: string } | void>({
+      query: (args) => ({
         url: `api/account-overview`,
+        // Without asOf the server answers for today, which is what the banner
+        // shows regardless of the month the dashboard is filtered to.
+        params: args && args.asOf ? { asOf: args.asOf } : undefined,
       }),
       providesTags: ["accountOverview"],
+    }),
+    getNetWorthHistory: build.query<NetWorthPoint[], { startDate: string; endDate: string }>({
+      query: ({ startDate, endDate }) => ({
+        url: `api/net-worth-history`,
+        params: { startDate, endDate },
+      }),
+      providesTags: ["netWorthHistory"],
     }),
     getCategoryList: build.query<any, void>({
       query: () => ({
@@ -240,7 +268,7 @@ export const api = createApi({
         },
         body: investments,
       }),
-      invalidatesTags: ["accountOverview"],
+      invalidatesTags: ["accountOverview", "netWorthHistory"],
     }),
     deleteTransaction: build.mutation<void, number>({
       query: (id) => ({
@@ -249,8 +277,9 @@ export const api = createApi({
       }),
       invalidatesTags: ["transactions", "searchTransactions", "categorySums",
                         "incomeExpensesSum", "emptyCategoryTransactions",
-                        "accountOverview", "transferCandidates",
-                        "unknownAccounts", "transactionAccounts"],
+                        "accountOverview", "netWorthHistory",
+                        "transferCandidates", "unknownAccounts",
+                        "transactionAccounts"],
     }),
     getTags: build.query<Tag[], { includeClosed?: boolean } | void>({
       query: (args) => ({
@@ -463,4 +492,5 @@ export const {
   useGetTransactionAccountsQuery,
   useBulkUpdateTransactionsMutation,
   useBulkSetTagMutation,
+  useGetNetWorthHistoryQuery,
 } = api;

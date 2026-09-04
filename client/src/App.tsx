@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Header from '@/scenes/header';
+import NetWorthBanner from '@/components/NetWorthBanner';
 import Dashboard from '@/scenes/dashboard';
 import { createTheme } from '@mui/material/styles';
 import { themeSettings } from '@/theme';
@@ -21,6 +22,9 @@ const ThemedApp: React.FC = () => {
       <DateRangeProvider>
         <Box maxWidth="1700px" padding="1rem 2rem 4rem 2rem" style={{ width: '100%' }}>
           <Header />
+          {/* Always today's figures, on every tab and whatever month a page is
+              filtered to - the fixed reference the rest is read against. */}
+          <NetWorthBanner />
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/transactions" element={<Transactions />} />

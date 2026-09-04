@@ -604,13 +604,31 @@ class FinanceManager {
     }
   }
 
-  public async getAccountOverview(): Promise<any> {
+  /**
+   * Balance per account, either as of today or as of a given date.
+   *
+   * `asOf` makes the figure historical: transactions after that date are left
+   * out, and an investment account takes the last balance recorded on or before
+   * it. Without it the query answers "right now".
+   *
+   * Internal transfers are deliberately included. They are excluded from income
+   * and expenses because nothing was earned or spent, but the money genuinely
+   * moved between accounts - leaving them out here would make both balances wrong.
+   */
+  public async getAccountOverview(asOf?: string): Promise<any> {
     const client = await dbContext.connect();
+    const params: any[] = [];
+    // The same bound is applied to transactions and investments, so a historical
+    // net worth mixes figures from one moment rather than several.
+    const dateFilter = asOf ? ` AND ${transaction_table}.date_str <= $1` : '';
+    const investmentFilter = asOf ? ` AND ${investment_table}.date_str <= $1` : '';
+    if (asOf) params.push(asOf);
 
     let query = `
       SELECT 
         ${account_table}.account_type, 
         ${account_table}.account_name, 
+        ${account_table}.details,
       COALESCE(
         CASE
           WHEN ${account_table}.account_type IN ('Checking Account', 'Savings Account') THEN (
@@ -622,12 +640,12 @@ class FinanceManager {
               END
             ), 0)
             FROM public.${transaction_table}
-            WHERE ${transaction_table}.account = ${account_table}.details
+            WHERE ${transaction_table}.account = ${account_table}.details${dateFilter}
           )
           WHEN ${account_table}.account_type = 'Investments' THEN (
             SELECT ${investment_table}.balance
             FROM public.${investment_table}
-            WHERE ${investment_table}.account = ${account_table}.details
+            WHERE ${investment_table}.account = ${account_table}.details${investmentFilter}
             ORDER BY ${investment_table}.date_str DESC
             LIMIT 1
           )
@@ -635,11 +653,73 @@ class FinanceManager {
         END,
         ${account_table}.balance_when_created
       ) AS current_balance
-    FROM public.${account_table};
+    FROM public.${account_table}
+    ORDER BY ${account_table}.account_type, ${account_table}.account_name;
     `;
     
     try {
-      const result = await client.query(query);
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Net worth at the end of each month over a period.
+   *
+   * Built for a chart: a running total per account carried forward month by
+   * month, so a month in which an account saw no activity keeps its previous
+   * balance rather than dropping to zero.
+   */
+  public async getNetWorthHistory(startDate: string, endDate: string): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      WITH months AS (
+        SELECT (DATE_TRUNC('month', d) + INTERVAL '1 month - 1 day')::date AS month_end
+        FROM GENERATE_SERIES($1::date, $2::date, '1 month') AS d
+      ),
+      -- Every account's balance at each month end: the opening balance plus
+      -- every movement up to that point, which is what carries a quiet month
+      -- forward instead of showing a gap.
+      balances AS (
+        SELECT
+          m.month_end,
+          a.account_type,
+          CASE
+            WHEN a.account_type IN ('Checking Account', 'Savings Account') THEN
+              a.balance_when_created + COALESCE((
+                SELECT SUM(CASE WHEN t.debit_credit = 'Debit' THEN -t.amount ELSE t.amount END)
+                FROM public.${transaction_table} t
+                WHERE t.account = a.details AND t.date_str <= m.month_end
+              ), 0)
+            WHEN a.account_type = 'Investments' THEN
+              COALESCE((
+                SELECT i.balance
+                FROM public.${investment_table} i
+                WHERE i.account = a.details AND i.date_str <= m.month_end
+                ORDER BY i.date_str DESC
+                LIMIT 1
+              ), a.balance_when_created)
+            ELSE a.balance_when_created
+          END AS balance
+        FROM months m
+        CROSS JOIN public.${account_table} a
+      )
+      SELECT
+        TO_CHAR(month_end, 'YYYY-MM') AS month,
+        SUM(balance)::numeric AS net_worth,
+        SUM(balance) FILTER (WHERE account_type = 'Checking Account')::numeric AS checking,
+        SUM(balance) FILTER (WHERE account_type = 'Savings Account')::numeric AS savings,
+        SUM(balance) FILTER (WHERE account_type = 'Investments')::numeric AS investments
+      FROM balances
+      GROUP BY month_end
+      ORDER BY month_end;
+    `;
+
+    try {
+      const result = await client.query(query, [startDate, endDate]);
       return result.rows;
     } finally {
       client.release();

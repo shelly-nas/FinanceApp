@@ -185,10 +185,39 @@ router.patch('/update-transaction/:id', async (req: Request, res: Response, next
   }
 });
 
+// ?asOf=YYYY-MM-DD returns balances as they stood on that date. Without it the
+// answer is "right now" - which is what the banner shows, regardless of the
+// month the dashboard is filtered to.
 router.get('/account-overview', async (req: Request, res: Response, next: NextFunction) => {
+  const { asOf } = req.query;
+
+  if (asOf !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(asOf as string)) {
+    return res.status(400).json({ error: 'asOf must be a date in YYYY-MM-DD form' });
+  }
+
   try {
-    const updatedTransaction = await FinanceManager.getAccountOverview();
-    res.status(200).json(updatedTransaction);
+    const overview = await FinanceManager.getAccountOverview(asOf as string | undefined);
+    res.status(200).json(overview);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Net worth at each month end over a range, for the history chart.
+router.get('/net-worth-history', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate } = req.query;
+  const isDate = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+  if (!isDate(startDate) || !isDate(endDate)) {
+    return res.status(400).json({ error: 'startDate and endDate are required, in YYYY-MM-DD form' });
+  }
+  if ((startDate as string) > (endDate as string)) {
+    return res.status(400).json({ error: 'startDate must not be after endDate' });
+  }
+
+  try {
+    const history = await FinanceManager.getNetWorthHistory(startDate as string, endDate as string);
+    res.status(200).json(history);
   } catch (error) {
     next(error);
   }

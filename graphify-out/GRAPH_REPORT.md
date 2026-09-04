@@ -1,16 +1,16 @@
 # Graph Report - FinanceApp  (2026-09-04)
 
 ## Corpus Check
-- 63 files · ~34,691 words
+- 64 files · ~37,247 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 363 nodes · 498 edges · 21 communities (15 shown, 6 thin omitted)
+- 380 nodes · 525 edges · 22 communities (16 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0bacbadd`
+- Built from commit: `57a672a4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,18 +35,19 @@
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `FinanceManager` - 35 edges
-2. `useDateRange()` - 9 edges
+1. `FinanceManager` - 36 edges
+2. `useDateRange()` - 11 edges
 3. `Belangrijk, niet blokkerend` - 8 edges
-4. `runMigrations()` - 7 edges
-5. `parseBankRow()` - 7 edges
-6. `FinanceApp — doorlichting` - 7 edges
-7. `formatDate()` - 7 edges
+4. `formatDate()` - 8 edges
+5. `runMigrations()` - 7 edges
+6. `parseBankRow()` - 7 edges
+7. `FinanceApp — doorlichting` - 7 edges
 8. `predictCategory()` - 6 edges
-9. `Opruimwerk` - 6 edges
-10. `identityKey()` - 5 edges
+9. `Functioneel` - 6 edges
+10. `Voorstel: een rapportagetab voor historisch verloop` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `start()` --calls--> `runMigrations()`  [EXTRACTED]
@@ -60,23 +61,23 @@
 - `classifyWith()` --calls--> `matchMerchantRule()`  [EXTRACTED]
   server/src/machineLearningModels/categoryModel.ts → server/src/machineLearningModels/dutchMerchantRules.ts
 
-## Communities (21 total, 6 thin omitted)
+## Communities (22 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (27): ACCOUNT_TYPES, Accounts(), DraftAccount, emptyDraft(), filter, TagOption, TagPickerProps, Column (+19 more)
+Nodes (27): formatCurrency(), groupByType(), NetWorthBanner(), TYPE_ORDER, filter, TagOption, TagPickerProps, Column (+19 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (32): ArrowButton, ExchangeType, IncomeExpenseItem, PeriodSummary(), Props, splitIncomeExpense(), SortableSpendingTableProps, SortableTransactionTableProps (+24 more)
-
-### Community 2 - "Community 2"
-Cohesion: 0.07
 Nodes (28): ensureMigrationsTable(), MIGRATIONS_DIR, readMigrationFiles(), runMigrations(), ImportResult, errorHandler(), app, start() (+20 more)
 
-### Community 4 - "Community 4"
-Cohesion: 0.06
-Nodes (30): 10. De rekeningtabel is met placeholder-IBAN's gevuld, 11. De transactietabel bouwt kolommen op uit `Object.keys(row)`, 12. Twee formatCurrency-definities, zeven keer gekopieerd, 13. Het `Transaction`-type staat vier keer opnieuw gedeclareerd, 14. De `Transactions`-klasse is een lege huls, 15. `getCategorySums` gebruikt vaste parameterindexen, 16. Ongebruikte parameters en dode routes, 1. Overboekingen tussen eigen rekeningen tellen dubbel mee (+22 more)
+### Community 2 - "Community 2"
+Cohesion: 0.05
+Nodes (36): 10. De rekeningtabel is met placeholder-IBAN's gevuld, 11. De transactietabel bouwt kolommen op uit `Object.keys(row)`, 12. Twee formatCurrency-definities, zeven keer gekopieerd, 13. Het `Transaction`-type staat vier keer opnieuw gedeclareerd, 14. De `Transactions`-klasse is een lege huls, 15. `getCategorySums` gebruikt vaste parameterindexen, 16. Ongebruikte parameters en dode routes, 1. Overboekingen tussen eigen rekeningen tellen dubbel mee (+28 more)
+
+### Community 3 - "Community 3"
+Cohesion: 0.09
+Nodes (23): ArrowButton, AccountCategory, AccountsOverview(), formatCurrency(), groupByAccountType(), ExchangeType, IncomeExpenseItem, PeriodSummary() (+15 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.12
@@ -96,11 +97,11 @@ Nodes (9): style, UploadButtonProps, Investment, style, UploadInvestButtonProps,
 
 ### Community 9 - "Community 9"
 Cohesion: 0.18
-Nodes (11): code:block1 (server/migrations/004_add_something.sql), code:bash (cd server && npm test    # 67 tests; the database ones skip ), code:bash (cp .env.example .env      # fill in DB_PASSWORD), code:bash (docker compose exec server npm run seed), Database changes, Local development, Rolling back, Tests (+3 more)
+Nodes (13): DateRangeContext, DateRangeContextProps, anchor, before, { firstDay, lastDay }, { lastDay }, march, now (+5 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.22
-Nodes (8): Cosmetics, Palette, PaletteColor, PaletteOptions, TypeBackground, TypographyPropsVariantOverrides, TypographyVariants, TypographyVariantsOptions
+Cohesion: 0.18
+Nodes (11): code:block1 (server/migrations/004_add_something.sql), code:bash (cd server && npm test    # 67 tests; the database ones skip ), code:bash (cp .env.example .env      # fill in DB_PASSWORD), code:bash (docker compose exec server npm run seed), Database changes, Local development, Rolling back, Tests (+3 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.31
@@ -111,32 +112,36 @@ Cohesion: 0.22
 Nodes (4): DashboardBox, DeletePopupProps, style, Props
 
 ### Community 13 - "Community 13"
+Cohesion: 0.22
+Nodes (8): Cosmetics, Palette, PaletteColor, PaletteOptions, TypeBackground, TypographyPropsVariantOverrides, TypographyVariants, TypographyVariantsOptions
+
+### Community 14 - "Community 14"
+Cohesion: 0.29
+Nodes (6): ACCOUNT_TYPES, Accounts(), DraftAccount, emptyDraft(), Account, UnknownAccount
+
+### Community 15 - "Community 15"
 Cohesion: 0.5
 Nodes (3): code:js (export default {), Expanding the ESLint configuration, React + TypeScript + Vite
 
-### Community 14 - "Community 14"
-Cohesion: 0.67
-Nodes (3): AccountCategory, AccountsOverview(), groupByAccountType()
-
 ## Knowledge Gaps
-- **122 isolated node(s):** `app`, `MIGRATIONS_DIR`, `ImportResult`, `ParsedRow`, `hasDatabase` (+117 more)
+- **129 isolated node(s):** `app`, `MIGRATIONS_DIR`, `ImportResult`, `ParsedRow`, `hasDatabase` (+124 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FinanceManager` connect `Community 3` to `Community 2`, `Community 7`?**
-  _High betweenness centrality (0.055) - this node is a cross-community bridge._
-- **Why does `DbContext` connect `Community 7` to `Community 2`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `FinanceManager` connect `Community 4` to `Community 1`, `Community 7`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `useDateRange()` connect `Community 3` to `Community 9`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `app`, `MIGRATIONS_DIR`, `ImportResult` to the rest of the system?**
-  _122 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _129 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._

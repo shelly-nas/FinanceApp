@@ -34,6 +34,9 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
     await runMigrations();
     const client = await dbContext.connect();
     try {
+      // Only this file's own accounts: a database that also holds accounts from
+      // manual testing would otherwise shift every balance assertion.
+      await client.query('DELETE FROM public.accounts WHERE details NOT LIKE $1', ['NL00SUMM%']);
       // Categories are a foreign key of transactions, so they have to exist.
       await client.query(`
         INSERT INTO categories (category_name, color, category_type, income_outcome) VALUES
@@ -362,5 +365,140 @@ describe('bulk edits', { skip: !hasDatabase && 'no database configured' }, () =>
 
   test('does nothing for an empty selection', async () => {
     assert.equal(await FinanceManager.bulkUpdateTransactions([], { category: 'Boodschappen' }), 0);
+  });
+});
+
+describe('historical balances', { skip: !hasDatabase && 'no database configured' }, () => {
+  before(async () => {
+    await runMigrations();
+  });
+
+  beforeEach(async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
+  });
+
+  test('as of a date, ignores everything after it', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', debit_credit: 'Credit', amount: 500 }),
+      row({ date_str: '2026-08-10', debit_credit: 'Credit', amount: 300 }),
+    ]);
+
+    const june = await FinanceManager.getAccountOverview('2026-06-30');
+    const august = await FinanceManager.getAccountOverview('2026-08-31');
+    const balance = (rows: any[]) =>
+      Number(rows.find((a: any) => a.account_name === 'Betaal').current_balance);
+
+    assert.equal(balance(june), 1500, '1000 opening + 500');
+    assert.equal(balance(august), 1800, 'plus the later 300');
+  });
+
+  test('includes the boundary date itself', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-30', debit_credit: 'Credit', amount: 100 }),
+    ]);
+
+    const rows = await FinanceManager.getAccountOverview('2026-06-30');
+    const checking = rows.find((a: any) => a.account_name === 'Betaal');
+    assert.equal(Number(checking.current_balance), 1100);
+  });
+
+  test('falls back to the opening balance before any transaction', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-08-10', debit_credit: 'Credit', amount: 999 }),
+    ]);
+
+    const rows = await FinanceManager.getAccountOverview('2026-01-31');
+    const checking = rows.find((a: any) => a.account_name === 'Betaal');
+    assert.equal(Number(checking.current_balance), 1000);
+  });
+
+  test('without a date, answers for today', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', debit_credit: 'Credit', amount: 500 }),
+    ]);
+
+    const now = await FinanceManager.getAccountOverview();
+    const asOfToday = await FinanceManager.getAccountOverview('2099-12-31');
+    const balance = (rows: any[]) =>
+      Number(rows.find((a: any) => a.account_name === 'Betaal').current_balance);
+
+    assert.equal(balance(now), balance(asOfToday));
+  });
+
+  test('counts a confirmed transfer, since the money did move', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-10', category: 'Sparen, Beleggen', counterparty: SAVINGS, amount: 400 }),
+      row({ date_str: '2026-06-10', category: 'Variabel Inkomen', account: SAVINGS, counterparty: CHECKING, debit_credit: 'Credit', amount: 400 }),
+    ]);
+    await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
+
+    const rows = await FinanceManager.getAccountOverview('2026-06-30');
+    const checking = rows.find((a: any) => a.account_name === 'Betaal');
+    const savings = rows.find((a: any) => a.account_name === 'Spaar');
+
+    assert.equal(Number(checking.current_balance), 600, '1000 - 400');
+    assert.equal(Number(savings.current_balance), 5400, '5000 + 400');
+  });
+});
+
+describe('getNetWorthHistory', { skip: !hasDatabase && 'no database configured' }, () => {
+  before(async () => {
+    await runMigrations();
+  });
+
+  beforeEach(async () => {
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
+  });
+
+  test('returns one row per month in the range', async () => {
+    const history = await FinanceManager.getNetWorthHistory('2026-06-01', '2026-08-31');
+    assert.deepEqual(history.map((h: any) => h.month), ['2026-06', '2026-07', '2026-08']);
+  });
+
+  test('carries a balance forward through a month with no activity', async () => {
+    // The point of the running total: an account that saw nothing in July must
+    // hold its June figure rather than drop out of the chart.
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-06-15', debit_credit: 'Credit', amount: 1000 }),
+    ]);
+
+    const history = await FinanceManager.getNetWorthHistory('2026-06-01', '2026-08-31');
+    const [june, july, august] = history;
+
+    assert.equal(Number(june.net_worth), Number(july.net_worth));
+    assert.equal(Number(july.net_worth), Number(august.net_worth));
+  });
+
+  test('reflects a movement in the month it happened and every month after', async () => {
+    await FinanceManager.addTransactions([
+      row({ date_str: '2026-07-15', debit_credit: 'Credit', amount: 200 }),
+    ]);
+
+    const history = await FinanceManager.getNetWorthHistory('2026-06-01', '2026-08-31');
+    const [june, july, august] = history;
+
+    assert.equal(Number(july.net_worth) - Number(june.net_worth), 200);
+    assert.equal(Number(august.net_worth), Number(july.net_worth));
+  });
+
+  test('splits the total by account type', async () => {
+    const history = await FinanceManager.getNetWorthHistory('2026-08-01', '2026-08-31');
+    const [august] = history;
+
+    assert.equal(
+      Number(august.checking) + Number(august.savings) + Number(august.investments ?? 0),
+      Number(august.net_worth),
+      'the parts should add up to the whole',
+    );
   });
 });
