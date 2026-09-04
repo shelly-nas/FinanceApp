@@ -16,8 +16,8 @@
     "hash": "ebcfa92a8946c1bdfea599cc692038f7"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/index.ts": {
-    "mtime": 1788492101.1276984,
-    "hash": "0daff53883b89f55d418b5ae31088d58"
+    "mtime": 1788511966.8581557,
+    "hash": "f74898db6640af999ed8a8c6bcfe52d3"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/middleware/errorHandler.ts": {
     "mtime": 1788492093.4448273,
@@ -32,8 +32,8 @@
     "hash": "8b0ddbf01018b4446b66944055e7b37b"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/managers/financeManager.ts": {
-    "mtime": 1788492373.6213243,
-    "hash": "8492c0ad4b04a9f856a2af7b1fc59348"
+    "mtime": 1788492658.1047544,
+    "hash": "4d3b9c6720b2136af513615267e08499"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/utils/importHash.ts": {
     "mtime": 1788491957.8797946,
@@ -48,8 +48,8 @@
     "hash": "bae4aa6c9e9f5c678647e66781dec856"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/machineLearningModels/categoryModel.ts": {
-    "mtime": 1788246017.3982315,
-    "hash": "dffb5309c8089452241cf7ca652f2006"
+    "mtime": 1788492647.9844692,
+    "hash": "4e08894596f7d025b950bf6ede0d60aa"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/machineLearningModels/dutchMerchantRules.ts": {
     "mtime": 1788246017.3983772,
@@ -60,8 +60,8 @@
     "hash": "8a41d4e1633a603874bb5d97a3e50ef5"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/server/src/controllers/financeController.ts": {
-    "mtime": 1788492083.3522723,
-    "hash": "a1b5e8bea6a0d18e0209ebe34cfc676f"
+    "mtime": 1788492647.984825,
+    "hash": "3a3ffd25fa39f6acb63d9aaf2efce8c7"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/client/vite.config.ts": {
     "mtime": 1788165307.467433,
@@ -203,13 +203,17 @@
     "mtime": 1788243827.6394622,
     "hash": "bf162e9f3cb3a903995590e248c027ff"
   },
+  "/Users/jelle/Documents/GitHub/FinanceApp/CONTRIBUTING.md": {
+    "mtime": 1788512014.5387795,
+    "hash": "e2d97bbcbe1effae2c5e9b2dafa8078e"
+  },
   "/Users/jelle/Documents/GitHub/FinanceApp/docker-compose.yml": {
     "mtime": 1788491914.187364,
     "hash": "2debc38586d55e7c901c0f179e0ed3b5"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/docker-compose.prod.yml": {
-    "mtime": 1788491914.1875951,
-    "hash": "0e6638bdef04b834e416b3326b1d4a65"
+    "mtime": 1788511957.941319,
+    "hash": "e859af4c25a8e9dcde7b0dfe02047b60"
   },
   "/Users/jelle/Documents/GitHub/FinanceApp/CLAUDE.md": {
     "mtime": 1788176071.4017105,

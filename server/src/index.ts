@@ -21,8 +21,12 @@ async function start() {
   // Logging is registered before the router - behind it, it never sees a request.
   app.use(morgan('common'));
 
+  // The running version, so a deploy can be confirmed without opening a shell
+  // on the host: the released image writes it into package.json.
+  const { version } = require('../package.json');
+
   app.get('/api/health', (_req, res) => {
-    res.status(200).json({ status: 'ok' });
+    res.status(200).json({ status: 'ok', version });
   });
   app.use('/api', financeController);
 

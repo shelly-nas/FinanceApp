@@ -58,14 +58,13 @@ async function preprocessText(textArray: string[]): Promise<string[]> {
 const MIN_TRAINING_DOCUMENTS = 10;
 
 async function trainModel() {
-    const data = await FinanceManager.getTransactions();
+    // Only categorised rows, and only the columns used below: training on the
+    // full table meant loading every uncategorised row just to skip it.
+    const data = await FinanceManager.getTrainingData();
     const classifier = new natural.BayesClassifier();
     let documentCount = 0;
 
     for (const row of data) {
-        // Only learn from rows a human actually categorised.
-        if (!row.category) continue;
-
         const combinedText = [`${row.name_description}`, `${row.notifications}`];
         const preprocessedText = await preprocessText(combinedText);
         const document = preprocessedText.join(' ').trim();

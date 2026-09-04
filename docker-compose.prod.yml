@@ -1,3 +1,12 @@
+# Production stack.
+#
+# IMAGE_TAG is the released version (1.2.3) and is written into .env by the
+# deploy workflow. Pinning it rather than tracking 'latest' is what makes a
+# rollback a change of one line here instead of a rebuild, and what keeps a
+# container restart from silently pulling a newer build.
+#
+# Database migrations are applied by the server on startup, so a deploy that
+# carries schema changes needs no separate step.
 services:
   db:
     # Het schema komt van de migraties in de server, niet uit een eigen image.
@@ -24,7 +33,7 @@ services:
       start_period: 10s
 
   server:
-    image: ${REGISTRY}/finance-app-server:${IMAGE_TAG:-latest}
+    image: ${REGISTRY}/finance-app-server:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
     container_name: finance-app-server
     restart: always
     environment:
@@ -61,7 +70,7 @@ services:
       - "traefik.http.services.finance-api.loadbalancer.server.port=3000"
 
   client:
-    image: ${REGISTRY}/finance-app-client:${IMAGE_TAG:-latest}
+    image: ${REGISTRY}/finance-app-client:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
     container_name: finance-app-client
     restart: always
     environment:

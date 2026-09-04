@@ -114,37 +114,82 @@ class FinanceManager {
     return { createdIds, imported: createdIds.length, skipped };
   }
 
-  public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
+  /**
+   * Transactions in a date range, or by id.
+   *
+   * `limit` caps the result: without one an unfiltered call returns the entire
+   * history, which grows without bound and is loaded into memory whole.
+   */
+  public async getTransactions(
+    startDate?: string,
+    endDate?: string,
+    ids?: number[],
+    limit = 5000,
+    offset = 0,
+  ): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM public.${transaction_table} WHERE 1=1`;
     const params: any[] = [];
     let paramIndex = 1;
-  
+
     if (startDate) {
       query += ` AND date_str >= $${paramIndex}`;
       params.push(startDate);
       paramIndex++;
     }
-  
+
     if (endDate) {
       query += ` AND date_str <= $${paramIndex}`;
       params.push(endDate);
       paramIndex++;
     }
-  
+
     if (ids && ids.length > 0) {
       const placeholders = ids.map((_, index) => `$${paramIndex + index}`).join(', ');
       query += ` AND id IN (${placeholders})`;
       params.push(...ids);
+      paramIndex += ids.length;
     }
-  
+
+    // A stable order is what makes offset paging meaningful; id breaks ties
+    // between rows sharing a date.
+    query += ` ORDER BY date_str DESC, id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(limit, offset);
+
     try {
       const result = await client.query(query, params);
       return result.rows;
     } finally {
       client.release();
     }
-  }  
+  }
+
+  /**
+   * The rows the classifier learns from: categorised transactions, and only the
+   * three columns it reads.
+   *
+   * Training used to call getTransactions(), pulling every column of every row
+   * including the uncategorised ones it discards - the bulk of the work on an
+   * import, repeated on each one.
+   */
+  public async getTrainingData(): Promise<{ name_description: string; notifications: string; category: string }[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT name_description, notifications, category
+      FROM public.${transaction_table}
+      WHERE category IS NOT NULL
+      ORDER BY id DESC
+      LIMIT 20000;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 
   public async getCategorySums(startDate?: string, endDate?: string): Promise<any[]> {
     const client = await dbContext.connect();
@@ -276,10 +321,14 @@ class FinanceManager {
   public async getEmptyCategoryTransactions(): Promise<any[]> {
     const client = await dbContext.connect();
 
+    // Newest first and capped: this feeds a review screen, and a backlog of
+    // thousands is worked through from the top rather than rendered whole.
     let query = `
       SELECT *
       FROM public.${transaction_table}
-      WHERE category IS NULL;
+      WHERE category IS NULL
+      ORDER BY date_str DESC, id DESC
+      LIMIT 2000;
     `;
 
     try {

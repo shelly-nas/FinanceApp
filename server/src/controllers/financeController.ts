@@ -34,7 +34,7 @@ const stripWrappingQuotes = (value: string) => {
     : trimmed;
 };
 
-router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response) => {
+router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
   const { bankType } = req.query;
   const filePath = req.file?.path;
 
@@ -169,18 +169,25 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
           skipped,
         });
       } catch (error) {
-        res.status(500).send(`Error importing entries: ${error}`);
+        // The raw error would otherwise reach the browser carrying the failed
+        // query and column names; the handler logs it and returns a reference.
+        next(error);
       } finally {
-        fs.unlinkSync(filePath);
+        // Async unlink: unlinkSync blocks the event loop, and the upload of a
+        // large export is exactly when the server has other requests to serve.
+        await fs.promises.unlink(filePath).catch((cleanupError) => {
+          console.warn(`Could not remove upload ${filePath}:`, cleanupError);
+        });
       }
     })
-    .on('error', (error) => {
-      res.status(500).send(`Error reading file: ${error}`);
+    .on('error', async (error) => {
+      await fs.promises.unlink(filePath).catch(() => undefined);
+      next(error);
     });
 });
 
-router.get('/transactions', async (req: Request, res: Response) => {
-  const { startDate, endDate, ids } = req.query;
+router.get('/transactions', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate, ids, limit, offset } = req.query;
   let idList: number[] = [];
 
   if (ids) {
@@ -191,47 +198,66 @@ router.get('/transactions', async (req: Request, res: Response) => {
     }
   }
 
+  // Capped rather than rejected: a caller asking for more than the ceiling gets
+  // the ceiling, so a large history cannot be pulled in one response.
+  const MAX_LIMIT = 5000;
+  const parsedLimit = limit === undefined ? MAX_LIMIT : Number(limit);
+  const parsedOffset = offset === undefined ? 0 : Number(offset);
+
+  if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
+    return res.status(400).json({ error: 'limit must be a positive number' });
+  }
+  if (!Number.isFinite(parsedOffset) || parsedOffset < 0) {
+    return res.status(400).json({ error: 'offset must be zero or more' });
+  }
+
   try {
-    const transactions = await FinanceManager.getTransactions(startDate as string, endDate as string, idList);
+    const transactions = await FinanceManager.getTransactions(
+      startDate as string,
+      endDate as string,
+      idList,
+      Math.min(parsedLimit, MAX_LIMIT),
+      parsedOffset,
+    );
     res.status(200).json(transactions);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
 
-router.get('/category-sums', async (req: Request, res: Response) => {
+router.get('/category-sums', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
 
   try {
     const categorySums = await FinanceManager.getCategorySums(startDate as string, endDate as string);
     res.status(200).json(categorySums);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/income-expenses-sum', async (req: Request, res: Response) => {
+router.get('/income-expenses-sum', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
 
   try {
     const categorySums = await FinanceManager.getIncomeExpensesSum(startDate as string, endDate as string);
     res.status(200).json(categorySums);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/empty-category-transactions', async (req: Request, res: Response) => {
+router.get('/empty-category-transactions', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const categorySums = await FinanceManager.getEmptyCategoryTransactions();
     res.status(200).json(categorySums);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.patch('/update-transaction/:id', async (req: Request, res: Response) => {
+router.patch('/update-transaction/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const updates = req.body;
 
@@ -239,34 +265,34 @@ router.patch('/update-transaction/:id', async (req: Request, res: Response) => {
     const updatedTransaction = await FinanceManager.updateTransaction(id, updates);
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/account-overview', async (req: Request, res: Response) => {
+router.get('/account-overview', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedTransaction = await FinanceManager.getAccountOverview();
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/category-list', async (req: Request, res: Response) => {
+router.get('/category-list', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedTransaction = await FinanceManager.getCategoryList();
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/investment-accounts', async (req: Request, res: Response) => {
+router.get('/investment-accounts', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedTransaction = await FinanceManager.getInvestmentAccounts();
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
@@ -278,25 +304,25 @@ router.use('/upload-investments', bodyParser.json(), (req, res, next) => {
   }
 });
 
-router.post('/upload-investments', async (req: Request, res: Response) => {
+router.post('/upload-investments', async (req: Request, res: Response, next: NextFunction) => {
   const investments = req.body;
 
   try {  
     const createdIds = await FinanceManager.addInvestments(investments);
     res.status(200).json({ message: 'Entries imported successfully', createdIds });
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.delete('/remove-transaction/:id', async (req: Request, res: Response) => {
+router.delete('/remove-transaction/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
     await FinanceManager.deleteTransaction(id);
     res.status(200).json({ message: 'Transaction deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
@@ -395,7 +421,7 @@ router.delete('/transfers/:id', async (req: Request, res: Response, next: NextFu
 
 // --- Tags -------------------------------------------------------------------
 
-router.get('/tags', async (req: Request, res: Response) => {
+router.get('/tags', async (req: Request, res: Response, next: NextFunction) => {
   // ?includeClosed=false hides finished events from pickers.
   const includeClosed = req.query.includeClosed !== 'false';
 
@@ -403,11 +429,11 @@ router.get('/tags', async (req: Request, res: Response) => {
     const tags = await FinanceManager.getTags(includeClosed);
     res.status(200).json(tags);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.post('/tags', async (req: Request, res: Response) => {
+router.post('/tags', async (req: Request, res: Response, next: NextFunction) => {
   const { tag_name, color, budget, notes } = req.body;
 
   if (!tag_name || typeof tag_name !== 'string' || !tag_name.trim()) {
@@ -422,11 +448,11 @@ router.post('/tags', async (req: Request, res: Response) => {
     if (error?.code === '23505') {
       return res.status(409).json({ error: 'A tag with that name already exists' });
     }
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.patch('/tags/:id', async (req: Request, res: Response) => {
+router.patch('/tags/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -437,11 +463,11 @@ router.patch('/tags/:id', async (req: Request, res: Response) => {
     if (error?.code === '23505') {
       return res.status(409).json({ error: 'A tag with that name already exists' });
     }
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.delete('/tags/:id', async (req: Request, res: Response) => {
+router.delete('/tags/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -449,11 +475,11 @@ router.delete('/tags/:id', async (req: Request, res: Response) => {
     if (!tag) return res.status(404).json({ error: 'Tag not found' });
     res.status(200).json({ message: 'Tag deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/tags/:id/summary', async (req: Request, res: Response) => {
+router.get('/tags/:id/summary', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -461,23 +487,23 @@ router.get('/tags/:id/summary', async (req: Request, res: Response) => {
     if (!summary) return res.status(404).json({ error: 'Tag not found' });
     res.status(200).json(summary);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/transactions/:id/tags', async (req: Request, res: Response) => {
+router.get('/transactions/:id/tags', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
     const tags = await FinanceManager.getTagsForTransaction(id);
     res.status(200).json(tags);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
 // Replaces the transaction's tags with the supplied set.
-router.put('/transactions/:id/tags', async (req: Request, res: Response) => {
+router.put('/transactions/:id/tags', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const { tagIds } = req.body;
 
@@ -493,7 +519,7 @@ router.put('/transactions/:id/tags', async (req: Request, res: Response) => {
     if (error?.code === '23503') {
       return res.status(400).json({ error: 'Unknown transaction or tag id' });
     }
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
