@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import FinanceManager from '@/managers/financeManager';
-import { bankMappings, asnCategoryMap, bankCategoryColumns } from '@/models/bankTransactionModel'
+import { bankMappings, asnCategoryMap } from '@/models/bankTransactionModel'
+import { parseBankRow, stripWrappingQuotes } from '@/utils/parseBankRow';
 import multer from 'multer';
 import fs from 'fs';
 import csvParser from 'csv-parser';
@@ -9,30 +10,6 @@ import bodyParser from 'body-parser';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // Temporary storage for uploaded files
-const reformatDate = (dateStr: string) => { // Function to reformat date from YYYYMMDD to YYYY-MM-DD
-  const year = dateStr.substring(0, 4);
-  const month = dateStr.substring(4, 6);
-  const day = dateStr.substring(6, 8);
-  return `${year}-${month}-${day}`;
-};
-
-// ASN exports dates as DD-MM-YYYY. These already contain hyphens, so they skip
-// the YYYYMMDD branch above and would otherwise reach Postgres ambiguously -
-// 01-08-2026 is 1 August here but reads as 8 January under a US datestyle.
-const isDayFirstDate = (dateStr: string) => /^\d{2}-\d{2}-\d{4}$/.test(dateStr);
-const reformatDayFirstDate = (dateStr: string) => {
-  const [day, month, year] = dateStr.split('-');
-  return `${year}-${month}-${day}`;
-};
-
-// ASN wraps free-text columns (description, category) in literal single quotes,
-// which are part of the value rather than CSV quoting and must be stripped.
-const stripWrappingQuotes = (value: string) => {
-  const trimmed = value.trim();
-  return trimmed.length > 1 && trimmed.startsWith("'") && trimmed.endsWith("'")
-    ? trimmed.slice(1, -1).trim()
-    : trimmed;
-};
 
 router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
   const { bankType } = req.query;
@@ -53,71 +30,8 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
   fs.createReadStream(filePath)
     .pipe(csvParser())
     .on('data', (data) => {
-      const entry: any = {};
-
-      // Map the of the csv headers to the database keys
-      for (const [csvKey, dbKey] of Object.entries(mapping)) {
-        entry[dbKey] = data[csvKey] || null;
-      }
-
-      // Keep the bank's own category (if it ships one) as a prediction hint.
-      // It is not written to the database directly - it only feeds the
-      // classifier, which maps it onto our own taxonomy.
-      const categoryColumn = bankCategoryColumns[bankType as string];
-      if (categoryColumn && data[categoryColumn]) {
-        entry['__bankCategory'] = data[categoryColumn];
-      }
-
-      // Special handling for reformatting the date if the key is 'date_str'
-      if (entry['date_str'] && !entry['date_str'].includes('-')) {
-        entry['date_str'] = reformatDate(entry['date_str']);
-      } else if (entry['date_str'] && isDayFirstDate(entry['date_str'])) {
-        entry['date_str'] = reformatDayFirstDate(entry['date_str']);
-      }
-
-      // Strip ASN's literal single quotes from the free-text columns
-      for (const key of ['name_description', 'notifications', 'counterparty']) {
-        if (typeof entry[key] === 'string') {
-          entry[key] = stripWrappingQuotes(entry[key]) || null;
-        }
-      }
-
-      // Replace ',' with '.' in the amount and convert it to a number
-      if (entry['amount']) {
-        entry['amount'] = parseFloat(entry['amount'].replace(',', '.'));
-      }
-
-      // Set debit_credit NL to ENG
-      if (entry['debit_credit'] !== undefined) {
-        if (entry['debit_credit'] == 'Af') {
-          entry['debit_credit'] = 'Debit';
-        } else if (entry['debit_credit'] == 'Bij') {
-            entry['debit_credit'] = 'Credit';
-        }
-      }
-
-      // Set debit_credit based on the amount if it's null
-      if (entry['debit_credit'] === undefined) {
-        entry['debit_credit'] = entry['amount'] < 0 ? 'Debit' : 'Credit';
-      }
-
-      // Convert amount to absolute value
-      entry['amount'] = Math.abs(entry['amount']);
-
-      // ASN leaves 'Naam' empty for card payments and direct debits - the merchant
-      // only appears at the start of the description. Fall back to that leading
-      // segment so the row is identifiable and can still be auto-categorised.
-      if (!entry['name_description'] && entry['notifications']) {
-        const merchant = entry['notifications'].split('>')[0].trim();
-        if (merchant) {
-          entry['name_description'] = merchant;
-        }
-      }
-
-      // Replace multiple whitespaces in name_description with a single whitespace
-      if (entry['name_description']) {
-        entry['name_description'] = entry['name_description'].replace(/\s+/g, ' ').trim();
-      }
+      const entry = parseBankRow(data, bankType as string);
+      if (!entry) return;
 
       entries.push(entry);
     })
@@ -138,10 +52,12 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         // bank's own category still categorise a first import, which is when
         // there is nothing to learn from.
         for (const entry of entries) {
-          const bankHint = entry['__bankCategory']
-            ? asnCategoryMap[stripWrappingQuotes(entry['__bankCategory'])] ?? null
+          // The bank's own category maps onto our taxonomy; it never reaches
+          // the database itself, only the classifier.
+          const bankHint = entry.bankCategory
+            ? asnCategoryMap[stripWrappingQuotes(entry.bankCategory)] ?? null
             : null;
-          delete entry['__bankCategory']; // hint only - not a database column
+          delete entry.bankCategory;
 
           if (entry['name_description']) {
             const predictedCategory = await classifyWith(
@@ -321,6 +237,102 @@ router.delete('/remove-transaction/:id', async (req: Request, res: Response, nex
   try {
     await FinanceManager.deleteTransaction(id);
     res.status(200).json({ message: 'Transaction deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// --- Accounts ---------------------------------------------------------------
+
+router.get('/accounts', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getAccounts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Account identifiers seen in transactions but absent from the accounts table.
+// Their rows import fine, but without an entry they have no name, no opening
+// balance, and cannot take part in transfer detection.
+router.get('/accounts/unknown', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getUnknownAccounts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+const ACCOUNT_TYPES = ['Checking Account', 'Savings Account', 'Investments'];
+
+router.post('/accounts', async (req: Request, res: Response, next: NextFunction) => {
+  const { account_type, account_name, details, balance_when_created } = req.body;
+
+  if (!ACCOUNT_TYPES.includes(account_type)) {
+    return res.status(400).json({ error: `account_type must be one of: ${ACCOUNT_TYPES.join(', ')}` });
+  }
+  if (!account_name || typeof account_name !== 'string' || !account_name.trim()) {
+    return res.status(400).json({ error: 'account_name is required' });
+  }
+  if (!details || typeof details !== 'string' || !details.trim()) {
+    return res.status(400).json({ error: 'details (the IBAN or account identifier) is required' });
+  }
+  if (balance_when_created !== undefined && balance_when_created !== null && Number.isNaN(Number(balance_when_created))) {
+    return res.status(400).json({ error: 'balance_when_created must be a number' });
+  }
+
+  try {
+    const account = await FinanceManager.createAccount({
+      account_type,
+      account_name: account_name.trim(),
+      details: details.trim(),
+      balance_when_created: balance_when_created === undefined || balance_when_created === null
+        ? 0
+        : Number(balance_when_created),
+    });
+    res.status(201).json(account);
+  } catch (error: any) {
+    // 23505 = unique_violation on details
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'An account with that identifier already exists' });
+    }
+    next(error);
+  }
+});
+
+router.patch('/accounts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  if (req.body.account_type !== undefined && !ACCOUNT_TYPES.includes(req.body.account_type)) {
+    return res.status(400).json({ error: `account_type must be one of: ${ACCOUNT_TYPES.join(', ')}` });
+  }
+
+  try {
+    const account = await FinanceManager.updateAccount(id, req.body);
+    if (!account) return res.status(404).json({ error: 'Account not found' });
+    res.status(200).json(account);
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'An account with that identifier already exists' });
+    }
+    next(error);
+  }
+});
+
+router.delete('/accounts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const { deleted, blockedBy } = await FinanceManager.deleteAccount(id);
+
+    if (blockedBy) {
+      return res.status(409).json({
+        error: `This account still has ${blockedBy} transaction(s) or investment(s). Reassign or remove those first.`,
+      });
+    }
+    if (!deleted) return res.status(404).json({ error: 'Account not found' });
+
+    res.status(200).json({ message: 'Account deleted' });
   } catch (error) {
     next(error);
   }

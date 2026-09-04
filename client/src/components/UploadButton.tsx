@@ -9,13 +9,24 @@ import { useNavigate } from 'react-router-dom';
 
 interface UploadButtonProps {
   onUploadSuccess: () => void;
+  /** Opened from the header's action menu rather than by its own button. */
+  openExternally?: boolean;
+  onCloseExternally?: () => void;
 }
 
-const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
+const UploadButton: React.FC<UploadButtonProps> = ({
+  onUploadSuccess,
+  openExternally,
+  onCloseExternally,
+}) => {
   const { palette } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+
+  // Controlled from outside when the menu opened it, self-controlled otherwise.
+  const isControlled = openExternally !== undefined;
+  const open = isControlled ? Boolean(openExternally) : ownOpen;
   const [bank, setBank] = useState('');
   const [error, setError] = useState<string | null>(null);
   
@@ -70,26 +81,31 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess }) => {
   };
 
   const handleOpen = () => {
-    setOpen(true);
+    setOwnOpen(true);
     setError(null); // Reset error state
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOwnOpen(false);
+    onCloseExternally?.();
+  };
 
   return (
     <>
-      <Button
-        sx={{
-          width: '100%',
-          color: palette.secondary[500],
-          '&:hover': {
-            backgroundColor: palette.action.hover
-          }
-        }}
-        onClick={handleOpen}
-      >
-        <CloudUploadIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
-      </Button>
+      {!isControlled && (
+        <Button
+          sx={{
+            width: '100%',
+            color: palette.secondary[500],
+            '&:hover': {
+              backgroundColor: palette.action.hover
+            }
+          }}
+          onClick={handleOpen}
+        >
+          <CloudUploadIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
+        </Button>
+      )}
 
       <Modal open={open} onClose={handleClose}>
         <DashboardBox sx={{ ...style, width: 300 }}>

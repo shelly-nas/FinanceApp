@@ -65,6 +65,24 @@ export interface Transfer {
   amount: string;
 }
 
+export interface Account {
+  id: number;
+  account_type: 'Checking Account' | 'Savings Account' | 'Investments';
+  account_name: string;
+  details: string;
+  balance_when_created: string | number | null;
+  transaction_count?: number;
+}
+
+/** An account identifier seen in transactions but not yet in the accounts table. */
+export interface UnknownAccount {
+  details: string;
+  transaction_count: number;
+  first_seen: string;
+  last_seen: string;
+  last_description: string | null;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
@@ -84,6 +102,8 @@ export const api = createApi({
     "transactionTags",
     "transferCandidates",
     "transfers",
+    "accounts",
+    "unknownAccounts",
   ],
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
@@ -225,6 +245,42 @@ export const api = createApi({
       }),
       providesTags: ["transactionTags"],
     }),
+    getAccounts: build.query<Account[], void>({
+      query: () => ({ url: `api/accounts` }),
+      providesTags: ["accounts"],
+    }),
+    getUnknownAccounts: build.query<UnknownAccount[], void>({
+      query: () => ({ url: `api/accounts/unknown` }),
+      providesTags: ["unknownAccounts"],
+    }),
+    createAccount: build.mutation<Account, Omit<Account, 'id' | 'transaction_count'>>({
+      query: (account) => ({
+        url: `api/accounts`,
+        method: 'POST',
+        body: account,
+      }),
+      // A newly named account changes the overview, empties it from the unknown
+      // list, and makes its rows eligible for transfer detection.
+      invalidatesTags: ["accounts", "unknownAccounts", "accountOverview",
+                        "investmentAccounts", "transferCandidates"],
+    }),
+    updateAccount: build.mutation<Account, { id: number; updates: Partial<Account> }>({
+      query: ({ id, updates }) => ({
+        url: `api/accounts/${id}`,
+        method: 'PATCH',
+        body: updates,
+      }),
+      // Renaming an identifier rewrites it on every transaction that used it.
+      invalidatesTags: ["accounts", "unknownAccounts", "accountOverview",
+                        "investmentAccounts", "transactions", "transferCandidates"],
+    }),
+    deleteAccount: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/accounts/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["accounts", "unknownAccounts", "accountOverview", "investmentAccounts"],
+    }),
     getTransferCandidates: build.query<TransferCandidate[], { ids?: string } | void>({
       query: (args) => ({
         url: `api/transfer-candidates`,
@@ -299,4 +355,9 @@ export const {
   useConfirmTransferMutation,
   useRejectTransferMutation,
   useUnlinkTransferMutation,
+  useGetAccountsQuery,
+  useGetUnknownAccountsQuery,
+  useCreateAccountMutation,
+  useUpdateAccountMutation,
+  useDeleteAccountMutation,
 } = api;

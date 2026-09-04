@@ -504,6 +504,204 @@ class FinanceManager {
 }
 
 
+
+  // ---------------------------------------------------------------------------
+  // Accounts
+  //
+  // Checking and savings accounts announce themselves: every imported row names
+  // the account it belongs to, so the list can be derived rather than kept by
+  // hand. Investment accounts cannot - they appear in no export, and are entered
+  // through the investments dialog, which reads its dropdown from this table.
+  //
+  // The table therefore stays authoritative. What it gains is discovery: an
+  // account seen in transactions but absent here is offered for review rather
+  // than silently ignored, which is what leaves balances stuck at zero.
+  // ---------------------------------------------------------------------------
+
+  /** All accounts, with the number of transactions each one carries. */
+  public async getAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        a.id,
+        a.account_type,
+        a.account_name,
+        a.details,
+        a.balance_when_created,
+        (SELECT COUNT(*)::int FROM public.${transaction_table} t WHERE t.account = a.details) AS transaction_count
+      FROM public.${account_table} a
+      ORDER BY a.account_type, a.account_name;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Account identifiers seen in transactions that have no row in the accounts
+   * table.
+   *
+   * Their transactions still import and still count towards the summaries, but
+   * they have no name, no type and no opening balance, so they are missing from
+   * the account overview and cannot take part in transfer detection.
+   */
+  public async getUnknownAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.account AS details,
+        COUNT(*)::int AS transaction_count,
+        MIN(t.date_str) AS first_seen,
+        MAX(t.date_str) AS last_seen,
+        -- A sample description helps identify whose account it is.
+        (ARRAY_AGG(t.name_description ORDER BY t.date_str DESC))[1] AS last_description
+      FROM public.${transaction_table} t
+      LEFT JOIN public.${account_table} a ON a.details = t.account
+      WHERE t.account IS NOT NULL
+        AND a.id IS NULL
+      GROUP BY t.account
+      ORDER BY COUNT(*) DESC;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async createAccount(account: {
+    account_type: string,
+    account_name: string,
+    details: string,
+    balance_when_created?: number | null,
+  }): Promise<any> {
+    const client = await dbContext.connect();
+
+    const query = `
+      INSERT INTO public.${account_table} (account_type, account_name, details, balance_when_created)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [
+        account.account_type,
+        account.account_name,
+        account.details,
+        account.balance_when_created ?? 0,
+      ]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  public async updateAccount(id: string, updates: { [key: string]: any }): Promise<any> {
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['account_type', 'account_name', 'details', 'balance_when_created']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    try {
+      await client.query('BEGIN');
+
+      const before = await client.query(
+        `SELECT details FROM public.${account_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (before.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      const result = await client.query(
+        `UPDATE public.${account_table} SET ${setClause} WHERE id = $${values.length + 1} RETURNING *`,
+        [...values, id],
+      );
+
+      // transactions.account and investments.account reference details by value,
+      // not by key. Renaming an identifier without carrying those along would
+      // orphan every row that used the old one - the balance would silently
+      // revert to the opening figure.
+      const oldDetails = before.rows[0].details;
+      const newDetails = result.rows[0].details;
+
+      if (oldDetails !== newDetails) {
+        await client.query(
+          `UPDATE public.${transaction_table} SET account = $1 WHERE account = $2`,
+          [newDetails, oldDetails],
+        );
+        await client.query(
+          `UPDATE public.${investment_table} SET account = $1 WHERE account = $2`,
+          [newDetails, oldDetails],
+        );
+      }
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Remove an account. Refuses while transactions or investments still point at
+   * it, since those rows reference it by value and would be left orphaned.
+   */
+  public async deleteAccount(id: string): Promise<{ deleted: any, blockedBy?: number }> {
+    const client = await dbContext.connect();
+
+    try {
+      const existing = await client.query(
+        `SELECT details FROM public.${account_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (existing.rows.length === 0) return { deleted: null };
+
+      const { details } = existing.rows[0];
+      const inUse = await client.query(
+        `SELECT
+           (SELECT COUNT(*)::int FROM public.${transaction_table} WHERE account = $1) +
+           (SELECT COUNT(*)::int FROM public.${investment_table} WHERE account = $1) AS n`,
+        [details],
+      );
+
+      if (inUse.rows[0].n > 0) {
+        return { deleted: null, blockedBy: inUse.rows[0].n };
+      }
+
+      const removed = await client.query(
+        `DELETE FROM public.${account_table} WHERE id = $1 RETURNING *`,
+        [id],
+      );
+      return { deleted: removed.rows[0] };
+    } finally {
+      client.release();
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Internal transfers
   //

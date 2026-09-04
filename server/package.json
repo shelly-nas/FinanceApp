@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && node --require module-alias/register --test --test-concurrency=1 \"dist/__tests__/**/*.test.js\"",
     "clean": "rm -rf dist/*",
     "build": "npm run clean && tsc",
     "dev": "nodemon dist/index.js",
-    "seed": "node dist/scripts/seed.js"
+    "seed": "node dist/scripts/seed.js",
+    "test:watch": "npm run build && node --require module-alias/register --test --test-concurrency=1 --watch \"dist/__tests__/**/*.test.js\""
   },
   "keywords": [],
   "author": "",

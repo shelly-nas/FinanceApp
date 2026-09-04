@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody, useTheme } from '@mui/material';
 
 interface Transaction {
+  id: number,
   date_str: string,
   name_description: string,
   account: string,
@@ -93,7 +94,7 @@ const SortableTransactionTable: React.FC<SortableTransactionTableProps> = ({ ite
         </TableHead>
         <TableBody>
           {sortedTransactions.map((transaction) => (
-            <TableRow key={transaction.date_str + transaction.name_description}>
+            <TableRow key={transaction.id}>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.date_str}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left', minWidth: 180 }}>{transaction.name_description}</TableCell>
               <TableCell sx={{ ...typography.body2, textAlign: 'left' }}>{transaction.account}</TableCell>

@@ -13,6 +13,7 @@ import DashboardBox from '@/components/DashboardBox';
 import DeletePopup from '@/components/DeletePopup';
 import TagPicker from '@/components/TagPicker';
 import TransferSuggestions from '@/scenes/reviewTransactions/TransferSuggestions';
+import UnknownAccounts from '@/scenes/reviewTransactions/UnknownAccounts';
 
 interface Transaction {
   id: number;
@@ -26,6 +27,22 @@ interface Transaction {
   transaction_type: string;
   notifications: string;
 }
+
+// The columns the table renders, in order. Header and body both read this one
+// list: deriving the body from Object.keys(row) instead made the layout depend
+// on the column order Postgres happens to return, so adding a column shifted
+// every value one cell to the left of its heading.
+const COLUMNS: (keyof Transaction)[] = [
+  'id',
+  'date_str',
+  'name_description',
+  'account',
+  'counterparty',
+  'category',
+  'debit_credit',
+  'amount',
+  'notifications',
+];
 
 const ReviewTransactions: React.FC = () => {
   const { palette, typography } = useTheme();
@@ -213,6 +230,7 @@ const ReviewTransactions: React.FC = () => {
             : '.'}
         </Alert>
       )}
+      <UnknownAccounts />
       <TransferSuggestions transactionIds={transactionIds} />
       {reviewTransactions.length > 0 && (
         <Typography variant="body2" sx={{ px: 1, py: 0.5, opacity: 0.7 }}>
@@ -232,7 +250,7 @@ const ReviewTransactions: React.FC = () => {
           <Table size="small">
             <TableHead>
               <TableRow>
-                {['id', 'date_str', 'name_description', 'account', 'counterparty', 'category', 'debit_credit', 'amount', 'notifications'].map((key) => (
+                {COLUMNS.map((key) => (
                   <TableCell sx={{ ...typography.body1, fontWeight: 'bold', textAlign: 'left' }} key={key}>
                     <TableSortLabel
                       active={sortConfig?.key === key}
@@ -250,7 +268,7 @@ const ReviewTransactions: React.FC = () => {
             <TableBody>
               {reviewTransactions.map((row, rowIdx) => (
                 <TableRow key={row.id}>
-                  {Object.keys(row).map((key) => (
+                  {COLUMNS.map((key) => (
                     <TableCell
                       key={key}
                       onClick={() => handleStartEdit(rowIdx, key as keyof Transaction)}
