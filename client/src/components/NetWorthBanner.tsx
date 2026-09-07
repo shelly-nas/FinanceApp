@@ -6,6 +6,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
 import { AccountBalance, useGetAccountOverviewQuery } from '@/api';
 
 const formatCurrency = (value: number) =>
@@ -30,6 +32,9 @@ const groupByType = (accounts: AccountBalance[]) =>
  */
 const NetWorthBanner: React.FC = () => {
   const { palette } = useTheme();
+  // colorPrimary, not colorSecondary: the latter is grey[100], all but
+  // invisible against the panel background.
+  const dividerColor = palette.cosmetics.colorPrimary;
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -45,61 +50,63 @@ const NetWorthBanner: React.FC = () => {
   const blur = visible ? undefined : 'blur-text';
 
   return (
-    <Box
-      sx={{
-        border: `${palette.cosmetics.width} ${palette.cosmetics.borderStyle} ${palette.cosmetics.colorPrimary}`,
-        borderRadius: palette.cosmetics.radius,
-        backgroundColor: palette.background.light,
-        px: 2,
-        py: 1.25,
-        mb: 1.5,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
-        <Box>
-          <Typography
-            variant="body3"
-            sx={{ display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.7 }}
-          >
-            Net worth today
-          </Typography>
-          <Typography variant="h2" className={blur} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-            {formatCurrency(total)}
-          </Typography>
-        </Box>
+    // The same DashboardBox the widgets use, rather than a hand-rolled copy of
+    // its border and radius: one definition means the banner cannot drift out
+    // of step with the panels below it. Only the text alignment is overridden,
+    // since the box centres by default and these are label/value pairs.
+    <DashboardBox sx={{ mb: 1.5, textAlign: 'left' }}>
+      {/* The widgets carry a centred h3 with the actions at the right edge; the
+          banner follows suit so the two read as the same kind of panel. */}
+      <WidgetHeader
+        title="Net Worth Today"
+        action={
+          <>
+            <Tooltip title={visible ? 'Hide amounts' : 'Show amounts'}>
+              <IconButton size="small" onClick={() => setVisible((v) => !v)}>
+                {visible ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={expanded ? 'Hide accounts' : 'Show accounts'}>
+              <IconButton size="small" onClick={() => setExpanded((e) => !e)}>
+                {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          </>
+        }
+      />
+
+      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 3, flexWrap: 'wrap', px: 1 }}>
+        <Typography variant="h2" className={blur} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          {formatCurrency(total)}
+        </Typography>
+
+        <Box sx={{ flexGrow: 1 }} />
 
         {TYPE_ORDER.filter((type) => grouped[type]?.length).map((type) => (
-          <Box key={type}>
-            <Typography variant="body3" sx={{ display: 'block', opacity: 0.7 }}>
+          <Box key={type} sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+            <Typography variant="body2" sx={{ opacity: 0.75 }}>
               {type === 'Checking Account' ? 'Checking' : type === 'Savings Account' ? 'Savings' : 'Investments'}
             </Typography>
-            <Typography variant="body1" className={blur} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+            <Typography variant="body1" className={blur} fontWeight="bold" sx={{ fontVariantNumeric: 'tabular-nums' }}>
               {formatCurrency(typeTotal(type))}
             </Typography>
           </Box>
         ))}
-
-        <Box sx={{ flexGrow: 1 }} />
-
-        <Tooltip title={visible ? 'Hide amounts' : 'Show amounts'}>
-          <IconButton size="small" onClick={() => setVisible((v) => !v)}>
-            {visible ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={expanded ? 'Hide accounts' : 'Show accounts'}>
-          <IconButton size="small" onClick={() => setExpanded((e) => !e)}>
-            {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-          </IconButton>
-        </Tooltip>
       </Box>
 
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Divider sx={{ my: 1 }} />
+        {/* borderColor, not the color prop: MUI's Divider draws its line as a
+            border, so color leaves it invisible. */}
+        <Divider sx={{ mt: 1, mb: 1, borderColor: dividerColor }} />
+        {/* Wide enough that a long account name and its amount are not pushed
+            against each other; the column gap keeps neighbouring pairs apart. */}
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: 0.5,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            columnGap: 4,
+            rowGap: 0.5,
+            px: 1,
           }}
         >
           {TYPE_ORDER.filter((type) => grouped[type]?.length).flatMap((type) =>
@@ -121,7 +128,7 @@ const NetWorthBanner: React.FC = () => {
           )}
         </Box>
       </Collapse>
-    </Box>
+    </DashboardBox>
   );
 };
 

@@ -1,16 +1,16 @@
 # Graph Report - FinanceApp  (2026-09-04)
 
 ## Corpus Check
-- 72 files · ~47,681 words
+- 72 files · ~47,927 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 450 nodes · 631 edges · 23 communities (16 shown, 7 thin omitted)
+- 450 nodes · 632 edges · 22 communities (15 shown, 7 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cda55842`
+- Built from commit: `a62d9d26`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,7 +36,6 @@
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
-- [[_COMMUNITY_Community 21|Community 21]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `FinanceManager` - 44 edges
@@ -62,15 +61,15 @@
 - `ensureSchema()` --calls--> `runMigrations()`  [EXTRACTED]
   server/src/__tests__/schema.ts → server/src/context/migrations.ts
 
-## Communities (23 total, 7 thin omitted)
+## Communities (22 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (30): ACCOUNT_TYPES, Accounts(), DraftAccount, emptyDraft(), filter, TagOption, TagPickerProps, Column (+22 more)
+Nodes (42): ArrowButton, formatCurrency(), groupByType(), NetWorthBanner(), TYPE_ORDER, Props, AccountCategory, AccountsOverview() (+34 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.06
-Nodes (37): ArrowButton, Props, AccountCategory, AccountsOverview(), formatCurrency(), groupByAccountType(), ExchangeType, IncomeExpenseItem (+29 more)
+Cohesion: 0.05
+Nodes (30): ACCOUNT_TYPES, Accounts(), DraftAccount, emptyDraft(), filter, TagOption, TagPickerProps, Column (+22 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.06
@@ -86,7 +85,7 @@ Nodes (37): 10. De rekeningtabel is met placeholder-IBAN's gevuld, 11. De transa
 
 ### Community 6 - "Community 6"
 Cohesion: 0.09
-Nodes (21): formatCurrency(), groupByType(), NetWorthBanner(), TYPE_ORDER, ThemeModeToggle(), DateRangeProvider(), Props, TABS (+13 more)
+Nodes (21): Categories(), CATEGORY_TYPES, emptyDraft(), INCOME_OUTCOME, ThemeModeToggle(), DateRangeProvider(), Props, TABS (+13 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.13
@@ -113,14 +112,10 @@ Cohesion: 0.22
 Nodes (4): DashboardBox, DeletePopupProps, style, Props
 
 ### Community 14 - "Community 14"
-Cohesion: 0.4
-Nodes (5): Categories(), CATEGORY_TYPES, emptyDraft(), INCOME_OUTCOME, Category
-
-### Community 15 - "Community 15"
 Cohesion: 0.5
 Nodes (3): Changing the schema, code:bash (docker compose down -v && docker compose up --build), Database
 
-### Community 16 - "Community 16"
+### Community 15 - "Community 15"
 Cohesion: 0.5
 Nodes (3): code:js (export default {), Expanding the ESLint configuration, React + TypeScript + Vite
 
@@ -139,7 +134,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**

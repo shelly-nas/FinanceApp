@@ -75,7 +75,10 @@ const Header = (_props: Props) => {
 
       <Tabs
         value={activeTab === -1 ? false : activeTab}
-        sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 40 }}
+        // Same gap below as the widgets keep between each other (mb: 1.5), so
+        // the tab strip sits in the page's rhythm rather than crowding the
+        // panel underneath it.
+        sx={{ minHeight: 48, mb: 1.5 }}
       >
         {TABS.map((tab) => (
           <Tab
@@ -88,7 +91,7 @@ const Header = (_props: Props) => {
                 ? '/transactions?review=true'
                 : tab.path
             }
-            sx={{ minHeight: 40, textTransform: 'none' }}
+            sx={{ minHeight: 48, textTransform: 'none' }}
             label={
               tab.path === '/transactions' && reviewCount > 0 ? (
                 <Badge badgeContent={reviewCount} color="secondary" sx={{ pr: 1.5 }}>
