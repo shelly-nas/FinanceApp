@@ -1,5 +1,6 @@
 import dbContext from '@/context/dbContext';
 import Transactions from '@/models/financeModel';
+import { computeImportHash, identityKey, HashableEntry } from '@/utils/importHash';
 
 const category_table = "categories"
 const transaction_table = "transactions";
@@ -7,27 +8,101 @@ const account_table = "accounts";
 const investment_table = "investments";
 const tag_table = "tags";
 const transaction_tag_table = "transaction_tags";
+const transfer_table = "transfers";
+
+export interface ImportResult {
+  createdIds: number[];
+  imported: number;
+  skipped: number;
+}
 
 class FinanceManager {
-  public async addTransactions(entries: { date_str: string, name_description: string, account: string, counterparty: string | null, category: string | null, debit_credit: string | undefined, amount: number, notifications: string | null }[]): Promise<number[]> {
+  /**
+   * Import a batch of transactions, skipping rows already stored.
+   *
+   * Bank exports overlap: asking for "the last three months" twice delivers the
+   * same rows again. Each row therefore carries an import_hash over its
+   * identifying fields, and a unique index turns a repeat into a no-op instead
+   * of a second copy that silently doubles every total.
+   */
+  public async addTransactions(entries: {
+    date_str: string,
+    name_description: string,
+    account: string,
+    counterparty: string | null,
+    category: string | null,
+    debit_credit: string | undefined,
+    amount: number,
+    notifications: string | null,
+  }[]): Promise<ImportResult> {
     const client = await dbContext.connect();
     const createdIds: number[] = [];
+    let skipped = 0;
 
     try {
       await client.query('BEGIN');
-  
+
+      // Two identical payments on one day are both genuine, so a row's hash
+      // includes how many identical rows precede it. The count starts at what
+      // is already stored, which makes the numbering stable across re-imports
+      // of the same file.
+      const occurrences = new Map<string, number>();
+
       for (const entry of entries) {
         entry.category = entry.category === 'null' ? null : entry.category;
-        const result = await client.query(
-          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, category, debit_credit, amount, notifications)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.category, entry.debit_credit, entry.amount, entry.notifications]
+
+        const hashable: HashableEntry = {
+          date_str: entry.date_str,
+          account: entry.account,
+          amount: entry.amount,
+          debit_credit: entry.debit_credit ?? null,
+          name_description: entry.name_description,
+          notifications: entry.notifications,
+        };
+        const key = identityKey(hashable);
+
+        const occurrence = occurrences.get(key) ?? 0;
+        occurrences.set(key, occurrence + 1);
+
+        // Rows stored before import_hash existed carry none, so the unique
+        // index cannot catch them. Match those on their identifying fields
+        // instead, counting how many the file has already claimed, so a genuine
+        // pair of identical payments still imports both halves.
+        const legacy = await client.query(
+          `SELECT COUNT(*)::int AS n FROM public.${transaction_table}
+           WHERE import_hash IS NULL
+             AND date_str = $1 AND account IS NOT DISTINCT FROM $2
+             AND amount = $3 AND debit_credit IS NOT DISTINCT FROM $4
+             AND name_description IS NOT DISTINCT FROM $5`,
+          [entry.date_str, entry.account, entry.amount, entry.debit_credit ?? null, entry.name_description],
         );
 
-        const insertedId = result.rows[0].id;
-        createdIds.push(insertedId);
+        if (legacy.rows[0].n > occurrence) {
+          skipped++;
+          continue;
+        }
+
+        const importHash = computeImportHash(hashable, occurrence);
+
+        const result = await client.query(
+          // The unique index is partial (rows predating the column have a NULL
+          // hash and must not collide), and Postgres only accepts a partial
+          // index as a conflict target when the predicate is restated here.
+          `INSERT INTO ${transaction_table} (date_str, name_description, account, counterparty, category, debit_credit, amount, notifications, import_hash)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT (import_hash) WHERE import_hash IS NOT NULL DO NOTHING
+          RETURNING id`,
+          [entry.date_str, entry.name_description, entry.account, entry.counterparty, entry.category, entry.debit_credit, entry.amount, entry.notifications, importHash]
+        );
+
+        if (result.rows.length === 0) {
+          skipped++;
+          continue;
+        }
+
+        createdIds.push(result.rows[0].id);
       }
-  
+
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
@@ -35,41 +110,307 @@ class FinanceManager {
     } finally {
       client.release();
     }
-  
-    return createdIds;
+
+    return { createdIds, imported: createdIds.length, skipped };
   }
-  
-  public async getTransactions(startDate?: string, endDate?: string, ids?: number[]): Promise<Transactions[]> {
+
+  /**
+   * Transactions in a date range, or by id.
+   *
+   * `limit` caps the result: without one an unfiltered call returns the entire
+   * history, which grows without bound and is loaded into memory whole.
+   */
+  public async getTransactions(
+    startDate?: string,
+    endDate?: string,
+    ids?: number[],
+    limit = 5000,
+    offset = 0,
+  ): Promise<Transactions[]> {
     const client = await dbContext.connect();
     let query = `SELECT * FROM public.${transaction_table} WHERE 1=1`;
     const params: any[] = [];
     let paramIndex = 1;
-  
+
     if (startDate) {
       query += ` AND date_str >= $${paramIndex}`;
       params.push(startDate);
       paramIndex++;
     }
-  
+
     if (endDate) {
       query += ` AND date_str <= $${paramIndex}`;
       params.push(endDate);
       paramIndex++;
     }
-  
+
     if (ids && ids.length > 0) {
       const placeholders = ids.map((_, index) => `$${paramIndex + index}`).join(', ');
       query += ` AND id IN (${placeholders})`;
       params.push(...ids);
+      paramIndex += ids.length;
     }
-  
+
+    // A stable order is what makes offset paging meaningful; id breaks ties
+    // between rows sharing a date.
+    query += ` ORDER BY date_str DESC, id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(limit, offset);
+
     try {
       const result = await client.query(query, params);
       return result.rows;
     } finally {
       client.release();
     }
-  }  
+  }
+
+  /**
+   * Search transactions.
+   *
+   * One query behind every list of transactions in the app: the review screen is
+   * this with `uncategorised: true`, a category drill-down is this with a
+   * category, and the search screen is this with whatever the user typed. Having
+   * a single source avoids two tables that drift apart in what they can show.
+   *
+   * Returns the page plus the total, so the client can page without guessing how
+   * many rows there are.
+   */
+  public async searchTransactions(filters: {
+    query?: string,
+    startDate?: string,
+    endDate?: string,
+    categories?: string[],
+    accounts?: string[],
+    tagIds?: number[],
+    debitCredit?: string,
+    minAmount?: number,
+    maxAmount?: number,
+    uncategorised?: boolean,
+    includeInternal?: boolean,
+    sortBy?: string,
+    sortDir?: 'asc' | 'desc',
+    limit?: number,
+    offset?: number,
+  }): Promise<{ rows: any[], total: number }> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+    const where: string[] = ['1=1'];
+
+    const add = (value: any) => {
+      params.push(value);
+      return `$${params.length}`;
+    };
+
+    if (filters.query) {
+      // One parameter matched against the three free-text columns: a merchant
+      // may be named in the description on one bank's export and only in the
+      // remittance text on another's.
+      const term = add(`%${filters.query}%`);
+      where.push(`(
+        t.name_description ILIKE ${term}
+        OR t.notifications ILIKE ${term}
+        OR t.counterparty ILIKE ${term}
+        OR t.account ILIKE ${term}
+      )`);
+    }
+
+    if (filters.startDate) where.push(`t.date_str >= ${add(filters.startDate)}`);
+    if (filters.endDate) where.push(`t.date_str <= ${add(filters.endDate)}`);
+
+    if (filters.categories && filters.categories.length > 0) {
+      where.push(`t.category = ANY(${add(filters.categories)}::text[])`);
+    }
+
+    if (filters.accounts && filters.accounts.length > 0) {
+      where.push(`t.account = ANY(${add(filters.accounts)}::text[])`);
+    }
+
+    if (filters.tagIds && filters.tagIds.length > 0) {
+      where.push(`EXISTS (
+        SELECT 1 FROM public.${transaction_tag_table} tt
+        WHERE tt.transaction_id = t.id AND tt.tag_id = ANY(${add(filters.tagIds)}::int[])
+      )`);
+    }
+
+    if (filters.debitCredit) where.push(`t.debit_credit = ${add(filters.debitCredit)}`);
+    if (filters.minAmount !== undefined) where.push(`t.amount >= ${add(filters.minAmount)}`);
+    if (filters.maxAmount !== undefined) where.push(`t.amount <= ${add(filters.maxAmount)}`);
+
+    // The review list: rows the classifier was not confident enough to label.
+    if (filters.uncategorised) where.push('t.category IS NULL');
+
+    // Confirmed transfers are money moved rather than spent. They stay out of
+    // the default view for the same reason they stay out of the summaries, but
+    // remain findable when explicitly asked for.
+    if (!filters.includeInternal) where.push('t.is_internal IS NOT TRUE');
+
+    const whereClause = where.join(' AND ');
+
+    // Whitelisted: a sort column cannot be parameterised, so it is matched
+    // against known names rather than interpolated.
+    const SORTABLE = new Set(['date_str', 'name_description', 'account', 'category', 'amount', 'debit_credit']);
+    const sortBy = filters.sortBy && SORTABLE.has(filters.sortBy) ? filters.sortBy : 'date_str';
+    const sortDir = filters.sortDir === 'asc' ? 'ASC' : 'DESC';
+
+    const limit = Math.min(filters.limit ?? 100, 1000);
+    const offset = filters.offset ?? 0;
+
+    // The count runs on the filter parameters only; limit and offset are added
+    // after this snapshot so the two queries cannot drift apart.
+    const filterParams = [...params];
+
+    const rowsQuery = `
+      SELECT
+        t.*,
+        COALESCE(
+          (SELECT JSON_AGG(JSON_BUILD_OBJECT('id', tg.id, 'tag_name', tg.tag_name, 'color', tg.color)
+                           ORDER BY tg.tag_name)
+           FROM public.${transaction_tag_table} tt
+           JOIN public.${tag_table} tg ON tg.id = tt.tag_id
+           WHERE tt.transaction_id = t.id),
+          '[]'::json
+        ) AS tags
+      FROM public.${transaction_table} t
+      WHERE ${whereClause}
+      ORDER BY ${sortBy} ${sortDir}, t.id ${sortDir}
+      LIMIT ${add(limit)} OFFSET ${add(offset)};
+    `;
+
+    // Counted with the same filters but without paging, so the client can show
+    // "showing 100 of 1,432" rather than inferring it from a short page.
+    const countQuery = `
+      SELECT COUNT(*)::int AS total
+      FROM public.${transaction_table} t
+      WHERE ${whereClause};
+    `;
+
+    try {
+      const [rows, count] = await Promise.all([
+        client.query(rowsQuery, params),
+        client.query(countQuery, filterParams),
+      ]);
+
+      return { rows: rows.rows, total: count.rows[0].total };
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Apply one change to many transactions at once.
+   *
+   * Categorising an import row by row is the bulk of the work on this screen;
+   * with filters in place, "everything matching this search" is usually the same
+   * category.
+   */
+  public async bulkUpdateTransactions(ids: number[], updates: { [key: string]: any }): Promise<number> {
+    if (ids.length === 0) return 0;
+
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['category', 'debit_credit', 'account', 'counterparty', 'is_internal']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    try {
+      const result = await client.query(
+        `UPDATE public.${transaction_table}
+         SET ${setClause}
+         WHERE id = ANY($${values.length + 1}::int[])`,
+        [...values, ids],
+      );
+      return result.rowCount ?? 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Assign or clear one tag across many transactions in a single statement. */
+  public async bulkSetTag(ids: number[], tagId: number, mode: 'add' | 'remove'): Promise<number> {
+    if (ids.length === 0) return 0;
+
+    const client = await dbContext.connect();
+
+    try {
+      if (mode === 'remove') {
+        const result = await client.query(
+          `DELETE FROM public.${transaction_tag_table}
+           WHERE tag_id = $1 AND transaction_id = ANY($2::int[])`,
+          [tagId, ids],
+        );
+        return result.rowCount ?? 0;
+      }
+
+      const result = await client.query(
+        `INSERT INTO public.${transaction_tag_table} (transaction_id, tag_id)
+         SELECT UNNEST($2::int[]), $1
+         ON CONFLICT DO NOTHING`,
+        [tagId, ids],
+      );
+      return result.rowCount ?? 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Distinct account identifiers present in transactions, for the filter list. */
+  public async getTransactionAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.account AS details,
+        COALESCE(a.account_name, t.account) AS account_name,
+        COUNT(*)::int AS transaction_count
+      FROM public.${transaction_table} t
+      LEFT JOIN public.${account_table} a ON a.details = t.account
+      WHERE t.account IS NOT NULL
+      GROUP BY t.account, a.account_name
+      ORDER BY 2;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * The rows the classifier learns from: categorised transactions, and only the
+   * three columns it reads.
+   *
+   * Training used to call getTransactions(), pulling every column of every row
+   * including the uncategorised ones it discards - the bulk of the work on an
+   * import, repeated on each one.
+   */
+  public async getTrainingData(): Promise<{ name_description: string; notifications: string; category: string }[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT name_description, notifications, category
+      FROM public.${transaction_table}
+      WHERE category IS NOT NULL
+      ORDER BY id DESC
+      LIMIT 20000;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 
   public async getCategorySums(startDate?: string, endDate?: string): Promise<any[]> {
     const client = await dbContext.connect();
@@ -92,16 +433,23 @@ class FinanceManager {
         public.${category_table} c ON ja.category = c.category_name
       WHERE 
         1=1
+        -- Confirmed transfers between the user's own accounts are money moved,
+        -- not money spent or earned, so they must not reach a breakdown.
+        AND ja.is_internal IS NOT TRUE
     `;
 
+    let paramIndex = 1;
+
     if (startDate) {
-      query += " AND ja.date_str >= $1";
+      query += ` AND ja.date_str >= $${paramIndex}`;
       params.push(startDate);
+      paramIndex++;
     }
 
     if (endDate) {
-      query += " AND ja.date_str <= $2";
+      query += ` AND ja.date_str <= $${paramIndex}`;
       params.push(endDate);
+      paramIndex++;
     }
 
     query += `
@@ -148,16 +496,24 @@ class FinanceManager {
           public.categories c ON ja.category = c.category_name
         WHERE
           c.category_type IN ('Vast', 'Variabel')
+          -- See getCategorySums: an internal transfer is neither income nor
+          -- expense, and counting both its sides inflates each by the amount
+          -- moved and distorts the savings rate.
+          AND ja.is_internal IS NOT TRUE
     `;
 
+    let paramIndex = 1;
+
     if (startDate) {
-      query += " AND ja.date_str >= $1";
+      query += ` AND ja.date_str >= $${paramIndex}`;
       params.push(startDate);
+      paramIndex++;
     }
 
     if (endDate) {
-      query += " AND ja.date_str <= $2";
+      query += ` AND ja.date_str <= $${paramIndex}`;
       params.push(endDate);
+      paramIndex++;
     }
 
     query += `
@@ -186,10 +542,14 @@ class FinanceManager {
   public async getEmptyCategoryTransactions(): Promise<any[]> {
     const client = await dbContext.connect();
 
+    // Newest first and capped: this feeds a review screen, and a backlog of
+    // thousands is worked through from the top rather than rendered whole.
     let query = `
       SELECT *
       FROM public.${transaction_table}
-      WHERE category IS NULL;
+      WHERE category IS NULL
+      ORDER BY date_str DESC, id DESC
+      LIMIT 2000;
     `;
 
     try {
@@ -244,13 +604,31 @@ class FinanceManager {
     }
   }
 
-  public async getAccountOverview(): Promise<any> {
+  /**
+   * Balance per account, either as of today or as of a given date.
+   *
+   * `asOf` makes the figure historical: transactions after that date are left
+   * out, and an investment account takes the last balance recorded on or before
+   * it. Without it the query answers "right now".
+   *
+   * Internal transfers are deliberately included. They are excluded from income
+   * and expenses because nothing was earned or spent, but the money genuinely
+   * moved between accounts - leaving them out here would make both balances wrong.
+   */
+  public async getAccountOverview(asOf?: string): Promise<any> {
     const client = await dbContext.connect();
+    const params: any[] = [];
+    // The same bound is applied to transactions and investments, so a historical
+    // net worth mixes figures from one moment rather than several.
+    const dateFilter = asOf ? ` AND ${transaction_table}.date_str <= $1` : '';
+    const investmentFilter = asOf ? ` AND ${investment_table}.date_str <= $1` : '';
+    if (asOf) params.push(asOf);
 
     let query = `
       SELECT 
         ${account_table}.account_type, 
         ${account_table}.account_name, 
+        ${account_table}.details,
       COALESCE(
         CASE
           WHEN ${account_table}.account_type IN ('Checking Account', 'Savings Account') THEN (
@@ -262,12 +640,12 @@ class FinanceManager {
               END
             ), 0)
             FROM public.${transaction_table}
-            WHERE ${transaction_table}.account = ${account_table}.details
+            WHERE ${transaction_table}.account = ${account_table}.details${dateFilter}
           )
           WHEN ${account_table}.account_type = 'Investments' THEN (
             SELECT ${investment_table}.balance
             FROM public.${investment_table}
-            WHERE ${investment_table}.account = ${account_table}.details
+            WHERE ${investment_table}.account = ${account_table}.details${investmentFilter}
             ORDER BY ${investment_table}.date_str DESC
             LIMIT 1
           )
@@ -275,12 +653,299 @@ class FinanceManager {
         END,
         ${account_table}.balance_when_created
       ) AS current_balance
-    FROM public.${account_table};
+    FROM public.${account_table}
+    ORDER BY ${account_table}.account_type, ${account_table}.account_name;
     `;
     
     try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Spending per category per month, for the trend chart.
+   *
+   * Returns one row per category-month with a positive figure for spending, so
+   * a category that nets positive over a month (a refund) is visible as such
+   * rather than folded away. Confirmed internal transfers are excluded for the
+   * same reason they are excluded from the summaries - nothing was spent.
+   *
+   * Months with no activity for a category are absent rather than zero; the
+   * chart fills those, because the caller knows the range it asked for.
+   */
+  public async getCategoryHistory(
+    startDate: string,
+    endDate: string,
+    filters: { categories?: string[]; accounts?: string[]; includeInternal?: boolean } = {},
+  ): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [startDate, endDate];
+    const where: string[] = ['t.date_str >= $1', 't.date_str <= $2'];
+
+    const add = (value: any) => {
+      params.push(value);
+      return `$${params.length}`;
+    };
+
+    if (filters.categories && filters.categories.length > 0) {
+      where.push(`t.category = ANY(${add(filters.categories)}::text[])`);
+    }
+    if (filters.accounts && filters.accounts.length > 0) {
+      where.push(`t.account = ANY(${add(filters.accounts)}::text[])`);
+    }
+    if (!filters.includeInternal) {
+      where.push('t.is_internal IS NOT TRUE');
+    }
+
+    // Uncategorised rows are left out: they would all collapse into one unnamed
+    // series that says nothing about where money goes.
+    where.push('t.category IS NOT NULL');
+
+    // Income categories are excluded: this chart answers "what did things cost",
+    // and a salary of a few thousand as a negative series drags the axis below
+    // zero and makes every real cost a sliver by comparison.
+    where.push("c.income_outcome IS DISTINCT FROM 'Inkomsten'");
+
+    const query = `
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', t.date_str), 'YYYY-MM') AS month,
+        t.category,
+        c.color,
+        c.income_outcome,
+        -- Debits positive: this chart answers "what did this cost", so spending
+        -- reads as a positive height and a refund pulls it back down.
+        SUM(CASE WHEN t.debit_credit = 'Debit' THEN t.amount ELSE -t.amount END)::numeric AS total
+      FROM public.${transaction_table} t
+      JOIN public.${category_table} c ON c.category_name = t.category
+      WHERE ${where.join(' AND ')}
+      GROUP BY 1, t.category, c.color, c.income_outcome
+      ORDER BY 1, t.category;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Net worth at the end of each month over a period.
+   *
+   * Built for a chart: a running total per account carried forward month by
+   * month, so a month in which an account saw no activity keeps its previous
+   * balance rather than dropping to zero.
+   */
+  public async getNetWorthHistory(startDate: string, endDate: string): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      WITH months AS (
+        SELECT (DATE_TRUNC('month', d) + INTERVAL '1 month - 1 day')::date AS month_end
+        FROM GENERATE_SERIES($1::date, $2::date, '1 month') AS d
+      ),
+      -- Every account's balance at each month end: the opening balance plus
+      -- every movement up to that point, which is what carries a quiet month
+      -- forward instead of showing a gap.
+      balances AS (
+        SELECT
+          m.month_end,
+          a.account_type,
+          CASE
+            WHEN a.account_type IN ('Checking Account', 'Savings Account') THEN
+              a.balance_when_created + COALESCE((
+                SELECT SUM(CASE WHEN t.debit_credit = 'Debit' THEN -t.amount ELSE t.amount END)
+                FROM public.${transaction_table} t
+                WHERE t.account = a.details AND t.date_str <= m.month_end
+              ), 0)
+            WHEN a.account_type = 'Investments' THEN
+              COALESCE((
+                SELECT i.balance
+                FROM public.${investment_table} i
+                WHERE i.account = a.details AND i.date_str <= m.month_end
+                ORDER BY i.date_str DESC
+                LIMIT 1
+              ), a.balance_when_created)
+            ELSE a.balance_when_created
+          END AS balance
+        FROM months m
+        CROSS JOIN public.${account_table} a
+      )
+      SELECT
+        TO_CHAR(month_end, 'YYYY-MM') AS month,
+        SUM(balance)::numeric AS net_worth,
+        SUM(balance) FILTER (WHERE account_type = 'Checking Account')::numeric AS checking,
+        SUM(balance) FILTER (WHERE account_type = 'Savings Account')::numeric AS savings,
+        SUM(balance) FILTER (WHERE account_type = 'Investments')::numeric AS investments
+      FROM balances
+      GROUP BY month_end
+      ORDER BY month_end;
+    `;
+
+    try {
+      const result = await client.query(query, [startDate, endDate]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Categories
+  //
+  // Reference data rather than a fixed list: the colour drives the breakdown
+  // chart, category_type splits fixed from variable spending, and income_outcome
+  // decides which side of the period summary a category lands on. All three are
+  // judgement calls that belong to the user, not to the seed.
+  // ---------------------------------------------------------------------------
+
+  /** Categories with everything the management screen needs, plus usage. */
+  public async getCategories(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        c.id,
+        c.category_name,
+        c.color,
+        c.category_type,
+        c.income_outcome,
+        (SELECT COUNT(*)::int FROM public.${transaction_table} t
+         WHERE t.category = c.category_name) AS transaction_count
+      FROM public.${category_table} c
+      ORDER BY c.income_outcome DESC, c.category_name ASC;
+    `;
+
+    try {
       const result = await client.query(query);
       return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async createCategory(category: {
+    category_name: string,
+    color?: string | null,
+    category_type?: string | null,
+    income_outcome?: string | null,
+  }): Promise<any> {
+    const client = await dbContext.connect();
+
+    const query = `
+      INSERT INTO public.${category_table} (category_name, color, category_type, income_outcome)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [
+        category.category_name,
+        category.color ?? null,
+        category.category_type ?? 'Variabel',
+        category.income_outcome ?? 'Uitgaven',
+      ]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  public async updateCategory(id: string, updates: { [key: string]: any }): Promise<any> {
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['category_name', 'color', 'category_type', 'income_outcome']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    try {
+      await client.query('BEGIN');
+
+      // transactions.category references the name, so a rename touches two
+      // tables and neither statement is valid on its own. Deferring the check
+      // to commit lets both run first and validates the result.
+      await client.query('SET CONSTRAINTS public.transactions_category_fkey DEFERRED');
+
+      const before = await client.query(
+        `SELECT category_name FROM public.${category_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (before.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      const result = await client.query(
+        `UPDATE public.${category_table} SET ${setClause} WHERE id = $${values.length + 1} RETURNING *`,
+        [...values, id],
+      );
+
+      // transactions.category is a foreign key on the name, not the id, so a
+      // rename has to carry the transactions with it - otherwise the update is
+      // rejected outright, or the history is orphaned.
+      const oldName = before.rows[0].category_name;
+      const newName = result.rows[0].category_name;
+
+      if (oldName !== newName) {
+        await client.query(
+          `UPDATE public.${transaction_table} SET category = $1 WHERE category = $2`,
+          [newName, oldName],
+        );
+      }
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Remove a category. Refuses while transactions still carry it: those would be
+   * left pointing at a name that no longer exists, and their history would drop
+   * out of every breakdown.
+   */
+  public async deleteCategory(id: string): Promise<{ deleted: any, blockedBy?: number }> {
+    const client = await dbContext.connect();
+
+    try {
+      const existing = await client.query(
+        `SELECT category_name FROM public.${category_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (existing.rows.length === 0) return { deleted: null };
+
+      const inUse = await client.query(
+        `SELECT COUNT(*)::int AS n FROM public.${transaction_table} WHERE category = $1`,
+        [existing.rows[0].category_name],
+      );
+
+      if (inUse.rows[0].n > 0) {
+        return { deleted: null, blockedBy: inUse.rows[0].n };
+      }
+
+      const removed = await client.query(
+        `DELETE FROM public.${category_table} WHERE id = $1 RETURNING *`,
+        [id],
+      );
+      return { deleted: removed.rows[0] };
     } finally {
       client.release();
     }
@@ -364,6 +1029,576 @@ class FinanceManager {
     }
 }
 
+
+
+  // ---------------------------------------------------------------------------
+  // Accounts
+  //
+  // Checking and savings accounts announce themselves: every imported row names
+  // the account it belongs to, so the list can be derived rather than kept by
+  // hand. Investment accounts cannot - they appear in no export, and are entered
+  // through the investments dialog, which reads its dropdown from this table.
+  //
+  // The table therefore stays authoritative. What it gains is discovery: an
+  // account seen in transactions but absent here is offered for review rather
+  // than silently ignored, which is what leaves balances stuck at zero.
+  // ---------------------------------------------------------------------------
+
+  /** All accounts, with the number of transactions each one carries. */
+  public async getAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        a.id,
+        a.account_type,
+        a.account_name,
+        a.details,
+        a.balance_when_created,
+        (SELECT COUNT(*)::int FROM public.${transaction_table} t WHERE t.account = a.details) AS transaction_count
+      FROM public.${account_table} a
+      ORDER BY a.account_type, a.account_name;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Account identifiers seen in transactions that have no row in the accounts
+   * table.
+   *
+   * Their transactions still import and still count towards the summaries, but
+   * they have no name, no type and no opening balance, so they are missing from
+   * the account overview and cannot take part in transfer detection.
+   */
+  public async getUnknownAccounts(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.account AS details,
+        COUNT(*)::int AS transaction_count,
+        MIN(t.date_str) AS first_seen,
+        MAX(t.date_str) AS last_seen,
+        -- A sample description helps identify whose account it is.
+        (ARRAY_AGG(t.name_description ORDER BY t.date_str DESC))[1] AS last_description
+      FROM public.${transaction_table} t
+      LEFT JOIN public.${account_table} a ON a.details = t.account
+      WHERE t.account IS NOT NULL
+        AND a.id IS NULL
+      GROUP BY t.account
+      ORDER BY COUNT(*) DESC;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  public async createAccount(account: {
+    account_type: string,
+    account_name: string,
+    details: string,
+    balance_when_created?: number | null,
+  }): Promise<any> {
+    const client = await dbContext.connect();
+
+    const query = `
+      INSERT INTO public.${account_table} (account_type, account_name, details, balance_when_created)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [
+        account.account_type,
+        account.account_name,
+        account.details,
+        account.balance_when_created ?? 0,
+      ]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  public async updateAccount(id: string, updates: { [key: string]: any }): Promise<any> {
+    const client = await dbContext.connect();
+
+    // Column names cannot be parameterised - only allow known-safe ones.
+    const allowedColumns = new Set(['account_type', 'account_name', 'details', 'balance_when_created']);
+    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+
+    if (entries.length === 0) {
+      client.release();
+      throw new Error('No updatable columns supplied');
+    }
+
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+
+    try {
+      await client.query('BEGIN');
+
+      // investments.account references details by value, so a rename touches
+      // two tables and neither statement is valid alone. Deferring the check to
+      // commit lets both run before the constraint is verified.
+      await client.query('SET CONSTRAINTS public.investments_account_fkey DEFERRED');
+
+      const before = await client.query(
+        `SELECT details FROM public.${account_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (before.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      const result = await client.query(
+        `UPDATE public.${account_table} SET ${setClause} WHERE id = $${values.length + 1} RETURNING *`,
+        [...values, id],
+      );
+
+      // transactions.account and investments.account reference details by value,
+      // not by key. Renaming an identifier without carrying those along would
+      // orphan every row that used the old one - the balance would silently
+      // revert to the opening figure.
+      const oldDetails = before.rows[0].details;
+      const newDetails = result.rows[0].details;
+
+      if (oldDetails !== newDetails) {
+        await client.query(
+          `UPDATE public.${transaction_table} SET account = $1 WHERE account = $2`,
+          [newDetails, oldDetails],
+        );
+        await client.query(
+          `UPDATE public.${investment_table} SET account = $1 WHERE account = $2`,
+          [newDetails, oldDetails],
+        );
+      }
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Remove an account. Refuses while transactions or investments still point at
+   * it, since those rows reference it by value and would be left orphaned.
+   */
+  public async deleteAccount(id: string): Promise<{ deleted: any, blockedBy?: number }> {
+    const client = await dbContext.connect();
+
+    try {
+      const existing = await client.query(
+        `SELECT details FROM public.${account_table} WHERE id = $1`,
+        [id],
+      );
+
+      if (existing.rows.length === 0) return { deleted: null };
+
+      const { details } = existing.rows[0];
+      const inUse = await client.query(
+        `SELECT
+           (SELECT COUNT(*)::int FROM public.${transaction_table} WHERE account = $1) +
+           (SELECT COUNT(*)::int FROM public.${investment_table} WHERE account = $1) AS n`,
+        [details],
+      );
+
+      if (inUse.rows[0].n > 0) {
+        return { deleted: null, blockedBy: inUse.rows[0].n };
+      }
+
+      const removed = await client.query(
+        `DELETE FROM public.${account_table} WHERE id = $1 RETURNING *`,
+        [id],
+      );
+      return { deleted: removed.rows[0] };
+    } finally {
+      client.release();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Internal transfers
+  //
+  // Moving money between the user's own accounts produces two rows: a Debit on
+  // one and a Credit on the other. Counted naively both land in the monthly
+  // totals, inflating income and expenses by the same amount and skewing the
+  // savings rate - yet nothing was earned or spent.
+  //
+  // Matching is a suggestion, never a silent rewrite. Two unrelated payments of
+  // the same amount on the same day are indistinguishable from a transfer to
+  // any matcher, so the pairs surface on the review screen and only take effect
+  // once confirmed.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Mark transactions whose counterparty is an account the user owns.
+   *
+   * A pair is only one of the two shapes an internal transfer takes. The other
+   * has no counterpart at all: an investment account ships no CSV, so money paid
+   * into it appears once, on the outgoing side, and counted naively the monthly
+   * deposit into savings or a broker becomes the largest "expense" of the month.
+   *
+   * This is not a guess like an amount match is - the counterparty is literally
+   * one of the user's own accounts - so it is applied rather than proposed. The
+   * rows stay visible under "Include transfers" and can be reverted per row.
+   *
+   * Returns the ids it marked, so an import can report them.
+   */
+  public async markCounterpartyTransfers(ids?: number[]): Promise<number[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+    let scope = '';
+
+    if (ids && ids.length > 0) {
+      scope = `AND t.id = ANY($1::int[])`;
+      params.push(ids);
+    }
+
+    // is_internal IS NULL only: a row the user explicitly rejected (FALSE) or
+    // already confirmed (TRUE) is left exactly as they left it.
+    const query = `
+      UPDATE public.${transaction_table} t
+      SET is_internal = TRUE,
+          category = COALESCE(t.category, 'Overboekingen')
+      FROM public.${account_table} a
+      WHERE a.details = t.counterparty
+        AND t.counterparty IS NOT NULL
+        AND t.account IS DISTINCT FROM t.counterparty
+        AND t.is_internal IS NULL
+        ${scope}
+      RETURNING t.id;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows.map((r: any) => r.id);
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Transactions marked internal on the strength of their counterparty alone,
+   * with no matching counterpart stored.
+   *
+   * Shown after an import so the automatic marking is visible rather than silent.
+   */
+  public async getOneSidedTransfers(ids?: number[]): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [];
+    let scope = '';
+
+    if (ids && ids.length > 0) {
+      scope = `AND t.id = ANY($1::int[])`;
+      params.push(ids);
+    }
+
+    const query = `
+      SELECT
+        t.id,
+        t.date_str,
+        t.name_description,
+        t.account,
+        own.account_name AS account_name,
+        t.counterparty,
+        other.account_name AS counterparty_name,
+        t.debit_credit,
+        t.amount::numeric AS amount
+      FROM public.${transaction_table} t
+      JOIN public.${account_table} other ON other.details = t.counterparty
+      LEFT JOIN public.${account_table} own ON own.details = t.account
+      WHERE t.is_internal IS TRUE
+        AND NOT EXISTS (
+          SELECT 1 FROM public.${transfer_table} tr
+          WHERE tr.from_transaction_id = t.id OR tr.to_transaction_id = t.id
+        )
+        ${scope}
+      ORDER BY t.date_str DESC
+      LIMIT 200;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Undo the automatic marking for one transaction. */
+  public async unmarkInternal(id: string): Promise<any> {
+    const client = await dbContext.connect();
+
+    // FALSE rather than NULL: the row was assessed and rejected, so the next
+    // import must not mark it again.
+    const query = `
+      UPDATE public.${transaction_table}
+      SET is_internal = FALSE
+      WHERE id = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM public.${transfer_table} t
+          WHERE t.from_transaction_id = $1 OR t.to_transaction_id = $1
+        )
+      RETURNING *;
+    `;
+
+    try {
+      const result = await client.query(query, [id]);
+      return result.rows[0] ?? null;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Candidate transfer pairs: a Debit and a Credit of the same amount, close in
+   * time, on two different accounts, neither already part of a confirmed pair.
+   *
+   * Restricted to the supplied transaction ids when given, so a fresh import
+   * proposes pairs involving the rows just added rather than re-proposing the
+   * user's whole history.
+   */
+  public async getTransferCandidates(ids?: number[], windowDays = 3): Promise<any[]> {
+    const client = await dbContext.connect();
+    const params: any[] = [windowDays];
+    let scope = '';
+
+    if (ids && ids.length > 0) {
+      // Either side may be the new row: the counterpart often came in with an
+      // earlier import of the other bank's export.
+      const placeholders = ids.map((_, i) => `$${i + 2}`).join(', ');
+      scope = `AND (d.id IN (${placeholders}) OR c.id IN (${placeholders}))`;
+      params.push(...ids);
+    }
+
+    // Every debit is paired with every credit that matches, which for a repeated
+    // amount is a cross product: two 500-euro transfers on consecutive days
+    // produce four pairings, of which two are wrong. Ranking each side's options
+    // and keeping only mutual first choices leaves the two real pairs.
+    //
+    // match_basis records how sure we are. 'iban' is reserved for pairs whose
+    // counterparty fields point at each other's account - a transfer by
+    // definition. 'amount' means only the figures line up, which is a guess.
+    const query = `
+      WITH pairs AS (
+        SELECT
+          d.id                AS from_transaction_id,
+          d.date_str          AS from_date,
+          d.account           AS from_account,
+          da.account_name     AS from_account_name,
+          d.name_description  AS from_description,
+          c.id                AS to_transaction_id,
+          c.date_str          AS to_date,
+          c.account           AS to_account,
+          ca.account_name     AS to_account_name,
+          c.name_description  AS to_description,
+          d.amount::numeric   AS amount,
+          CASE
+            WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 'iban'
+            ELSE 'amount'
+          END AS match_basis,
+          -- Mutually referencing counterparties beat a bare amount match, and a
+          -- smaller gap in time beats a larger one.
+          (CASE WHEN d.counterparty = c.account AND c.counterparty = d.account THEN 0 ELSE 1 END) AS basis_rank,
+          ABS(c.date_str - d.date_str) AS day_gap
+        FROM public.${transaction_table} d
+        JOIN public.${transaction_table} c
+          ON c.amount = d.amount
+         AND c.debit_credit = 'Credit'
+         AND c.account IS DISTINCT FROM d.account
+         AND ABS(c.date_str - d.date_str) <= $1
+        LEFT JOIN public.${account_table} da ON da.details = d.account
+        LEFT JOIN public.${account_table} ca ON ca.details = c.account
+        WHERE d.debit_credit = 'Debit'
+          AND d.is_internal IS DISTINCT FROM FALSE
+          AND c.is_internal IS DISTINCT FROM FALSE
+          AND NOT EXISTS (
+            SELECT 1 FROM public.${transfer_table} t
+            WHERE t.from_transaction_id IN (d.id, c.id)
+               OR t.to_transaction_id IN (d.id, c.id)
+          )
+          ${scope}
+      ),
+      ranked AS (
+        SELECT
+          pairs.*,
+          ROW_NUMBER() OVER (
+            PARTITION BY from_transaction_id
+            ORDER BY basis_rank, day_gap, to_transaction_id
+          ) AS rank_for_debit,
+          ROW_NUMBER() OVER (
+            PARTITION BY to_transaction_id
+            ORDER BY basis_rank, day_gap, from_transaction_id
+          ) AS rank_for_credit
+        FROM pairs
+      )
+      SELECT
+        from_transaction_id, from_date, from_account, from_account_name, from_description,
+        to_transaction_id, to_date, to_account, to_account_name, to_description,
+        amount, match_basis
+      FROM ranked
+      -- Only where both sides consider each other their best option, so one
+      -- transaction never appears in two competing suggestions.
+      WHERE rank_for_debit = 1 AND rank_for_credit = 1
+      ORDER BY basis_rank, day_gap, from_date DESC
+      LIMIT 200;
+    `;
+
+    try {
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Confirm one pair as an internal transfer.
+   *
+   * Both rows are marked internal so the summaries drop them, and both are put
+   * in the transfer category - which is also what takes them off the review
+   * screen's uncategorised list, so confirming a transfer resolves the same row
+   * the user was there to categorise.
+   */
+  public async confirmTransfer(
+    fromId: number,
+    toId: number,
+    matchBasis: string,
+    category = 'Overboekingen',
+  ): Promise<any> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const inserted = await client.query(
+        `INSERT INTO public.${transfer_table} (from_transaction_id, to_transaction_id, match_basis)
+         VALUES ($1, $2, $3)
+         ON CONFLICT DO NOTHING
+         RETURNING *`,
+        [fromId, toId, matchBasis],
+      );
+
+      if (inserted.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      await client.query(
+        `UPDATE public.${transaction_table}
+         SET is_internal = TRUE,
+             category = COALESCE(category, $2)
+         WHERE id = ANY($1::int[])`,
+        [[fromId, toId], category],
+      );
+
+      await client.query('COMMIT');
+      return inserted.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Reject a suggested pair. Marking both sides FALSE rather than leaving them
+   * NULL is what stops the same pair being proposed again after every import.
+   */
+  public async rejectTransfer(fromId: number, toId: number): Promise<void> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query(
+        `UPDATE public.${transaction_table}
+         SET is_internal = FALSE
+         WHERE id = ANY($1::int[]) AND is_internal IS NULL`,
+        [[fromId, toId]],
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Undo a confirmation: the pair is removed and both rows count again. */
+  public async unlinkTransfer(transferId: string): Promise<any> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const removed = await client.query(
+        `DELETE FROM public.${transfer_table} WHERE id = $1 RETURNING *`,
+        [transferId],
+      );
+
+      if (removed.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      const { from_transaction_id, to_transaction_id } = removed.rows[0];
+      await client.query(
+        `UPDATE public.${transaction_table} SET is_internal = NULL WHERE id = ANY($1::int[])`,
+        [[from_transaction_id, to_transaction_id]],
+      );
+
+      await client.query('COMMIT');
+      return removed.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Confirmed transfers, most recent first. */
+  public async getTransfers(): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        t.id,
+        t.match_basis,
+        t.confirmed_at,
+        d.date_str AS from_date, d.account AS from_account, da.account_name AS from_account_name,
+        c.date_str AS to_date,   c.account AS to_account,   ca.account_name AS to_account_name,
+        d.amount::numeric AS amount
+      FROM public.${transfer_table} t
+      JOIN public.${transaction_table} d ON d.id = t.from_transaction_id
+      JOIN public.${transaction_table} c ON c.id = t.to_transaction_id
+      LEFT JOIN public.${account_table} da ON da.details = d.account
+      LEFT JOIN public.${account_table} ca ON ca.details = c.account
+      ORDER BY t.confirmed_at DESC
+      LIMIT 500;
+    `;
+
+    try {
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Tags
@@ -581,6 +1816,253 @@ class FinanceManager {
         by_category: byCategory.rows,
         by_month: byMonth.rows,
       };
+    } finally {
+      client.release();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Backup and restore
+  //
+  // A bank export only carries transaction columns, so a CSV round-trip loses
+  // everything the user built on top of the imports: which rows are internal
+  // transfers, which pairs were confirmed, the events and their budgets, the
+  // investment snapshots. The backup is therefore the tables themselves rather
+  // than a report derived from them.
+  //
+  // Ids are exported and used to rebuild relationships, but not reinserted -
+  // the sequences assign fresh ones on restore and the join tables are rewritten
+  // against the new values, so a restore into a non-empty database cannot
+  // collide with rows already there.
+  // ---------------------------------------------------------------------------
+
+  /** Every table, in dependency order. */
+  public async exportAll(): Promise<Record<string, any[]>> {
+    const client = await dbContext.connect();
+
+    try {
+      const [categories, accounts, transactions, investments, transfers, tags, transactionTags] =
+        await Promise.all([
+          client.query(`SELECT category_name, color, category_type, income_outcome
+                        FROM public.${category_table} ORDER BY category_name`),
+          client.query(`SELECT account_type, account_name, details, balance_when_created
+                        FROM public.${account_table} ORDER BY id`),
+          client.query(`SELECT id, date_str, name_description, account, counterparty,
+                               category, debit_credit, amount, notifications, import_hash,
+                               is_internal
+                        FROM public.${transaction_table} ORDER BY id`),
+          client.query(`SELECT date_str, name_description, account, balance
+                        FROM public.${investment_table} ORDER BY id`),
+          client.query(`SELECT from_transaction_id, to_transaction_id, match_basis, confirmed_at
+                        FROM public.${transfer_table} ORDER BY id`),
+          client.query(`SELECT id, tag_name, color, budget, is_closed, notes, created_at
+                        FROM public.${tag_table} ORDER BY id`),
+          client.query(`SELECT transaction_id, tag_id
+                        FROM public.${transaction_tag_table} ORDER BY transaction_id, tag_id`),
+        ]);
+
+      return {
+        categories: categories.rows,
+        accounts: accounts.rows,
+        transactions: transactions.rows,
+        investments: investments.rows,
+        transfers: transfers.rows,
+        tags: tags.rows,
+        transaction_tags: transactionTags.rows,
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Restore a backup.
+   *
+   * `replace` empties the tables first, which is what makes a restore produce
+   * the database the backup was taken from rather than a merge with whatever is
+   * there now. Without it the import adds to the existing data and relies on
+   * import_hash to skip transactions already stored, which is the right
+   * behaviour when merging two exports but not when recovering from a mistake.
+   *
+   * The whole restore is one transaction: a backup that fails halfway would
+   * otherwise leave the database in a state that is neither the old one nor the
+   * new one, which for financial data is worse than failing outright.
+   */
+  public async importAll(
+    data: Record<string, any[]>,
+    replace: boolean,
+  ): Promise<Record<string, number>> {
+    const client = await dbContext.connect();
+    const counts: Record<string, number> = {
+      categories: 0, accounts: 0, transactions: 0, investments: 0,
+      transfers: 0, tags: 0, transaction_tags: 0, skipped_transactions: 0,
+    };
+
+    try {
+      await client.query('BEGIN');
+
+      if (replace) {
+        // transaction_tags and transfers cascade from transactions; categories
+        // and accounts are referenced by it, so they go last. Categories are
+        // kept: they are reference data the transactions point at by name, and
+        // the backup's own list is re-inserted below.
+        await client.query(`TRUNCATE public.${transaction_table} CASCADE`);
+        await client.query(`TRUNCATE public.${tag_table} CASCADE`);
+        await client.query(`DELETE FROM public.${investment_table}`);
+        await client.query(`DELETE FROM public.${account_table}`);
+      }
+
+      // Categories first: transactions carry a foreign key onto the name.
+      for (const c of data.categories ?? []) {
+        const res = await client.query(
+          `INSERT INTO public.${category_table} (category_name, color, category_type, income_outcome)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (category_name) DO NOTHING`,
+          [c.category_name, c.color ?? null, c.category_type ?? null, c.income_outcome ?? null],
+        );
+        counts.categories += res.rowCount ?? 0;
+      }
+
+      for (const a of data.accounts ?? []) {
+        const res = await client.query(
+          `INSERT INTO public.${account_table} (account_type, account_name, details, balance_when_created)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (details) DO NOTHING`,
+          [a.account_type ?? null, a.account_name ?? null, a.details, a.balance_when_created ?? 0],
+        );
+        counts.accounts += res.rowCount ?? 0;
+      }
+
+      // Old id -> new id, so transfers and tag assignments can be rebuilt
+      // against the ids the sequence just handed out.
+      const txIdMap = new Map<number, number>();
+      // Repeat counter per identity, so two genuinely identical payments on one
+      // day both restore instead of the second being taken for a duplicate.
+      const occurrences = new Map<string, number>();
+
+      for (const t of data.transactions ?? []) {
+        const hashable: HashableEntry = {
+          date_str: t.date_str,
+          account: t.account ?? null,
+          amount: t.amount,
+          debit_credit: t.debit_credit ?? null,
+          name_description: t.name_description ?? null,
+          notifications: t.notifications ?? null,
+        };
+        const key = identityKey(hashable);
+        const occurrence = occurrences.get(key) ?? 0;
+        occurrences.set(key, occurrence + 1);
+
+        // A row exported without a hash gets one derived from its identifying
+        // fields. Without this a merge of the same backup duplicates every
+        // such row: the unique index is partial, so NULL hashes never conflict
+        // and nothing dedupes them.
+        const importHash = t.import_hash ?? computeImportHash(hashable, occurrence);
+
+        const res = await client.query(
+          `INSERT INTO public.${transaction_table}
+             (date_str, name_description, account, counterparty, category,
+              debit_credit, amount, notifications, import_hash, is_internal)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+           ON CONFLICT (import_hash) WHERE import_hash IS NOT NULL DO NOTHING
+           RETURNING id`,
+          [
+            t.date_str, t.name_description ?? null, t.account ?? null, t.counterparty ?? null,
+            t.category ?? null, t.debit_credit ?? null, t.amount, t.notifications ?? null,
+            importHash, t.is_internal ?? null,
+          ],
+        );
+
+        if (res.rows.length > 0) {
+          counts.transactions += 1;
+          if (t.id !== undefined && t.id !== null) txIdMap.set(Number(t.id), res.rows[0].id);
+        } else {
+          // Already present. Map the old id onto the stored row so its tags and
+          // transfer pairing still land on something.
+          counts.skipped_transactions += 1;
+          if (t.id !== undefined && t.id !== null) {
+            const existing = await client.query(
+              `SELECT id FROM public.${transaction_table} WHERE import_hash = $1`,
+              [importHash],
+            );
+            if (existing.rows.length > 0) txIdMap.set(Number(t.id), existing.rows[0].id);
+          }
+        }
+      }
+
+      // The investments table carries no unique constraint, so a merge has to
+      // check before inserting or a repeated restore doubles every snapshot.
+      // One balance per account per date is the real identity here.
+      for (const i of data.investments ?? []) {
+        const res = await client.query(
+          // Casts are explicit: $3 appears both as an inserted value and in the
+          // comparison below, and Postgres otherwise deduces text in one place
+          // and varchar in the other and rejects the statement.
+          `INSERT INTO public.${investment_table} (date_str, name_description, account, balance)
+           SELECT $1::date, $2::varchar, $3::varchar, $4::numeric
+           WHERE NOT EXISTS (
+             SELECT 1 FROM public.${investment_table}
+             WHERE date_str = $1::date AND account IS NOT DISTINCT FROM $3::varchar
+           )`,
+          [i.date_str, i.name_description ?? null, i.account ?? null, i.balance],
+        );
+        counts.investments += res.rowCount ?? 0;
+      }
+
+      const tagIdMap = new Map<number, number>();
+
+      for (const g of data.tags ?? []) {
+        const res = await client.query(
+          `INSERT INTO public.${tag_table} (tag_name, color, budget, is_closed, notes, created_at)
+           VALUES ($1, $2, $3, $4, $5, COALESCE($6, now()))
+           ON CONFLICT (tag_name) DO UPDATE SET tag_name = EXCLUDED.tag_name
+           RETURNING id`,
+          [g.tag_name, g.color ?? null, g.budget ?? null, g.is_closed ?? false,
+           g.notes ?? null, g.created_at ?? null],
+        );
+        // DO UPDATE rather than DO NOTHING so a name already present still
+        // returns its id and the assignments below can be rebuilt.
+        if (res.rows.length > 0) {
+          counts.tags += 1;
+          if (g.id !== undefined && g.id !== null) tagIdMap.set(Number(g.id), res.rows[0].id);
+        }
+      }
+
+      for (const tt of data.transaction_tags ?? []) {
+        const txId = txIdMap.get(Number(tt.transaction_id));
+        const tagId = tagIdMap.get(Number(tt.tag_id));
+        // A pair whose transaction or tag did not make it is dropped rather
+        // than guessed at.
+        if (!txId || !tagId) continue;
+
+        const res = await client.query(
+          `INSERT INTO public.${transaction_tag_table} (transaction_id, tag_id)
+           VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [txId, tagId],
+        );
+        counts.transaction_tags += res.rowCount ?? 0;
+      }
+
+      for (const tr of data.transfers ?? []) {
+        const fromId = txIdMap.get(Number(tr.from_transaction_id));
+        const toId = txIdMap.get(Number(tr.to_transaction_id));
+        if (!fromId || !toId) continue;
+
+        const res = await client.query(
+          `INSERT INTO public.${transfer_table}
+             (from_transaction_id, to_transaction_id, match_basis, confirmed_at)
+           VALUES ($1, $2, $3, COALESCE($4, now()))
+           ON CONFLICT DO NOTHING`,
+          [fromId, toId, tr.match_basis ?? 'iban', tr.confirmed_at ?? null],
+        );
+        counts.transfers += res.rowCount ?? 0;
+      }
+
+      await client.query('COMMIT');
+      return counts;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
     } finally {
       client.release();
     }

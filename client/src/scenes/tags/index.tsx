@@ -7,9 +7,11 @@ import {
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DashboardBox from '@/components/DashboardBox';
 import {
+  Tag,
   useGetTagsQuery,
   useCreateTagMutation,
   useUpdateTagMutation,
@@ -39,6 +41,10 @@ const Tags: React.FC = () => {
   const [newBudget, setNewBudget] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editBudget, setEditBudget] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     const name = newName.trim();
@@ -57,6 +63,43 @@ const Tags: React.FC = () => {
       setError(null);
     } catch (e: any) {
       setError(e?.data?.error ?? 'Could not create the tag');
+    }
+  };
+
+  const openEdit = (tag: Tag) => {
+    setEditId(tag.id);
+    setEditName(tag.tag_name);
+    // NUMERIC arrives as a string, and a null budget has to become '' rather
+    // than the string 'null' for the field to read as empty.
+    setEditBudget(tag.budget === null || tag.budget === undefined ? '' : String(tag.budget));
+    setEditError(null);
+  };
+
+  const handleEdit = async () => {
+    if (editId === null) return;
+    const name = editName.trim();
+    if (!name) {
+      setEditError('Give the event a name');
+      return;
+    }
+    const budget = editBudget.trim();
+    if (budget && !(Number(budget) >= 0)) {
+      setEditError('The budget has to be a positive amount, or empty for none');
+      return;
+    }
+    try {
+      await updateTag({
+        id: editId,
+        // null rather than omitted when the field is cleared: leaving the key
+        // out would keep the old budget, so there would be no way to remove one.
+        updates: { tag_name: name, budget: budget === '' ? null : Number(budget) },
+      }).unwrap();
+      setEditId(null);
+      setEditError(null);
+    } catch (e: any) {
+      // 409 when another event already carries the name - tag_name is unique,
+      // so the message has to reach the dialog rather than closing it.
+      setEditError(e?.data?.error ?? 'Could not save the event');
     }
   };
 
@@ -122,6 +165,11 @@ const Tags: React.FC = () => {
                     <TagProgress tagId={tag.id} budget={tag.budget ? Number(tag.budget) : null} />
                   </TableCell>
                   <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                    <Tooltip title="Edit">
+                      <IconButton size="small" onClick={() => openEdit(tag)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title={tag.is_closed ? 'Reopen' : 'Close event'}>
                       <IconButton
                         size="small"
@@ -171,6 +219,43 @@ const Tags: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
           <Button onClick={handleCreate}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={editId !== null}
+        onClose={() => setEditId(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Edit event</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="dense"
+            label="Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleEdit(); }}
+            error={Boolean(editError)}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Budget"
+            type="number"
+            placeholder="None"
+            value={editBudget}
+            onChange={(e) => setEditBudget(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleEdit(); }}
+            error={Boolean(editError)}
+            helperText={editError ?? 'Leave empty for no budget; the progress bar then just totals the spend.'}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditId(null)}>Cancel</Button>
+          <Button onClick={handleEdit}>Save</Button>
         </DialogActions>
       </Dialog>
 

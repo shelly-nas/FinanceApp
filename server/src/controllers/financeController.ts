@@ -1,6 +1,7 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import FinanceManager from '@/managers/financeManager';
-import { bankMappings, asnCategoryMap, bankCategoryColumns } from '@/models/bankTransactionModel'
+import { bankMappings, asnCategoryMap } from '@/models/bankTransactionModel'
+import { parseBankRow, stripWrappingQuotes } from '@/utils/parseBankRow';
 import multer from 'multer';
 import fs from 'fs';
 import csvParser from 'csv-parser';
@@ -9,32 +10,8 @@ import bodyParser from 'body-parser';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // Temporary storage for uploaded files
-const reformatDate = (dateStr: string) => { // Function to reformat date from YYYYMMDD to YYYY-MM-DD
-  const year = dateStr.substring(0, 4);
-  const month = dateStr.substring(4, 6);
-  const day = dateStr.substring(6, 8);
-  return `${year}-${month}-${day}`;
-};
 
-// ASN exports dates as DD-MM-YYYY. These already contain hyphens, so they skip
-// the YYYYMMDD branch above and would otherwise reach Postgres ambiguously -
-// 01-08-2026 is 1 August here but reads as 8 January under a US datestyle.
-const isDayFirstDate = (dateStr: string) => /^\d{2}-\d{2}-\d{4}$/.test(dateStr);
-const reformatDayFirstDate = (dateStr: string) => {
-  const [day, month, year] = dateStr.split('-');
-  return `${year}-${month}-${day}`;
-};
-
-// ASN wraps free-text columns (description, category) in literal single quotes,
-// which are part of the value rather than CSV quoting and must be stripped.
-const stripWrappingQuotes = (value: string) => {
-  const trimmed = value.trim();
-  return trimmed.length > 1 && trimmed.startsWith("'") && trimmed.endsWith("'")
-    ? trimmed.slice(1, -1).trim()
-    : trimmed;
-};
-
-router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response) => {
+router.post('/upload-transactions', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
   const { bankType } = req.query;
   const filePath = req.file?.path;
 
@@ -53,71 +30,8 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
   fs.createReadStream(filePath)
     .pipe(csvParser())
     .on('data', (data) => {
-      const entry: any = {};
-
-      // Map the of the csv headers to the database keys
-      for (const [csvKey, dbKey] of Object.entries(mapping)) {
-        entry[dbKey] = data[csvKey] || null;
-      }
-
-      // Keep the bank's own category (if it ships one) as a prediction hint.
-      // It is not written to the database directly - it only feeds the
-      // classifier, which maps it onto our own taxonomy.
-      const categoryColumn = bankCategoryColumns[bankType as string];
-      if (categoryColumn && data[categoryColumn]) {
-        entry['__bankCategory'] = data[categoryColumn];
-      }
-
-      // Special handling for reformatting the date if the key is 'date_str'
-      if (entry['date_str'] && !entry['date_str'].includes('-')) {
-        entry['date_str'] = reformatDate(entry['date_str']);
-      } else if (entry['date_str'] && isDayFirstDate(entry['date_str'])) {
-        entry['date_str'] = reformatDayFirstDate(entry['date_str']);
-      }
-
-      // Strip ASN's literal single quotes from the free-text columns
-      for (const key of ['name_description', 'notifications', 'counterparty']) {
-        if (typeof entry[key] === 'string') {
-          entry[key] = stripWrappingQuotes(entry[key]) || null;
-        }
-      }
-
-      // Replace ',' with '.' in the amount and convert it to a number
-      if (entry['amount']) {
-        entry['amount'] = parseFloat(entry['amount'].replace(',', '.'));
-      }
-
-      // Set debit_credit NL to ENG
-      if (entry['debit_credit'] !== undefined) {
-        if (entry['debit_credit'] == 'Af') {
-          entry['debit_credit'] = 'Debit';
-        } else if (entry['debit_credit'] == 'Bij') {
-            entry['debit_credit'] = 'Credit';
-        }
-      }
-
-      // Set debit_credit based on the amount if it's null
-      if (entry['debit_credit'] === undefined) {
-        entry['debit_credit'] = entry['amount'] < 0 ? 'Debit' : 'Credit';
-      }
-
-      // Convert amount to absolute value
-      entry['amount'] = Math.abs(entry['amount']);
-
-      // ASN leaves 'Naam' empty for card payments and direct debits - the merchant
-      // only appears at the start of the description. Fall back to that leading
-      // segment so the row is identifiable and can still be auto-categorised.
-      if (!entry['name_description'] && entry['notifications']) {
-        const merchant = entry['notifications'].split('>')[0].trim();
-        if (merchant) {
-          entry['name_description'] = merchant;
-        }
-      }
-
-      // Replace multiple whitespaces in name_description with a single whitespace
-      if (entry['name_description']) {
-        entry['name_description'] = entry['name_description'].replace(/\s+/g, ' ').trim();
-      }
+      const entry = parseBankRow(data, bankType as string);
+      if (!entry) return;
 
       entries.push(entry);
     })
@@ -138,10 +52,12 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
         // bank's own category still categorise a first import, which is when
         // there is nothing to learn from.
         for (const entry of entries) {
-          const bankHint = entry['__bankCategory']
-            ? asnCategoryMap[stripWrappingQuotes(entry['__bankCategory'])] ?? null
+          // The bank's own category maps onto our taxonomy; it never reaches
+          // the database itself, only the classifier.
+          const bankHint = entry.bankCategory
+            ? asnCategoryMap[stripWrappingQuotes(entry.bankCategory)] ?? null
             : null;
-          delete entry['__bankCategory']; // hint only - not a database column
+          delete entry.bankCategory;
 
           if (entry['name_description']) {
             const predictedCategory = await classifyWith(
@@ -157,21 +73,125 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
           }
         }
         
-        const createdIds = await FinanceManager.addTransactions(entries);
-        res.status(200).json({ message: 'Entries imported successfully', createdIds });
+        const { createdIds, imported, skipped } = await FinanceManager.addTransactions(entries);
+
+        // A row whose counterparty is one of the user's own accounts is an
+        // internal transfer on its own evidence, with no counterpart needed -
+        // which is the only way a deposit into an investment account can be
+        // recognised, since those ship no export of their own.
+        const markedInternal = await FinanceManager.markCounterpartyTransfers(createdIds);
+
+        // Rows already present are skipped rather than rejected, so overlapping
+        // export periods can be imported without thinking about it. The counts
+        // tell the user what actually happened.
+        res.status(200).json({
+          message: 'Entries imported successfully',
+          createdIds,
+          imported,
+          skipped,
+          markedInternal: markedInternal.length,
+        });
       } catch (error) {
-        res.status(500).send(`Error importing entries: ${error}`);
+        // The raw error would otherwise reach the browser carrying the failed
+        // query and column names; the handler logs it and returns a reference.
+        next(error);
       } finally {
-        fs.unlinkSync(filePath);
+        // Async unlink: unlinkSync blocks the event loop, and the upload of a
+        // large export is exactly when the server has other requests to serve.
+        await fs.promises.unlink(filePath).catch((cleanupError) => {
+          console.warn(`Could not remove upload ${filePath}:`, cleanupError);
+        });
       }
     })
-    .on('error', (error) => {
-      res.status(500).send(`Error reading file: ${error}`);
+    .on('error', async (error) => {
+      await fs.promises.unlink(filePath).catch(() => undefined);
+      next(error);
     });
 });
 
-router.get('/transactions', async (req: Request, res: Response) => {
-  const { startDate, endDate, ids } = req.query;
+// ---------------------------------------------------------------------------
+// Backup and restore
+//
+// A bank CSV carries transaction columns only, so it cannot round-trip the
+// work built on top of an import: internal-transfer flags, confirmed pairs,
+// events and their budgets, investment snapshots. The backup is the tables
+// themselves, as JSON.
+// ---------------------------------------------------------------------------
+
+router.get('/export', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await FinanceManager.exportAll();
+
+    const payload = {
+      // Read by the importer: a future schema change can migrate an old backup
+      // instead of failing on it or, worse, importing it wrongly.
+      version: 1,
+      exported_at: new Date().toISOString(),
+      ...data,
+    };
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    // Content-Disposition so the browser saves a named file rather than
+    // rendering a wall of JSON in a tab.
+    res.setHeader('Content-Disposition', `attachment; filename="finance-backup-${stamp}.json"`);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).send(JSON.stringify(payload, null, 2));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/import', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
+  const filePath = req.file?.path;
+
+  if (!filePath) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Default to replacing: a restore is meant to reproduce the database the
+  // backup came from. Merging is the exception and has to be asked for.
+  const replace = req.query.mode !== 'merge';
+
+  try {
+    const raw = await fs.promises.readFile(filePath, 'utf8');
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return res.status(400).json({ error: 'That file is not valid JSON. Use a backup exported by this app.' });
+    }
+
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.transactions)) {
+      return res.status(400).json({
+        error: 'That JSON is not a backup from this app: no transactions array found.',
+      });
+    }
+
+    if (parsed.version !== undefined && Number(parsed.version) > 1) {
+      return res.status(400).json({
+        error: `This backup was written by a newer version (v${parsed.version}). Update the app before restoring it.`,
+      });
+    }
+
+    const counts = await FinanceManager.importAll(parsed, replace);
+
+    res.status(200).json({
+      message: 'Backup restored successfully',
+      mode: replace ? 'replace' : 'merge',
+      ...counts,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await fs.promises.unlink(filePath).catch((cleanupError) => {
+      console.warn(`Could not remove upload ${filePath}:`, cleanupError);
+    });
+  }
+});
+
+router.get('/transactions', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate, ids, limit, offset } = req.query;
   let idList: number[] = [];
 
   if (ids) {
@@ -182,47 +202,66 @@ router.get('/transactions', async (req: Request, res: Response) => {
     }
   }
 
+  // Capped rather than rejected: a caller asking for more than the ceiling gets
+  // the ceiling, so a large history cannot be pulled in one response.
+  const MAX_LIMIT = 5000;
+  const parsedLimit = limit === undefined ? MAX_LIMIT : Number(limit);
+  const parsedOffset = offset === undefined ? 0 : Number(offset);
+
+  if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
+    return res.status(400).json({ error: 'limit must be a positive number' });
+  }
+  if (!Number.isFinite(parsedOffset) || parsedOffset < 0) {
+    return res.status(400).json({ error: 'offset must be zero or more' });
+  }
+
   try {
-    const transactions = await FinanceManager.getTransactions(startDate as string, endDate as string, idList);
+    const transactions = await FinanceManager.getTransactions(
+      startDate as string,
+      endDate as string,
+      idList,
+      Math.min(parsedLimit, MAX_LIMIT),
+      parsedOffset,
+    );
     res.status(200).json(transactions);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
 
-router.get('/category-sums', async (req: Request, res: Response) => {
+router.get('/category-sums', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
 
   try {
     const categorySums = await FinanceManager.getCategorySums(startDate as string, endDate as string);
     res.status(200).json(categorySums);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/income-expenses-sum', async (req: Request, res: Response) => {
+router.get('/income-expenses-sum', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
 
   try {
     const categorySums = await FinanceManager.getIncomeExpensesSum(startDate as string, endDate as string);
     res.status(200).json(categorySums);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/empty-category-transactions', async (req: Request, res: Response) => {
+router.get('/empty-category-transactions', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const categorySums = await FinanceManager.getEmptyCategoryTransactions();
     res.status(200).json(categorySums);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.patch('/update-transaction/:id', async (req: Request, res: Response) => {
+router.patch('/update-transaction/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const updates = req.body;
 
@@ -230,34 +269,97 @@ router.patch('/update-transaction/:id', async (req: Request, res: Response) => {
     const updatedTransaction = await FinanceManager.updateTransaction(id, updates);
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/account-overview', async (req: Request, res: Response) => {
+// ?asOf=YYYY-MM-DD returns balances as they stood on that date. Without it the
+// answer is "right now" - which is what the banner shows, regardless of the
+// month the dashboard is filtered to.
+router.get('/account-overview', async (req: Request, res: Response, next: NextFunction) => {
+  const { asOf } = req.query;
+
+  if (asOf !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(asOf as string)) {
+    return res.status(400).json({ error: 'asOf must be a date in YYYY-MM-DD form' });
+  }
+
   try {
-    const updatedTransaction = await FinanceManager.getAccountOverview();
-    res.status(200).json(updatedTransaction);
+    const overview = await FinanceManager.getAccountOverview(asOf as string | undefined);
+    res.status(200).json(overview);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/category-list', async (req: Request, res: Response) => {
+// Spending per category per month, for the trend chart.
+router.get('/reports/category-history', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate, categories, accounts, includeInternal } = req.query;
+  const isDate = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+  if (!isDate(startDate) || !isDate(endDate)) {
+    return res.status(400).json({ error: 'startDate and endDate are required, in YYYY-MM-DD form' });
+  }
+  if ((startDate as string) > (endDate as string)) {
+    return res.status(400).json({ error: 'startDate must not be after endDate' });
+  }
+
+  const parseList = (value: unknown): string[] | undefined => {
+    if (value === undefined) return undefined;
+    try {
+      const parsed = JSON.parse(value as string);
+      return Array.isArray(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  try {
+    const rows = await FinanceManager.getCategoryHistory(startDate as string, endDate as string, {
+      categories: parseList(categories),
+      accounts: parseList(accounts),
+      includeInternal: includeInternal === 'true',
+    });
+    res.status(200).json(rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Net worth at each month end over a range, for the history chart.
+router.get('/net-worth-history', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate } = req.query;
+  const isDate = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+  if (!isDate(startDate) || !isDate(endDate)) {
+    return res.status(400).json({ error: 'startDate and endDate are required, in YYYY-MM-DD form' });
+  }
+  if ((startDate as string) > (endDate as string)) {
+    return res.status(400).json({ error: 'startDate must not be after endDate' });
+  }
+
+  try {
+    const history = await FinanceManager.getNetWorthHistory(startDate as string, endDate as string);
+    res.status(200).json(history);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/category-list', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedTransaction = await FinanceManager.getCategoryList();
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/investment-accounts', async (req: Request, res: Response) => {
+router.get('/investment-accounts', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedTransaction = await FinanceManager.getInvestmentAccounts();
     res.status(200).json(updatedTransaction);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
@@ -269,31 +371,464 @@ router.use('/upload-investments', bodyParser.json(), (req, res, next) => {
   }
 });
 
-router.post('/upload-investments', async (req: Request, res: Response) => {
+router.post('/upload-investments', async (req: Request, res: Response, next: NextFunction) => {
   const investments = req.body;
 
   try {  
     const createdIds = await FinanceManager.addInvestments(investments);
     res.status(200).json({ message: 'Entries imported successfully', createdIds });
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.delete('/remove-transaction/:id', async (req: Request, res: Response) => {
+router.delete('/remove-transaction/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
     await FinanceManager.deleteTransaction(id);
     res.status(200).json({ message: 'Transaction deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
+  }
+});
+
+// --- Search and bulk edits --------------------------------------------------
+
+const parseJsonArray = (value: unknown): any[] | undefined => {
+  if (value === undefined) return undefined;
+  try {
+    const parsed = JSON.parse(value as string);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+// The one query behind every transaction list: the review screen passes
+// uncategorised=true, a category drill-down passes categories, the search screen
+// passes whatever was typed.
+router.get('/transactions/search', async (req: Request, res: Response, next: NextFunction) => {
+  const {
+    query, startDate, endDate, categories, accounts, tagIds,
+    debitCredit, minAmount, maxAmount, uncategorised, includeInternal,
+    sortBy, sortDir, limit, offset,
+  } = req.query;
+
+  const parsedLimit = limit === undefined ? 100 : Number(limit);
+  const parsedOffset = offset === undefined ? 0 : Number(offset);
+
+  if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
+    return res.status(400).json({ error: 'limit must be a positive number' });
+  }
+  if (!Number.isFinite(parsedOffset) || parsedOffset < 0) {
+    return res.status(400).json({ error: 'offset must be zero or more' });
+  }
+  if (debitCredit !== undefined && debitCredit !== 'Debit' && debitCredit !== 'Credit') {
+    return res.status(400).json({ error: "debitCredit must be 'Debit' or 'Credit'" });
+  }
+
+  try {
+    const result = await FinanceManager.searchTransactions({
+      query: query as string | undefined,
+      startDate: startDate as string | undefined,
+      endDate: endDate as string | undefined,
+      categories: parseJsonArray(categories),
+      accounts: parseJsonArray(accounts),
+      tagIds: parseJsonArray(tagIds),
+      debitCredit: debitCredit as string | undefined,
+      minAmount: minAmount === undefined ? undefined : Number(minAmount),
+      maxAmount: maxAmount === undefined ? undefined : Number(maxAmount),
+      uncategorised: uncategorised === 'true',
+      includeInternal: includeInternal === 'true',
+      sortBy: sortBy as string | undefined,
+      sortDir: sortDir === 'asc' ? 'asc' : 'desc',
+      limit: parsedLimit,
+      offset: parsedOffset,
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Account identifiers actually present in transactions, for the filter list -
+// including ones with no entry in the accounts table yet.
+router.get('/transactions/accounts', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getTransactionAccounts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+// One change applied to a selection: categorising an import row by row is the
+// bulk of the work on the review screen.
+router.patch('/transactions/bulk', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, updates } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0 || ids.some((id) => !Number.isInteger(id))) {
+    return res.status(400).json({ error: 'ids must be a non-empty array of integers' });
+  }
+  if (!updates || typeof updates !== 'object') {
+    return res.status(400).json({ error: 'updates must be an object' });
+  }
+
+  try {
+    const updated = await FinanceManager.bulkUpdateTransactions(ids, updates);
+    res.status(200).json({ updated });
+  } catch (error: any) {
+    if (error?.message === 'No updatable columns supplied') {
+      return res.status(400).json({ error: error.message });
+    }
+    // 23503 = foreign_key_violation, an unknown category
+    if (error?.code === '23503') {
+      return res.status(400).json({ error: 'Unknown category' });
+    }
+    next(error);
+  }
+});
+
+router.post('/transactions/bulk-tag', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, tagId, mode } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0 || ids.some((id) => !Number.isInteger(id))) {
+    return res.status(400).json({ error: 'ids must be a non-empty array of integers' });
+  }
+  if (!Number.isInteger(tagId)) {
+    return res.status(400).json({ error: 'tagId must be an integer' });
+  }
+  if (mode !== 'add' && mode !== 'remove') {
+    return res.status(400).json({ error: "mode must be 'add' or 'remove'" });
+  }
+
+  try {
+    const affected = await FinanceManager.bulkSetTag(ids, tagId, mode);
+    res.status(200).json({ affected });
+  } catch (error: any) {
+    if (error?.code === '23503') {
+      return res.status(400).json({ error: 'Unknown transaction or tag id' });
+    }
+    next(error);
+  }
+});
+
+// --- Categories -------------------------------------------------------------
+
+const CATEGORY_TYPES = ['Vast', 'Variabel'];
+const INCOME_OUTCOME = ['Inkomsten', 'Uitgaven'];
+
+router.get('/categories', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getCategories());
+  } catch (error) {
+    next(error);
+  }
+});
+
+const validateCategory = (body: any, requireName: boolean): string | null => {
+  if (requireName && (!body.category_name || typeof body.category_name !== 'string' || !body.category_name.trim())) {
+    return 'category_name is required';
+  }
+  if (body.category_type !== undefined && !CATEGORY_TYPES.includes(body.category_type)) {
+    return `category_type must be one of: ${CATEGORY_TYPES.join(', ')}`;
+  }
+  if (body.income_outcome !== undefined && !INCOME_OUTCOME.includes(body.income_outcome)) {
+    return `income_outcome must be one of: ${INCOME_OUTCOME.join(', ')}`;
+  }
+  // The colour is rendered straight into the breakdown chart.
+  if (body.color !== undefined && body.color !== null && !/^#[0-9a-fA-F]{6}$/.test(body.color)) {
+    return 'color must be a hex value like #8cc2b3';
+  }
+  return null;
+};
+
+router.post('/categories', async (req: Request, res: Response, next: NextFunction) => {
+  const invalid = validateCategory(req.body, true);
+  if (invalid) return res.status(400).json({ error: invalid });
+
+  try {
+    const category = await FinanceManager.createCategory({
+      ...req.body,
+      category_name: req.body.category_name.trim(),
+    });
+    res.status(201).json(category);
+  } catch (error: any) {
+    // 23505 = unique_violation on category_name
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'A category with that name already exists' });
+    }
+    next(error);
+  }
+});
+
+router.patch('/categories/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const invalid = validateCategory(req.body, false);
+  if (invalid) return res.status(400).json({ error: invalid });
+
+  try {
+    const category = await FinanceManager.updateCategory(id, req.body);
+    if (!category) return res.status(404).json({ error: 'Category not found' });
+    res.status(200).json(category);
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'A category with that name already exists' });
+    }
+    next(error);
+  }
+});
+
+router.delete('/categories/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const { deleted, blockedBy } = await FinanceManager.deleteCategory(id);
+
+    if (blockedBy) {
+      return res.status(409).json({
+        error: `${blockedBy} transaction(s) still use this category. Move them to another one first.`,
+      });
+    }
+    if (!deleted) return res.status(404).json({ error: 'Category not found' });
+
+    res.status(200).json({ message: 'Category deleted' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// --- Accounts ---------------------------------------------------------------
+
+router.get('/accounts', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getAccounts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Account identifiers seen in transactions but absent from the accounts table.
+// Their rows import fine, but without an entry they have no name, no opening
+// balance, and cannot take part in transfer detection.
+router.get('/accounts/unknown', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json(await FinanceManager.getUnknownAccounts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+const ACCOUNT_TYPES = ['Checking Account', 'Savings Account', 'Investments'];
+
+router.post('/accounts', async (req: Request, res: Response, next: NextFunction) => {
+  const { account_type, account_name, details, balance_when_created } = req.body;
+
+  if (!ACCOUNT_TYPES.includes(account_type)) {
+    return res.status(400).json({ error: `account_type must be one of: ${ACCOUNT_TYPES.join(', ')}` });
+  }
+  if (!account_name || typeof account_name !== 'string' || !account_name.trim()) {
+    return res.status(400).json({ error: 'account_name is required' });
+  }
+  if (!details || typeof details !== 'string' || !details.trim()) {
+    return res.status(400).json({ error: 'details (the IBAN or account identifier) is required' });
+  }
+  if (balance_when_created !== undefined && balance_when_created !== null && Number.isNaN(Number(balance_when_created))) {
+    return res.status(400).json({ error: 'balance_when_created must be a number' });
+  }
+
+  try {
+    const account = await FinanceManager.createAccount({
+      account_type,
+      account_name: account_name.trim(),
+      details: details.trim(),
+      balance_when_created: balance_when_created === undefined || balance_when_created === null
+        ? 0
+        : Number(balance_when_created),
+    });
+    res.status(201).json(account);
+  } catch (error: any) {
+    // 23505 = unique_violation on details
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'An account with that identifier already exists' });
+    }
+    next(error);
+  }
+});
+
+router.patch('/accounts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  if (req.body.account_type !== undefined && !ACCOUNT_TYPES.includes(req.body.account_type)) {
+    return res.status(400).json({ error: `account_type must be one of: ${ACCOUNT_TYPES.join(', ')}` });
+  }
+
+  try {
+    const account = await FinanceManager.updateAccount(id, req.body);
+    if (!account) return res.status(404).json({ error: 'Account not found' });
+    res.status(200).json(account);
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      return res.status(409).json({ error: 'An account with that identifier already exists' });
+    }
+    next(error);
+  }
+});
+
+router.delete('/accounts/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const { deleted, blockedBy } = await FinanceManager.deleteAccount(id);
+
+    if (blockedBy) {
+      return res.status(409).json({
+        error: `This account still has ${blockedBy} transaction(s) or investment(s). Reassign or remove those first.`,
+      });
+    }
+    if (!deleted) return res.status(404).json({ error: 'Account not found' });
+
+    res.status(200).json({ message: 'Account deleted' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// --- Internal transfers -----------------------------------------------------
+
+// Candidate pairs for review. ?ids=[..] narrows it to a fresh import, so the
+// review screen proposes pairs for the rows just added instead of the whole
+// history.
+router.get('/transfer-candidates', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, windowDays } = req.query;
+  let idList: number[] = [];
+
+  if (ids) {
+    try {
+      idList = JSON.parse(ids as string);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid IDs format' });
+    }
+  }
+
+  const days = windowDays ? Number(windowDays) : 3;
+  if (!Number.isFinite(days) || days < 0 || days > 31) {
+    return res.status(400).json({ error: 'windowDays must be between 0 and 31' });
+  }
+
+  try {
+    const candidates = await FinanceManager.getTransferCandidates(idList, days);
+    res.status(200).json(candidates);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Transactions marked internal on their counterparty alone, with no counterpart
+// stored. Shown after an import so the automatic marking is visible.
+router.get('/transfers/one-sided', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids } = req.query;
+  let idList: number[] = [];
+
+  if (ids) {
+    try {
+      idList = JSON.parse(ids as string);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid IDs format' });
+    }
+  }
+
+  try {
+    res.status(200).json(await FinanceManager.getOneSidedTransfers(idList));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Revert the automatic marking: the row counts as ordinary spending again.
+router.post('/transfers/unmark/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const row = await FinanceManager.unmarkInternal(id);
+    if (!row) {
+      return res.status(409).json({
+        error: 'This transaction is part of a confirmed transfer. Unlink that first.',
+      });
+    }
+    res.status(200).json(row);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/transfers', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const transfers = await FinanceManager.getTransfers();
+    res.status(200).json(transfers);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Confirm a suggested pair: both rows drop out of the income/expense summaries
+// and are categorised as a transfer, which also clears them off the review list.
+router.post('/transfers', async (req: Request, res: Response, next: NextFunction) => {
+  const { fromTransactionId, toTransactionId, matchBasis } = req.body;
+
+  if (!Number.isInteger(fromTransactionId) || !Number.isInteger(toTransactionId)) {
+    return res.status(400).json({ error: 'fromTransactionId and toTransactionId must be integers' });
+  }
+  if (fromTransactionId === toTransactionId) {
+    return res.status(400).json({ error: 'A transfer needs two different transactions' });
+  }
+  if (matchBasis !== 'iban' && matchBasis !== 'amount') {
+    return res.status(400).json({ error: "matchBasis must be 'iban' or 'amount'" });
+  }
+
+  try {
+    const transfer = await FinanceManager.confirmTransfer(fromTransactionId, toTransactionId, matchBasis);
+    if (!transfer) {
+      return res.status(409).json({ error: 'One of these transactions is already part of a transfer' });
+    }
+    res.status(201).json(transfer);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Reject a suggestion, so it is not proposed again after the next import.
+router.post('/transfers/reject', async (req: Request, res: Response, next: NextFunction) => {
+  const { fromTransactionId, toTransactionId } = req.body;
+
+  if (!Number.isInteger(fromTransactionId) || !Number.isInteger(toTransactionId)) {
+    return res.status(400).json({ error: 'fromTransactionId and toTransactionId must be integers' });
+  }
+
+  try {
+    await FinanceManager.rejectTransfer(fromTransactionId, toTransactionId);
+    res.status(200).json({ message: 'Suggestion dismissed' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/transfers/:id', async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const removed = await FinanceManager.unlinkTransfer(id);
+    if (!removed) return res.status(404).json({ error: 'Transfer not found' });
+    res.status(200).json({ message: 'Transfer unlinked' });
+  } catch (error) {
+    next(error);
   }
 });
 
 // --- Tags -------------------------------------------------------------------
 
-router.get('/tags', async (req: Request, res: Response) => {
+router.get('/tags', async (req: Request, res: Response, next: NextFunction) => {
   // ?includeClosed=false hides finished events from pickers.
   const includeClosed = req.query.includeClosed !== 'false';
 
@@ -301,11 +836,11 @@ router.get('/tags', async (req: Request, res: Response) => {
     const tags = await FinanceManager.getTags(includeClosed);
     res.status(200).json(tags);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.post('/tags', async (req: Request, res: Response) => {
+router.post('/tags', async (req: Request, res: Response, next: NextFunction) => {
   const { tag_name, color, budget, notes } = req.body;
 
   if (!tag_name || typeof tag_name !== 'string' || !tag_name.trim()) {
@@ -320,11 +855,11 @@ router.post('/tags', async (req: Request, res: Response) => {
     if (error?.code === '23505') {
       return res.status(409).json({ error: 'A tag with that name already exists' });
     }
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.patch('/tags/:id', async (req: Request, res: Response) => {
+router.patch('/tags/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -335,11 +870,11 @@ router.patch('/tags/:id', async (req: Request, res: Response) => {
     if (error?.code === '23505') {
       return res.status(409).json({ error: 'A tag with that name already exists' });
     }
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.delete('/tags/:id', async (req: Request, res: Response) => {
+router.delete('/tags/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -347,11 +882,11 @@ router.delete('/tags/:id', async (req: Request, res: Response) => {
     if (!tag) return res.status(404).json({ error: 'Tag not found' });
     res.status(200).json({ message: 'Tag deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/tags/:id/summary', async (req: Request, res: Response) => {
+router.get('/tags/:id/summary', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -359,23 +894,23 @@ router.get('/tags/:id/summary', async (req: Request, res: Response) => {
     if (!summary) return res.status(404).json({ error: 'Tag not found' });
     res.status(200).json(summary);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
-router.get('/transactions/:id/tags', async (req: Request, res: Response) => {
+router.get('/transactions/:id/tags', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
 
   try {
     const tags = await FinanceManager.getTagsForTransaction(id);
     res.status(200).json(tags);
   } catch (error) {
-    res.status(500).json({ error });
+    next(error);
   }
 });
 
 // Replaces the transaction's tags with the supplied set.
-router.put('/transactions/:id/tags', async (req: Request, res: Response) => {
+router.put('/transactions/:id/tags', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const { tagIds } = req.body;
 
@@ -391,7 +926,7 @@ router.put('/transactions/:id/tags', async (req: Request, res: Response) => {
     if (error?.code === '23503') {
       return res.status(400).json({ error: 'Unknown transaction or tag id' });
     }
-    res.status(500).json({ error });
+    next(error);
   }
 });
 

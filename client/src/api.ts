@@ -28,10 +28,203 @@ export interface TagSummary extends Tag {
   by_month: { month: string; total_amount: string }[];
 }
 
+export interface ImportSummary {
+  message: string;
+  createdIds: number[];
+  imported: number;
+  skipped: number;
+  /** Rows recognised as internal on their counterparty alone. */
+  markedInternal: number;
+}
+
+/** Per-table row counts from a backup restore. */
+export interface RestoreSummary {
+  message: string;
+  mode: 'replace' | 'merge';
+  categories: number;
+  accounts: number;
+  transactions: number;
+  investments: number;
+  transfers: number;
+  tags: number;
+  transaction_tags: number;
+  /** Transactions already stored, matched on import_hash. */
+  skipped_transactions: number;
+}
+
+// Every cache tag, defined once: `tagTypes` registers them and a restore
+// invalidates all of them. Two hand-kept lists would drift the moment a tag is
+// added, and the one that silently goes stale is the restore.
+const ALL_TAGS = [
+  "transactions",
+  "categorySums",
+  "incomeExpensesSum",
+  "emptyCategoryTransactions",
+  "accountOverview",
+  "categoryList",
+  "investmentAccounts",
+  "tags",
+  "tagSummary",
+  "transactionTags",
+  "transferCandidates",
+  "transfers",
+  "oneSidedTransfers",
+  "accounts",
+  "unknownAccounts",
+  "searchTransactions",
+  "transactionAccounts",
+  "netWorthHistory",
+  "categoryHistory",
+  "categories",
+] as const;
+
+/** A proposed pair of rows that together look like one internal transfer. */
+export interface TransferCandidate {
+  from_transaction_id: number;
+  from_date: string;
+  from_account: string | null;
+  from_account_name: string | null;
+  from_description: string | null;
+  to_transaction_id: number;
+  to_date: string;
+  to_account: string | null;
+  to_account_name: string | null;
+  to_description: string | null;
+  amount: string;
+  /** 'iban' when both accounts are known and certain, 'amount' when inferred. */
+  match_basis: 'iban' | 'amount';
+}
+
+/** A movement marked internal on its counterparty alone, with no counterpart. */
+export interface OneSidedTransfer {
+  id: number;
+  date_str: string;
+  name_description: string | null;
+  account: string | null;
+  account_name: string | null;
+  counterparty: string | null;
+  counterparty_name: string | null;
+  debit_credit: string;
+  amount: string;
+}
+
+export interface Transfer {
+  id: number;
+  match_basis: 'iban' | 'amount';
+  confirmed_at: string;
+  from_date: string;
+  from_account: string | null;
+  from_account_name: string | null;
+  to_date: string;
+  to_account: string | null;
+  to_account_name: string | null;
+  amount: string;
+}
+
+export interface Account {
+  id: number;
+  account_type: 'Checking Account' | 'Savings Account' | 'Investments';
+  account_name: string;
+  details: string;
+  balance_when_created: string | number | null;
+  transaction_count?: number;
+}
+
+/** An account identifier seen in transactions but not yet in the accounts table. */
+export interface UnknownAccount {
+  details: string;
+  transaction_count: number;
+  first_seen: string;
+  last_seen: string;
+  last_description: string | null;
+}
+
+export interface TransactionRow {
+  id: number;
+  date_str: string;
+  name_description: string | null;
+  account: string | null;
+  counterparty: string | null;
+  category: string | null;
+  debit_credit: string;
+  amount: string;
+  notifications: string | null;
+  is_internal: boolean | null;
+  tags: { id: number; tag_name: string; color: string | null }[];
+}
+
+export interface SearchFilters {
+  query?: string;
+  startDate?: string;
+  endDate?: string;
+  categories?: string[];
+  accounts?: string[];
+  tagIds?: number[];
+  debitCredit?: 'Debit' | 'Credit';
+  minAmount?: number;
+  maxAmount?: number;
+  uncategorised?: boolean;
+  includeInternal?: boolean;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchResult {
+  rows: TransactionRow[];
+  /** Matches ignoring paging, so the client can show "100 of 1,432". */
+  total: number;
+}
+
+export interface TransactionAccount {
+  details: string;
+  account_name: string;
+  transaction_count: number;
+}
+
+export interface AccountBalance {
+  account_type: string;
+  account_name: string;
+  details: string;
+  current_balance: string;
+}
+
+export interface NetWorthPoint {
+  month: string;
+  net_worth: string;
+  checking: string | null;
+  savings: string | null;
+  investments: string | null;
+}
+
+export interface Category {
+  id: number;
+  category_name: string;
+  color: string | null;
+  /** 'Vast' or 'Variabel' - splits the period summary. */
+  category_type: string | null;
+  /** 'Inkomsten' or 'Uitgaven' - decides which side of the summary it lands on. */
+  income_outcome: string | null;
+  transaction_count?: number;
+}
+
+/** One category's spend in one month. Spending is positive. */
+export interface CategoryHistoryPoint {
+  month: string;
+  category: string;
+  color: string | null;
+  income_outcome: string | null;
+  total: string;
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BASE_URL }),
   reducerPath: "main",
-  tagTypes: ["transactions", "categorySums", "incomeExpensesSum", "uploadTransactions", "emptyCategoryTransactions", "transaction", "accountOverview", "categoryList", "investmentAccounts", "uploadInvestments", "deleteTransactions", "tags", "tagSummary", "transactionTags"],
+  // Only tags a query actually provides belong here. A mutation invalidating a
+  // tag nothing provides refetches nothing, which is what left the app relying
+  // on full page reloads to show a change.
+  tagTypes: ALL_TAGS,
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -62,14 +255,31 @@ export const api = createApi({
       }),
       providesTags: ["incomeExpensesSum"],
     }),
-    uploadTransactions: build.mutation<any, { formData: FormData, bankType: string }>({
+    // A restore replaces the contents of every table, so it invalidates every
+    // cache tag rather than a list that would need updating whenever a new one
+    // is added.
+    importBackup: build.mutation<RestoreSummary, { formData: FormData; mode?: 'replace' | 'merge' }>({
+      query: ({ formData, mode }) => ({
+        url: `api/import`,
+        method: 'POST',
+        body: formData,
+        params: mode ? { mode } : undefined,
+      }),
+      invalidatesTags: ALL_TAGS,
+    }),
+    uploadTransactions: build.mutation<ImportSummary, { formData: FormData, bankType: string }>({
       query: ({ formData, bankType }) => ({
         url: `api/upload-transactions`,
         method: 'POST',
         body: formData,
         params: {bankType}
       }),
-      invalidatesTags: ["uploadTransactions"],
+      // An import changes every derived figure at once.
+      invalidatesTags: ["transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview", "netWorthHistory", "categoryHistory",
+                        "transferCandidates", "oneSidedTransfers",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getEmptyCategoryTransactions: build.query<any, void>({
       query: () => ({
@@ -83,13 +293,29 @@ export const api = createApi({
         method: 'PATCH',
         body: patch,
       }),
-      invalidatesTags: ["transaction"],
+      // Editing a category moves money between breakdowns, so the sums and the
+      // review list are stale too - not just the transaction itself.
+      invalidatesTags: ["transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview", "netWorthHistory", "categoryHistory",
+                        "transferCandidates", "oneSidedTransfers",
+                        "unknownAccounts", "transactionAccounts"],
     }),
-    getAccountOverview: build.query<any, void>({
-      query: () => ({
+    getAccountOverview: build.query<AccountBalance[], { asOf?: string } | void>({
+      query: (args) => ({
         url: `api/account-overview`,
+        // Without asOf the server answers for today, which is what the banner
+        // shows regardless of the month the dashboard is filtered to.
+        params: args && args.asOf ? { asOf: args.asOf } : undefined,
       }),
       providesTags: ["accountOverview"],
+    }),
+    getNetWorthHistory: build.query<NetWorthPoint[], { startDate: string; endDate: string }>({
+      query: ({ startDate, endDate }) => ({
+        url: `api/net-worth-history`,
+        params: { startDate, endDate },
+      }),
+      providesTags: ["netWorthHistory"],
     }),
     getCategoryList: build.query<any, void>({
       query: () => ({
@@ -112,14 +338,18 @@ export const api = createApi({
         },
         body: investments,
       }),
-      invalidatesTags: ['uploadInvestments'],
+      invalidatesTags: ["accountOverview", "netWorthHistory"],
     }),
     deleteTransaction: build.mutation<void, number>({
       query: (id) => ({
         url: `api/remove-transaction/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ["deleteTransactions"],
+      invalidatesTags: ["transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview", "netWorthHistory", "categoryHistory",
+                        "transferCandidates", "oneSidedTransfers",
+                        "unknownAccounts", "transactionAccounts"],
     }),
     getTags: build.query<Tag[], { includeClosed?: boolean } | void>({
       query: (args) => ({
@@ -142,7 +372,10 @@ export const api = createApi({
         method: 'PATCH',
         body: updates,
       }),
-      invalidatesTags: ["tags", "tagSummary"],
+      // The transaction lists embed tag names rather than joining on id, so a
+      // rename has to reach them too or the table keeps the old name.
+      invalidatesTags: ["tags", "tagSummary", "transactions", "searchTransactions",
+        "transactionTags"],
     }),
     deleteTag: build.mutation<void, number>({
       query: (id) => ({
@@ -163,6 +396,193 @@ export const api = createApi({
       }),
       providesTags: ["transactionTags"],
     }),
+    searchTransactions: build.query<SearchResult, SearchFilters>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+        const set = (key: string, value: unknown) => {
+          if (value === undefined || value === '' || value === false) return;
+          params.set(key, Array.isArray(value) ? JSON.stringify(value) : String(value));
+        };
+
+        set('query', filters.query);
+        set('startDate', filters.startDate);
+        set('endDate', filters.endDate);
+        if (filters.categories?.length) set('categories', filters.categories);
+        if (filters.accounts?.length) set('accounts', filters.accounts);
+        if (filters.tagIds?.length) set('tagIds', filters.tagIds);
+        set('debitCredit', filters.debitCredit);
+        set('minAmount', filters.minAmount);
+        set('maxAmount', filters.maxAmount);
+        set('uncategorised', filters.uncategorised);
+        set('includeInternal', filters.includeInternal);
+        set('sortBy', filters.sortBy);
+        set('sortDir', filters.sortDir);
+        set('limit', filters.limit);
+        set('offset', filters.offset);
+
+        return { url: `api/transactions/search`, params };
+      },
+      providesTags: ["searchTransactions"],
+    }),
+    getTransactionAccounts: build.query<TransactionAccount[], void>({
+      query: () => ({ url: `api/transactions/accounts` }),
+      providesTags: ["transactionAccounts"],
+    }),
+    bulkUpdateTransactions: build.mutation<{ updated: number }, { ids: number[]; updates: Record<string, unknown> }>({
+      query: (body) => ({
+        url: `api/transactions/bulk`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ["searchTransactions", "transactions", "categorySums",
+                        "incomeExpensesSum", "emptyCategoryTransactions",
+                        "accountOverview"],
+    }),
+    bulkSetTag: build.mutation<{ affected: number }, { ids: number[]; tagId: number; mode: 'add' | 'remove' }>({
+      query: (body) => ({
+        url: `api/transactions/bulk-tag`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["searchTransactions", "transactionTags", "tags", "tagSummary"],
+    }),
+    getCategoryHistory: build.query<CategoryHistoryPoint[], {
+      startDate: string;
+      endDate: string;
+      categories?: string[];
+      accounts?: string[];
+      includeInternal?: boolean;
+    }>({
+      query: ({ startDate, endDate, categories, accounts, includeInternal }) => {
+        const params = new URLSearchParams({ startDate, endDate });
+        if (categories?.length) params.set('categories', JSON.stringify(categories));
+        if (accounts?.length) params.set('accounts', JSON.stringify(accounts));
+        if (includeInternal) params.set('includeInternal', 'true');
+        return { url: `api/reports/category-history`, params };
+      },
+      providesTags: ["categoryHistory"],
+    }),
+    getCategories: build.query<Category[], void>({
+      query: () => ({ url: `api/categories` }),
+      providesTags: ["categories"],
+    }),
+    createCategory: build.mutation<Category, Partial<Category> & { category_name: string }>({
+      query: (category) => ({
+        url: `api/categories`,
+        method: 'POST',
+        body: category,
+      }),
+      invalidatesTags: ["categories", "categoryList"],
+    }),
+    updateCategory: build.mutation<Category, { id: number; updates: Partial<Category> }>({
+      query: ({ id, updates }) => ({
+        url: `api/categories/${id}`,
+        method: 'PATCH',
+        body: updates,
+      }),
+      // A rename rewrites the category on every transaction that carried it, and
+      // a colour or type change moves figures between the summaries.
+      invalidatesTags: ["categories", "categoryList", "transactions",
+                        "searchTransactions", "categorySums", "incomeExpensesSum"],
+    }),
+    deleteCategory: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["categories", "categoryList"],
+    }),
+    getAccounts: build.query<Account[], void>({
+      query: () => ({ url: `api/accounts` }),
+      providesTags: ["accounts"],
+    }),
+    getUnknownAccounts: build.query<UnknownAccount[], void>({
+      query: () => ({ url: `api/accounts/unknown` }),
+      providesTags: ["unknownAccounts"],
+    }),
+    createAccount: build.mutation<Account, Omit<Account, 'id' | 'transaction_count'>>({
+      query: (account) => ({
+        url: `api/accounts`,
+        method: 'POST',
+        body: account,
+      }),
+      // A newly named account changes the overview, empties it from the unknown
+      // list, and makes its rows eligible for transfer detection.
+      invalidatesTags: ["accounts", "unknownAccounts", "accountOverview",
+                        "investmentAccounts", "transferCandidates"],
+    }),
+    updateAccount: build.mutation<Account, { id: number; updates: Partial<Account> }>({
+      query: ({ id, updates }) => ({
+        url: `api/accounts/${id}`,
+        method: 'PATCH',
+        body: updates,
+      }),
+      // Renaming an identifier rewrites it on every transaction that used it.
+      invalidatesTags: ["accounts", "unknownAccounts", "accountOverview",
+                        "investmentAccounts", "transactions", "transferCandidates"],
+    }),
+    deleteAccount: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/accounts/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["accounts", "unknownAccounts", "accountOverview", "investmentAccounts"],
+    }),
+    getTransferCandidates: build.query<TransferCandidate[], { ids?: string } | void>({
+      query: (args) => ({
+        url: `api/transfer-candidates`,
+        params: args && args.ids ? { ids: args.ids } : undefined,
+      }),
+      providesTags: ["transferCandidates"],
+    }),
+    getOneSidedTransfers: build.query<OneSidedTransfer[], { ids?: string } | void>({
+      query: (args) => ({
+        url: `api/transfers/one-sided`,
+        params: args && args.ids ? { ids: args.ids } : undefined,
+      }),
+      providesTags: ["oneSidedTransfers"],
+    }),
+    unmarkInternal: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/transfers/unmark/${id}`,
+        method: 'POST',
+      }),
+      // The row counts as spending again, so every derived figure shifts.
+      invalidatesTags: ["oneSidedTransfers", "transactions", "searchTransactions",
+                        "categorySums", "incomeExpensesSum", "transferCandidates"],
+    }),
+    getTransfers: build.query<Transfer[], void>({
+      query: () => ({ url: `api/transfers` }),
+      providesTags: ["transfers"],
+    }),
+    confirmTransfer: build.mutation<Transfer, { fromTransactionId: number; toTransactionId: number; matchBasis: 'iban' | 'amount' }>({
+      query: (body) => ({
+        url: `api/transfers`,
+        method: 'POST',
+        body,
+      }),
+      // Confirming removes both rows from the summaries and categorises them,
+      // so every derived figure and the review list change with it.
+      invalidatesTags: ["transferCandidates", "transfers", "transactions",
+                        "categorySums", "incomeExpensesSum",
+                        "emptyCategoryTransactions"],
+    }),
+    rejectTransfer: build.mutation<void, { fromTransactionId: number; toTransactionId: number }>({
+      query: (body) => ({
+        url: `api/transfers/reject`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["transferCandidates"],
+    }),
+    unlinkTransfer: build.mutation<void, number>({
+      query: (id) => ({
+        url: `api/transfers/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["transfers", "transferCandidates", "transactions",
+                        "categorySums", "incomeExpensesSum"],
+    }),
     setTransactionTags: build.mutation<Tag[], { id: number; tagIds: number[] }>({
       query: ({ id, tagIds }) => ({
         url: `api/transactions/${id}/tags`,
@@ -179,6 +599,7 @@ export const {
   useGetCategorySumsQuery,
   useGetIncomeExpensesSumQuery,
   useUploadTransactionsMutation,
+  useImportBackupMutation,
   useGetEmptyCategoryTransactionsQuery,
   useUpdateTransactionMutation,
   useGetAccountOverviewQuery,
@@ -193,4 +614,26 @@ export const {
   useGetTagSummaryQuery,
   useGetTransactionTagsQuery,
   useSetTransactionTagsMutation,
+  useGetTransferCandidatesQuery,
+  useGetTransfersQuery,
+  useGetOneSidedTransfersQuery,
+  useUnmarkInternalMutation,
+  useConfirmTransferMutation,
+  useRejectTransferMutation,
+  useUnlinkTransferMutation,
+  useGetAccountsQuery,
+  useGetUnknownAccountsQuery,
+  useCreateAccountMutation,
+  useUpdateAccountMutation,
+  useDeleteAccountMutation,
+  useSearchTransactionsQuery,
+  useGetTransactionAccountsQuery,
+  useBulkUpdateTransactionsMutation,
+  useBulkSetTagMutation,
+  useGetNetWorthHistoryQuery,
+  useGetCategoryHistoryQuery,
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
 } = api;

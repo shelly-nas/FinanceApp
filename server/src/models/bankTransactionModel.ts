@@ -25,21 +25,6 @@ export const bankMappings = {
 		'Bedrag bij / af': 'amount',
 		'Omschrijving': 'notifications'
 	},
-	Rabobank: {
-		'Datum': 'date_str',
-		'Naam tegenpartij': 'name_description',
-		'IBAN/BBAN': 'account',
-		'Tegerekening IBAN/BBAN': 'counterparty',
-		'Bedrag': 'amount',
-		'Omschrijving-1': 'notifications',
-	},
-	Rabobank_CC: {
-		'Datum': 'date_str',
-		'Omschrijving': 'name_description',
-		'Creditcard Nummer': 'account',
-		'Tegerekening IBAN': 'counterparty',
-		'Bedrag': 'amount'
-	}
 };
 
 // ASN exports its own category per transaction. It is a useful hint on a first

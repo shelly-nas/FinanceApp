@@ -3,6 +3,7 @@ import { Button, Typography, TextField, Modal, Table, TableBody, TableCell, Tabl
 import { useTheme } from '@mui/material/styles';
 import LineAxisIcon from '@mui/icons-material/LineAxis';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Link } from 'react-router-dom';
 import DashboardBox from './DashboardBox';
 import { useGetInvestmentAccountsQuery, useUploadInvestmentsMutation } from '@/api';
 
@@ -13,9 +14,21 @@ export interface Investment {
   account: string;
 }
 
-const UploadInvestButton: React.FC = () => {
+interface UploadInvestButtonProps {
+  /** Opened from the header's action menu rather than by its own button. */
+  openExternally?: boolean;
+  onCloseExternally?: () => void;
+}
+
+const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
+  openExternally,
+  onCloseExternally,
+}) => {
   const { palette } = useTheme();
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+
+  const isControlled = openExternally !== undefined;
+  const open = isControlled ? Boolean(openExternally) : ownOpen;
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [dateStr, setDateStr] = useState('');
   const [nameDescription, setNameDescription] = useState('');
@@ -31,14 +44,15 @@ const UploadInvestButton: React.FC = () => {
   const [postUploadInvestments] = useUploadInvestmentsMutation();
 
   const handleOpen = () => {
-    setOpen(true);
+    setOwnOpen(true);
     setPopupActiveDate(new Date().toISOString().split('T')[0]); // Store the current date when the popup is opened
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setOwnOpen(false);
     setError(null); // Clear error when modal is closed
     setSuccess(null); // Clear success message when modal is closed
+    onCloseExternally?.();
   };
 
   const handleAddInvestmentToList = () => {
@@ -83,18 +97,20 @@ const UploadInvestButton: React.FC = () => {
 
   return (
     <>
-      <Button
-        sx={{
-          width: '100%',
-          color: palette.secondary[500],
-          '&:hover': {
-            backgroundColor: palette.action.hover
-          }
-        }}
-        onClick={handleOpen}
-      >
-        <LineAxisIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
-      </Button>
+      {!isControlled && (
+        <Button
+          sx={{
+            width: '100%',
+            color: palette.secondary[500],
+            '&:hover': {
+              backgroundColor: palette.action.hover
+            }
+          }}
+          onClick={handleOpen}
+        >
+          <LineAxisIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
+        </Button>
+      )}
 
       <Modal open={open} onClose={handleClose}>
         <DashboardBox sx={{ ...style, width: 300 }}>
@@ -111,22 +127,37 @@ const UploadInvestButton: React.FC = () => {
             inputProps={{ pattern: "\\d{4}-\\d{2}-\\d{2}" }}
           />
 
-          <FormControl fullWidth sx={{ mt: 2 }}>
-            <InputLabel id="account-select-label">Account</InputLabel>
-            <Select
-              labelId="account-select-label"
-              value={account}
-              onChange={(e: SelectChangeEvent) => setAccount(e.target.value as string)}
-              label="Account"
-              sx={{ textAlign: 'left' }}
-            >
-              {accounts.map((acc: any) => (
-                <MenuItem key={acc.details} value={acc.details}>
-                  {acc.account_name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {accounts.length === 0 ? (
+            // Investment accounts appear in no bank export, so unlike checking
+            // and savings accounts they cannot be discovered from an import -
+            // there is nothing to pick until one is created by hand.
+            <Box sx={{ mt: 2, textAlign: 'left' }}>
+              <Typography variant="body3" sx={{ display: 'block', mb: 1 }}>
+                No investment accounts yet. Add one first — they never appear in a
+                bank export, so they have to be created by hand.
+              </Typography>
+              <Button size="small" component={Link} to="/accounts" onClick={handleClose}>
+                Add an investment account
+              </Button>
+            </Box>
+          ) : (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel id="account-select-label">Account</InputLabel>
+              <Select
+                labelId="account-select-label"
+                value={account}
+                onChange={(e: SelectChangeEvent) => setAccount(e.target.value as string)}
+                label="Account"
+                sx={{ textAlign: 'left' }}
+              >
+                {accounts.map((acc: any) => (
+                  <MenuItem key={acc.details} value={acc.details}>
+                    {acc.account_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
           <TextField
             label="Name/Description"
@@ -161,7 +192,7 @@ const UploadInvestButton: React.FC = () => {
               }
             }}
             onClick={handleAddInvestmentToList}
-            disabled={loading}
+            disabled={loading || !account || !dateStr || balance === ''}
           >
             Add to List
           </Button>

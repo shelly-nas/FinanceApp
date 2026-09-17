@@ -17,9 +17,9 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: financier
-      DB_PASSWORD: m0n3y
-      DB_NAME: finance
+      DB_USER: ${DB_USER:-financier}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD ontbreekt - zet hem in .env}
+      DB_NAME: ${DB_NAME:-finance}
       SERVER_PORT: 3000
     depends_on:
       db:
@@ -30,14 +30,22 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: financier
-      POSTGRES_PASSWORD: m0n3y
-      POSTGRES_DB: finance
+      POSTGRES_USER: ${DB_USER:-financier}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD ontbreekt - zet hem in .env}
+      POSTGRES_DB: ${DB_NAME:-finance}
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./database/initProd.sql:/docker-entrypoint-initdb.d/01-init-schema.sql:ro
+      # Draait alleen bij een leeg volume, in bestandsvolgorde. Zodra 1.0.0
+      # ergens met data draait, moet een schemawijziging een migratie worden -
+      # dit script wordt op een bestaand volume nooit opnieuw uitgevoerd.
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      # Alleen lokaal: demodata om tegen te testen. Staat bewust niet in
+      # database/Dockerfile, dus productie krijgt dit bestand nooit. Slaat
+      # zichzelf over als er al transacties staan.
+      - ./database/seed-demo.sql:/docker-entrypoint-initdb.d/03-seed-demo.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U financier -d finance"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-financier} -d ${DB_NAME:-finance}"]
       interval: 10s
       timeout: 5s
       retries: 5

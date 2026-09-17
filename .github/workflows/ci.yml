@@ -1,0 +1,151 @@
+name: CI
+
+# Runs on every change: each push to any branch and every pull request, so a
+# problem surfaces before it reaches main rather than at deploy time.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch supersedes the run in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: Typecheck ${{ matrix.project }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [server, client]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+      - run: npm ci
+        working-directory: ${{ matrix.project }}
+      - run: npx tsc --noEmit
+        working-directory: ${{ matrix.project }}
+
+  client-tests:
+    name: Client unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+        working-directory: client
+      - run: npm test
+        working-directory: client
+
+  server-tests:
+    name: Schema and server tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: financier
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: finance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U financier -d finance"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: financier
+      DB_PASSWORD: ci-password
+      DB_NAME: finance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+        working-directory: server
+      - run: npm run build
+        working-directory: server
+
+      # Numbers must be unique. Two branches each adding 001_ merge cleanly in
+      # git and then collide in production, where one is recorded as applied and
+      # the other silently never runs. Empty until 1.0.0 ships, which is fine.
+      - name: Check for duplicate migration numbers
+        run: |
+          shopt -s nullglob
+          files=(server/migrations/[0-9][0-9][0-9]_*.sql)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No migrations yet - the schema comes from database/init.sql."
+            exit 0
+          fi
+          duplicates=$(printf '%s\n' "${files[@]}" \
+            | xargs -n1 basename | cut -d_ -f1 | sort | uniq -d)
+          if [ -n "$duplicates" ]; then
+            echo "Duplicate migration number(s): $duplicates"
+            exit 1
+          fi
+          echo "Migration numbering is unique."
+
+      # The schema an install actually gets: init.sql and the seed, exactly as
+      # the postgres entrypoint runs them.
+      - name: Apply the schema to a fresh database
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/init.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/seed.sql
+        env:
+          DATABASE_URL: postgresql://financier:ci-password@localhost:5432/finance
+
+      # Re-running the seed must be a no-op, so a redeploy cannot duplicate or
+      # overwrite categories the user has edited.
+      - name: Re-run the seed (must be a no-op)
+        run: |
+          before=$(psql "$DATABASE_URL" -t -A -c 'SELECT COUNT(*) FROM categories')
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/seed.sql
+          after=$(psql "$DATABASE_URL" -t -A -c 'SELECT COUNT(*) FROM categories')
+          if [ "$before" != "$after" ]; then
+            echo "Seed is not idempotent: $before categories before, $after after."
+            exit 1
+          fi
+          echo "Seed is idempotent ($after categories)."
+        env:
+          DATABASE_URL: postgresql://financier:ci-password@localhost:5432/finance
+
+      # Applied on top, so a migration added after 1.0.0 is exercised too.
+      - name: Apply pending migrations
+        working-directory: server
+        run: |
+          node -e "
+            require('module-alias/register');
+            require('./dist/context/migrations').runMigrations()
+              .then(() => process.exit(0))
+              .catch((e) => { console.error(e); process.exit(1); });
+          "
+
+      - name: Re-run migrations (must be a no-op)
+        working-directory: server
+        run: |
+          node -e "
+            require('module-alias/register');
+            require('./dist/context/migrations').runMigrations()
+              .then(() => process.exit(0))
+              .catch((e) => { console.error(e); process.exit(1); });
+          "
+
+      - name: Server tests
+        working-directory: server
+        run: npm test

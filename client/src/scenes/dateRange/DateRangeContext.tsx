@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { toMonthKey, parseMonthKey, shiftMonth, monthBounds, formatDate } from '@/utils/monthRange';
 
 interface DateRangeContextProps {
   firstDay: Date;
@@ -9,44 +11,40 @@ interface DateRangeContextProps {
 
 const DateRangeContext = createContext<DateRangeContextProps | undefined>(undefined);
 
+const MONTH_PARAM = 'month';
+
+/**
+ * The month every dashboard figure is scoped to.
+ *
+ * The month lives in the URL rather than in component state, so a reload keeps
+ * the period and a link to a given month can be shared. The arithmetic itself
+ * is in utils/monthRange, where it is covered by tests.
+ */
 export const DateRangeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [, setCurrentDate] = useState(new Date());
-  const [dateOneMonthAgo, setDateOneMonthAgo] = useState(new Date());
-
-  useEffect(() => {
-    const now = new Date();
-    setCurrentDate(now);
-
-    // Calculate the date one month ago
-    const oneMonthAgo = new Date(now);
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-    setDateOneMonthAgo(oneMonthAgo);
-  }, []);
-  
-  const incrementMonth = () => {
-    setCurrentDate(new Date(dateOneMonthAgo.setMonth(dateOneMonthAgo.getMonth() + 1)));
-  };
-
-  const decrementMonth = () => {
-    setCurrentDate(new Date(dateOneMonthAgo.setMonth(dateOneMonthAgo.getMonth() - 1)));
-  };
-
-  const getFirstAndLastDayOfMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    return { firstDay, lastDay };
-  };
-
-  const { firstDay, lastDay } = getFirstAndLastDayOfMonth(dateOneMonthAgo);
-
-  return (
-    <DateRangeContext.Provider value={{ firstDay, lastDay, incrementMonth, decrementMonth }}>
-      {children}
-    </DateRangeContext.Provider>
+  const [searchParams, setSearchParams] = useSearchParams();
+  const anchor = useMemo(
+    () => parseMonthKey(searchParams.get(MONTH_PARAM)),
+    [searchParams],
   );
+
+  const value = useMemo(() => {
+    const { firstDay, lastDay } = monthBounds(anchor);
+
+    const step = (delta: number) => {
+      const params = new URLSearchParams(searchParams);
+      params.set(MONTH_PARAM, toMonthKey(shiftMonth(anchor, delta)));
+      setSearchParams(params, { replace: true });
+    };
+
+    return {
+      firstDay,
+      lastDay,
+      incrementMonth: () => step(1),
+      decrementMonth: () => step(-1),
+    };
+  }, [anchor, searchParams, setSearchParams]);
+
+  return <DateRangeContext.Provider value={value}>{children}</DateRangeContext.Provider>;
 };
 
 export const useDateRange = () => {
@@ -57,10 +55,5 @@ export const useDateRange = () => {
   return context;
 };
 
-export const formatDate = (date: Date) => {
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-	const day = String(date.getDate()).padStart(2, '0');
-	return `${year}-${month}-${day}`;
-};
-  
+// Re-exported so the many components importing it from here keep working.
+export { formatDate };
