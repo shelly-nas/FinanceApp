@@ -5,8 +5,6 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LineAxisIcon from '@mui/icons-material/LineAxis';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import LabelIcon from '@mui/icons-material/Label';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeModeToggle from '@/components/ThemeModeToggle';
 import { useGetEmptyCategoryTransactionsQuery } from '@/api';
@@ -21,6 +19,7 @@ const TABS = [
   { label: 'Reports', path: '/reports' },
   { label: 'Events', path: '/events' },
   { label: 'Accounts', path: '/accounts' },
+  { label: 'Categories', path: '/categories' },
 ];
 
 type Props = {};
@@ -113,14 +112,6 @@ const Header = (_props: Props) => {
         <MenuItem onClick={() => go('/?import=investments')}>
           <ListItemIcon><LineAxisIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Update investments</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => go('/accounts')}>
-          <ListItemIcon><AccountBalanceIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Manage accounts</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => go('/categories')}>
-          <ListItemIcon><LabelIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Manage categories</ListItemText>
         </MenuItem>
       </Menu>
     </>
