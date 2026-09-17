@@ -340,7 +340,10 @@ export const api = createApi({
         method: 'PATCH',
         body: updates,
       }),
-      invalidatesTags: ["tags", "tagSummary"],
+      // The transaction lists embed tag names rather than joining on id, so a
+      // rename has to reach them too or the table keeps the old name.
+      invalidatesTags: ["tags", "tagSummary", "transactions", "searchTransactions",
+        "transactionTags"],
     }),
     deleteTag: build.mutation<void, number>({
       query: (id) => ({

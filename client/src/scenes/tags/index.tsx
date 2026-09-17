@@ -7,6 +7,7 @@ import {
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DashboardBox from '@/components/DashboardBox';
 import {
@@ -39,6 +40,9 @@ const Tags: React.FC = () => {
   const [newBudget, setNewBudget] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [renameId, setRenameId] = useState<number | null>(null);
+  const [renameName, setRenameName] = useState('');
+  const [renameError, setRenameError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     const name = newName.trim();
@@ -57,6 +61,30 @@ const Tags: React.FC = () => {
       setError(null);
     } catch (e: any) {
       setError(e?.data?.error ?? 'Could not create the tag');
+    }
+  };
+
+  const openRename = (id: number, currentName: string) => {
+    setRenameId(id);
+    setRenameName(currentName);
+    setRenameError(null);
+  };
+
+  const handleRename = async () => {
+    if (renameId === null) return;
+    const name = renameName.trim();
+    if (!name) {
+      setRenameError('Give the event a name');
+      return;
+    }
+    try {
+      await updateTag({ id: renameId, updates: { tag_name: name } }).unwrap();
+      setRenameId(null);
+      setRenameError(null);
+    } catch (e: any) {
+      // 409 when another event already carries the name - tag_name is unique,
+      // so the message has to reach the dialog rather than closing it.
+      setRenameError(e?.data?.error ?? 'Could not rename the event');
     }
   };
 
@@ -122,6 +150,11 @@ const Tags: React.FC = () => {
                     <TagProgress tagId={tag.id} budget={tag.budget ? Number(tag.budget) : null} />
                   </TableCell>
                   <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                    <Tooltip title="Rename">
+                      <IconButton size="small" onClick={() => openRename(tag.id, tag.tag_name)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title={tag.is_closed ? 'Reopen' : 'Close event'}>
                       <IconButton
                         size="small"
@@ -171,6 +204,32 @@ const Tags: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
           <Button onClick={handleCreate}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={renameId !== null}
+        onClose={() => setRenameId(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Rename event</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="dense"
+            label="Name"
+            value={renameName}
+            onChange={(e) => setRenameName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); }}
+            error={Boolean(renameError)}
+            helperText={renameError}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRenameId(null)}>Cancel</Button>
+          <Button onClick={handleRename}>Save</Button>
         </DialogActions>
       </Dialog>
 

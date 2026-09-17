@@ -1690,7 +1690,7 @@
       "label": "formatCurrency()",
       "file_type": "code",
       "source_file": "client/src/scenes/tags/index.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "id": "tags_index_formatcurrency",
       "community": 11,
       "norm_label": "formatcurrency()"
@@ -1699,7 +1699,7 @@
       "label": "Tags()",
       "file_type": "code",
       "source_file": "client/src/scenes/tags/index.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "id": "tags_index_tags",
       "community": 11,
       "norm_label": "tags()"
@@ -1708,7 +1708,7 @@
       "label": "TagProgress()",
       "file_type": "code",
       "source_file": "client/src/scenes/tags/index.tsx",
-      "source_location": "L195",
+      "source_location": "L254",
       "id": "tags_index_tagprogress",
       "community": 11,
       "norm_label": "tagprogress()"
@@ -9272,9 +9272,9 @@
       "source_file": "client/src/components/NetWorthBanner.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "client_src_components_networthbanner_tsx",
-      "target": "client_src_components_widgetheader_tsx",
-      "confidence_score": 1.0
+      "target": "client_src_components_widgetheader_tsx"
     },
     {
       "relation": "contains",
@@ -10626,5 +10626,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a62d9d2656eb7fe32ad277f2f421fd1f58cbd9be"
+  "built_at_commit": "7d1dc7928be9a29e3cdaa144dafb05855b9063bf"
 }
