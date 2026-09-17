@@ -1,18 +1,16 @@
-import { useState } from 'react';
-import { Typography, useTheme, Tabs, Tab, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Badge } from '@mui/material';
+import { Box, Button, Typography, useTheme, Tabs, Tab, Badge } from '@mui/material';
 import FlexBetween from '@/components/FlexBetween';
 import SavingsIcon from '@mui/icons-material/Savings';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LineAxisIcon from '@mui/icons-material/LineAxis';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeModeToggle from '@/components/ThemeModeToggle';
 import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 
-// The tabs are the app's places; the menu holds the actions. Keeping actions out
-// of the tab strip is what stops "Review transactions" from reading as a
-// destination when it is really a filter, and stops the upload buttons from
-// looking like dashboard panels.
+// The tabs are the app's places; the buttons beside them are the actions that
+// feed those places. Keeping actions out of the tab strip itself is what stops
+// "Review transactions" from reading as a destination when it is really a
+// filter, and stops the upload buttons from looking like dashboard panels.
 const TABS = [
   { label: 'Dashboard', path: '/' },
   { label: 'Transactions', path: '/transactions' },
@@ -28,7 +26,6 @@ const Header = (_props: Props) => {
   const { palette } = useTheme();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   // The count of rows still needing a category: more informative on the tab than
   // a button that cannot say whether there is anything to do.
@@ -43,13 +40,6 @@ const Header = (_props: Props) => {
         (tab.path === '/transactions' && pathname.startsWith('/review-transactions')),
   );
 
-  const closeMenu = () => setMenuAnchor(null);
-
-  const go = (path: string) => {
-    closeMenu();
-    navigate(path);
-  };
-
   return (
     <>
       <FlexBetween mb="0.25rem" p="0.5rem 0rem">
@@ -60,60 +50,68 @@ const Header = (_props: Props) => {
         </FlexBetween>
 
         {/* RIGHT SIDE */}
-        <FlexBetween gap="0.5rem">
-          <ThemeModeToggle />
-          <IconButton
-            onClick={(e) => setMenuAnchor(e.currentTarget)}
-            aria-label="Actions"
-            aria-haspopup="true"
-          >
-            <MoreVertIcon />
-          </IconButton>
-        </FlexBetween>
+        <ThemeModeToggle />
       </FlexBetween>
 
-      <Tabs
-        value={activeTab === -1 ? false : activeTab}
+      {/* The two import actions sit on the tab row rather than above it: both
+          submit data to the dashboard, so they belong at the same level as the
+          places they feed, not in the title bar. */}
+      <FlexBetween
         // Same gap below as the widgets keep between each other (mb: 1.5), so
         // the tab strip sits in the page's rhythm rather than crowding the
         // panel underneath it.
-        sx={{ minHeight: 48, mb: 1.5 }}
+        sx={{ mb: 1.5, borderBottom: 1, borderColor: 'divider' }}
       >
-        {TABS.map((tab) => (
-          <Tab
-            key={tab.path}
-            component={Link}
-            // With rows awaiting a category, the tab opens on that filter -
-            // which is what the badge is counting.
-            to={
-              tab.path === '/transactions' && reviewCount > 0
-                ? '/transactions?review=true'
-                : tab.path
-            }
-            sx={{ minHeight: 48, textTransform: 'none' }}
-            label={
-              tab.path === '/transactions' && reviewCount > 0 ? (
-                <Badge badgeContent={reviewCount} color="secondary" sx={{ pr: 1.5 }}>
-                  {tab.label}
-                </Badge>
-              ) : (
-                tab.label
-              )
-            }
-          />
-        ))}
-      </Tabs>
+        <Tabs
+          value={activeTab === -1 ? false : activeTab}
+          sx={{ minHeight: 48 }}
+        >
+          {TABS.map((tab) => (
+            <Tab
+              key={tab.path}
+              component={Link}
+              // With rows awaiting a category, the tab opens on that filter -
+              // which is what the badge is counting.
+              to={
+                tab.path === '/transactions' && reviewCount > 0
+                  ? '/transactions?review=true'
+                  : tab.path
+              }
+              sx={{ minHeight: 48, textTransform: 'none' }}
+              label={
+                tab.path === '/transactions' && reviewCount > 0 ? (
+                  <Badge badgeContent={reviewCount} color="secondary" sx={{ pr: 1.5 }}>
+                    {tab.label}
+                  </Badge>
+                ) : (
+                  tab.label
+                )
+              }
+            />
+          ))}
+        </Tabs>
 
-      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
-        <MenuItem onClick={() => go('/?import=transactions')}>
-          <ListItemIcon><CloudUploadIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Import transactions</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => go('/?import=investments')}>
-          <ListItemIcon><LineAxisIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Update investments</ListItemText>
-        </MenuItem>
-      </Menu>
+        <Box sx={{ display: 'flex', gap: 1, flexShrink: 0, pl: 2 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            onClick={() => navigate('/?import=transactions')}
+            sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}
+          >
+            Import transactions
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LineAxisIcon />}
+            onClick={() => navigate('/?import=investments')}
+            sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}
+          >
+            Update investments
+          </Button>
+        </Box>
+      </FlexBetween>
     </>
   );
 };

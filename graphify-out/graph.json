@@ -2257,7 +2257,7 @@
       "label": "TABS",
       "file_type": "code",
       "source_file": "client/src/scenes/header/index.tsx",
-      "source_location": "L16",
+      "source_location": "L14",
       "id": "header_index_tabs",
       "community": 6,
       "norm_label": "tabs"
@@ -2266,7 +2266,7 @@
       "label": "Props",
       "file_type": "code",
       "source_file": "client/src/scenes/header/index.tsx",
-      "source_location": "L25",
+      "source_location": "L23",
       "id": "header_index_props",
       "community": 6,
       "norm_label": "props"
@@ -2275,7 +2275,7 @@
       "label": "Header()",
       "file_type": "code",
       "source_file": "client/src/scenes/header/index.tsx",
-      "source_location": "L27",
+      "source_location": "L25",
       "id": "header_index_header",
       "community": 6,
       "norm_label": "header()"
@@ -10626,5 +10626,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5e9a1d8f655c9e1bd96201db376bc106aae2cd29"
+  "built_at_commit": "8dd59161440f75c4d903cbe209a95e70f3f849dc"
 }
