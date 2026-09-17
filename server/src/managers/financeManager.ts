@@ -1821,6 +1821,253 @@ class FinanceManager {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Backup and restore
+  //
+  // A bank export only carries transaction columns, so a CSV round-trip loses
+  // everything the user built on top of the imports: which rows are internal
+  // transfers, which pairs were confirmed, the events and their budgets, the
+  // investment snapshots. The backup is therefore the tables themselves rather
+  // than a report derived from them.
+  //
+  // Ids are exported and used to rebuild relationships, but not reinserted -
+  // the sequences assign fresh ones on restore and the join tables are rewritten
+  // against the new values, so a restore into a non-empty database cannot
+  // collide with rows already there.
+  // ---------------------------------------------------------------------------
+
+  /** Every table, in dependency order. */
+  public async exportAll(): Promise<Record<string, any[]>> {
+    const client = await dbContext.connect();
+
+    try {
+      const [categories, accounts, transactions, investments, transfers, tags, transactionTags] =
+        await Promise.all([
+          client.query(`SELECT category_name, color, category_type, income_outcome
+                        FROM public.${category_table} ORDER BY category_name`),
+          client.query(`SELECT account_type, account_name, details, balance_when_created
+                        FROM public.${account_table} ORDER BY id`),
+          client.query(`SELECT id, date_str, name_description, account, counterparty,
+                               category, debit_credit, amount, notifications, import_hash,
+                               is_internal
+                        FROM public.${transaction_table} ORDER BY id`),
+          client.query(`SELECT date_str, name_description, account, balance
+                        FROM public.${investment_table} ORDER BY id`),
+          client.query(`SELECT from_transaction_id, to_transaction_id, match_basis, confirmed_at
+                        FROM public.${transfer_table} ORDER BY id`),
+          client.query(`SELECT id, tag_name, color, budget, is_closed, notes, created_at
+                        FROM public.${tag_table} ORDER BY id`),
+          client.query(`SELECT transaction_id, tag_id
+                        FROM public.${transaction_tag_table} ORDER BY transaction_id, tag_id`),
+        ]);
+
+      return {
+        categories: categories.rows,
+        accounts: accounts.rows,
+        transactions: transactions.rows,
+        investments: investments.rows,
+        transfers: transfers.rows,
+        tags: tags.rows,
+        transaction_tags: transactionTags.rows,
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Restore a backup.
+   *
+   * `replace` empties the tables first, which is what makes a restore produce
+   * the database the backup was taken from rather than a merge with whatever is
+   * there now. Without it the import adds to the existing data and relies on
+   * import_hash to skip transactions already stored, which is the right
+   * behaviour when merging two exports but not when recovering from a mistake.
+   *
+   * The whole restore is one transaction: a backup that fails halfway would
+   * otherwise leave the database in a state that is neither the old one nor the
+   * new one, which for financial data is worse than failing outright.
+   */
+  public async importAll(
+    data: Record<string, any[]>,
+    replace: boolean,
+  ): Promise<Record<string, number>> {
+    const client = await dbContext.connect();
+    const counts: Record<string, number> = {
+      categories: 0, accounts: 0, transactions: 0, investments: 0,
+      transfers: 0, tags: 0, transaction_tags: 0, skipped_transactions: 0,
+    };
+
+    try {
+      await client.query('BEGIN');
+
+      if (replace) {
+        // transaction_tags and transfers cascade from transactions; categories
+        // and accounts are referenced by it, so they go last. Categories are
+        // kept: they are reference data the transactions point at by name, and
+        // the backup's own list is re-inserted below.
+        await client.query(`TRUNCATE public.${transaction_table} CASCADE`);
+        await client.query(`TRUNCATE public.${tag_table} CASCADE`);
+        await client.query(`DELETE FROM public.${investment_table}`);
+        await client.query(`DELETE FROM public.${account_table}`);
+      }
+
+      // Categories first: transactions carry a foreign key onto the name.
+      for (const c of data.categories ?? []) {
+        const res = await client.query(
+          `INSERT INTO public.${category_table} (category_name, color, category_type, income_outcome)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (category_name) DO NOTHING`,
+          [c.category_name, c.color ?? null, c.category_type ?? null, c.income_outcome ?? null],
+        );
+        counts.categories += res.rowCount ?? 0;
+      }
+
+      for (const a of data.accounts ?? []) {
+        const res = await client.query(
+          `INSERT INTO public.${account_table} (account_type, account_name, details, balance_when_created)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (details) DO NOTHING`,
+          [a.account_type ?? null, a.account_name ?? null, a.details, a.balance_when_created ?? 0],
+        );
+        counts.accounts += res.rowCount ?? 0;
+      }
+
+      // Old id -> new id, so transfers and tag assignments can be rebuilt
+      // against the ids the sequence just handed out.
+      const txIdMap = new Map<number, number>();
+      // Repeat counter per identity, so two genuinely identical payments on one
+      // day both restore instead of the second being taken for a duplicate.
+      const occurrences = new Map<string, number>();
+
+      for (const t of data.transactions ?? []) {
+        const hashable: HashableEntry = {
+          date_str: t.date_str,
+          account: t.account ?? null,
+          amount: t.amount,
+          debit_credit: t.debit_credit ?? null,
+          name_description: t.name_description ?? null,
+          notifications: t.notifications ?? null,
+        };
+        const key = identityKey(hashable);
+        const occurrence = occurrences.get(key) ?? 0;
+        occurrences.set(key, occurrence + 1);
+
+        // A row exported without a hash gets one derived from its identifying
+        // fields. Without this a merge of the same backup duplicates every
+        // such row: the unique index is partial, so NULL hashes never conflict
+        // and nothing dedupes them.
+        const importHash = t.import_hash ?? computeImportHash(hashable, occurrence);
+
+        const res = await client.query(
+          `INSERT INTO public.${transaction_table}
+             (date_str, name_description, account, counterparty, category,
+              debit_credit, amount, notifications, import_hash, is_internal)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+           ON CONFLICT (import_hash) WHERE import_hash IS NOT NULL DO NOTHING
+           RETURNING id`,
+          [
+            t.date_str, t.name_description ?? null, t.account ?? null, t.counterparty ?? null,
+            t.category ?? null, t.debit_credit ?? null, t.amount, t.notifications ?? null,
+            importHash, t.is_internal ?? null,
+          ],
+        );
+
+        if (res.rows.length > 0) {
+          counts.transactions += 1;
+          if (t.id !== undefined && t.id !== null) txIdMap.set(Number(t.id), res.rows[0].id);
+        } else {
+          // Already present. Map the old id onto the stored row so its tags and
+          // transfer pairing still land on something.
+          counts.skipped_transactions += 1;
+          if (t.id !== undefined && t.id !== null) {
+            const existing = await client.query(
+              `SELECT id FROM public.${transaction_table} WHERE import_hash = $1`,
+              [importHash],
+            );
+            if (existing.rows.length > 0) txIdMap.set(Number(t.id), existing.rows[0].id);
+          }
+        }
+      }
+
+      // The investments table carries no unique constraint, so a merge has to
+      // check before inserting or a repeated restore doubles every snapshot.
+      // One balance per account per date is the real identity here.
+      for (const i of data.investments ?? []) {
+        const res = await client.query(
+          // Casts are explicit: $3 appears both as an inserted value and in the
+          // comparison below, and Postgres otherwise deduces text in one place
+          // and varchar in the other and rejects the statement.
+          `INSERT INTO public.${investment_table} (date_str, name_description, account, balance)
+           SELECT $1::date, $2::varchar, $3::varchar, $4::numeric
+           WHERE NOT EXISTS (
+             SELECT 1 FROM public.${investment_table}
+             WHERE date_str = $1::date AND account IS NOT DISTINCT FROM $3::varchar
+           )`,
+          [i.date_str, i.name_description ?? null, i.account ?? null, i.balance],
+        );
+        counts.investments += res.rowCount ?? 0;
+      }
+
+      const tagIdMap = new Map<number, number>();
+
+      for (const g of data.tags ?? []) {
+        const res = await client.query(
+          `INSERT INTO public.${tag_table} (tag_name, color, budget, is_closed, notes, created_at)
+           VALUES ($1, $2, $3, $4, $5, COALESCE($6, now()))
+           ON CONFLICT (tag_name) DO UPDATE SET tag_name = EXCLUDED.tag_name
+           RETURNING id`,
+          [g.tag_name, g.color ?? null, g.budget ?? null, g.is_closed ?? false,
+           g.notes ?? null, g.created_at ?? null],
+        );
+        // DO UPDATE rather than DO NOTHING so a name already present still
+        // returns its id and the assignments below can be rebuilt.
+        if (res.rows.length > 0) {
+          counts.tags += 1;
+          if (g.id !== undefined && g.id !== null) tagIdMap.set(Number(g.id), res.rows[0].id);
+        }
+      }
+
+      for (const tt of data.transaction_tags ?? []) {
+        const txId = txIdMap.get(Number(tt.transaction_id));
+        const tagId = tagIdMap.get(Number(tt.tag_id));
+        // A pair whose transaction or tag did not make it is dropped rather
+        // than guessed at.
+        if (!txId || !tagId) continue;
+
+        const res = await client.query(
+          `INSERT INTO public.${transaction_tag_table} (transaction_id, tag_id)
+           VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [txId, tagId],
+        );
+        counts.transaction_tags += res.rowCount ?? 0;
+      }
+
+      for (const tr of data.transfers ?? []) {
+        const fromId = txIdMap.get(Number(tr.from_transaction_id));
+        const toId = txIdMap.get(Number(tr.to_transaction_id));
+        if (!fromId || !toId) continue;
+
+        const res = await client.query(
+          `INSERT INTO public.${transfer_table}
+             (from_transaction_id, to_transaction_id, match_basis, confirmed_at)
+           VALUES ($1, $2, $3, COALESCE($4, now()))
+           ON CONFLICT DO NOTHING`,
+          [fromId, toId, tr.match_basis ?? 'iban', tr.confirmed_at ?? null],
+        );
+        counts.transfers += res.rowCount ?? 0;
+      }
+
+      await client.query('COMMIT');
+      return counts;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
 }
 
 export default new FinanceManager();

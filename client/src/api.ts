@@ -37,6 +37,47 @@ export interface ImportSummary {
   markedInternal: number;
 }
 
+/** Per-table row counts from a backup restore. */
+export interface RestoreSummary {
+  message: string;
+  mode: 'replace' | 'merge';
+  categories: number;
+  accounts: number;
+  transactions: number;
+  investments: number;
+  transfers: number;
+  tags: number;
+  transaction_tags: number;
+  /** Transactions already stored, matched on import_hash. */
+  skipped_transactions: number;
+}
+
+// Every cache tag, defined once: `tagTypes` registers them and a restore
+// invalidates all of them. Two hand-kept lists would drift the moment a tag is
+// added, and the one that silently goes stale is the restore.
+const ALL_TAGS = [
+  "transactions",
+  "categorySums",
+  "incomeExpensesSum",
+  "emptyCategoryTransactions",
+  "accountOverview",
+  "categoryList",
+  "investmentAccounts",
+  "tags",
+  "tagSummary",
+  "transactionTags",
+  "transferCandidates",
+  "transfers",
+  "oneSidedTransfers",
+  "accounts",
+  "unknownAccounts",
+  "searchTransactions",
+  "transactionAccounts",
+  "netWorthHistory",
+  "categoryHistory",
+  "categories",
+] as const;
+
 /** A proposed pair of rows that together look like one internal transfer. */
 export interface TransferCandidate {
   from_transaction_id: number;
@@ -183,28 +224,7 @@ export const api = createApi({
   // Only tags a query actually provides belong here. A mutation invalidating a
   // tag nothing provides refetches nothing, which is what left the app relying
   // on full page reloads to show a change.
-  tagTypes: [
-    "transactions",
-    "categorySums",
-    "incomeExpensesSum",
-    "emptyCategoryTransactions",
-    "accountOverview",
-    "categoryList",
-    "investmentAccounts",
-    "tags",
-    "tagSummary",
-    "transactionTags",
-    "transferCandidates",
-    "transfers",
-    "oneSidedTransfers",
-    "accounts",
-    "unknownAccounts",
-    "searchTransactions",
-    "transactionAccounts",
-    "netWorthHistory",
-    "categoryHistory",
-    "categories",
-  ],
+  tagTypes: ALL_TAGS,
   endpoints: (build) => ({
     getTransactions: build.query<any, Partial<TransactionsQueryParams>>({
       query: ({ startDate, endDate, ids }) => {
@@ -234,6 +254,18 @@ export const api = createApi({
         params: { startDate, endDate },
       }),
       providesTags: ["incomeExpensesSum"],
+    }),
+    // A restore replaces the contents of every table, so it invalidates every
+    // cache tag rather than a list that would need updating whenever a new one
+    // is added.
+    importBackup: build.mutation<RestoreSummary, { formData: FormData; mode?: 'replace' | 'merge' }>({
+      query: ({ formData, mode }) => ({
+        url: `api/import`,
+        method: 'POST',
+        body: formData,
+        params: mode ? { mode } : undefined,
+      }),
+      invalidatesTags: ALL_TAGS,
     }),
     uploadTransactions: build.mutation<ImportSummary, { formData: FormData, bankType: string }>({
       query: ({ formData, bankType }) => ({
@@ -567,6 +599,7 @@ export const {
   useGetCategorySumsQuery,
   useGetIncomeExpensesSumQuery,
   useUploadTransactionsMutation,
+  useImportBackupMutation,
   useGetEmptyCategoryTransactionsQuery,
   useUpdateTransactionMutation,
   useGetAccountOverviewQuery,

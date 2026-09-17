@@ -4,7 +4,7 @@ import { bankMappings, bankCategoryColumns } from '@/models/bankTransactionModel
  * One row from a bank's CSV export, normalised to the shape the database uses.
  *
  * Extracted from the upload route so the per-bank quirks below can be tested
- * directly: five column mappings, three date formats and two amount conventions
+ * directly: three column mappings, three date formats and two amount conventions
  * are exactly the kind of logic that fails silently and produces wrong figures
  * rather than an error.
  */

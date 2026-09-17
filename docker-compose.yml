@@ -40,6 +40,10 @@ services:
       # dit script wordt op een bestaand volume nooit opnieuw uitgevoerd.
       - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      # Alleen lokaal: demodata om tegen te testen. Staat bewust niet in
+      # database/Dockerfile, dus productie krijgt dit bestand nooit. Slaat
+      # zichzelf over als er al transacties staan.
+      - ./database/seed-demo.sql:/docker-entrypoint-initdb.d/03-seed-demo.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-financier} -d ${DB_NAME:-finance}"]
       interval: 10s

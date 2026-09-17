@@ -109,6 +109,87 @@ router.post('/upload-transactions', upload.single('file'), async (req: Request, 
     });
 });
 
+// ---------------------------------------------------------------------------
+// Backup and restore
+//
+// A bank CSV carries transaction columns only, so it cannot round-trip the
+// work built on top of an import: internal-transfer flags, confirmed pairs,
+// events and their budgets, investment snapshots. The backup is the tables
+// themselves, as JSON.
+// ---------------------------------------------------------------------------
+
+router.get('/export', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await FinanceManager.exportAll();
+
+    const payload = {
+      // Read by the importer: a future schema change can migrate an old backup
+      // instead of failing on it or, worse, importing it wrongly.
+      version: 1,
+      exported_at: new Date().toISOString(),
+      ...data,
+    };
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    // Content-Disposition so the browser saves a named file rather than
+    // rendering a wall of JSON in a tab.
+    res.setHeader('Content-Disposition', `attachment; filename="finance-backup-${stamp}.json"`);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).send(JSON.stringify(payload, null, 2));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/import', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
+  const filePath = req.file?.path;
+
+  if (!filePath) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Default to replacing: a restore is meant to reproduce the database the
+  // backup came from. Merging is the exception and has to be asked for.
+  const replace = req.query.mode !== 'merge';
+
+  try {
+    const raw = await fs.promises.readFile(filePath, 'utf8');
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return res.status(400).json({ error: 'That file is not valid JSON. Use a backup exported by this app.' });
+    }
+
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.transactions)) {
+      return res.status(400).json({
+        error: 'That JSON is not a backup from this app: no transactions array found.',
+      });
+    }
+
+    if (parsed.version !== undefined && Number(parsed.version) > 1) {
+      return res.status(400).json({
+        error: `This backup was written by a newer version (v${parsed.version}). Update the app before restoring it.`,
+      });
+    }
+
+    const counts = await FinanceManager.importAll(parsed, replace);
+
+    res.status(200).json({
+      message: 'Backup restored successfully',
+      mode: replace ? 'replace' : 'merge',
+      ...counts,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    await fs.promises.unlink(filePath).catch((cleanupError) => {
+      console.warn(`Could not remove upload ${filePath}:`, cleanupError);
+    });
+  }
+});
+
 router.get('/transactions', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate, ids, limit, offset } = req.query;
   let idList: number[] = [];

@@ -11,6 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DashboardBox from '@/components/DashboardBox';
 import {
+  Tag,
   useGetTagsQuery,
   useCreateTagMutation,
   useUpdateTagMutation,
@@ -40,9 +41,10 @@ const Tags: React.FC = () => {
   const [newBudget, setNewBudget] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [renameId, setRenameId] = useState<number | null>(null);
-  const [renameName, setRenameName] = useState('');
-  const [renameError, setRenameError] = useState<string | null>(null);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editBudget, setEditBudget] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     const name = newName.trim();
@@ -64,27 +66,40 @@ const Tags: React.FC = () => {
     }
   };
 
-  const openRename = (id: number, currentName: string) => {
-    setRenameId(id);
-    setRenameName(currentName);
-    setRenameError(null);
+  const openEdit = (tag: Tag) => {
+    setEditId(tag.id);
+    setEditName(tag.tag_name);
+    // NUMERIC arrives as a string, and a null budget has to become '' rather
+    // than the string 'null' for the field to read as empty.
+    setEditBudget(tag.budget === null || tag.budget === undefined ? '' : String(tag.budget));
+    setEditError(null);
   };
 
-  const handleRename = async () => {
-    if (renameId === null) return;
-    const name = renameName.trim();
+  const handleEdit = async () => {
+    if (editId === null) return;
+    const name = editName.trim();
     if (!name) {
-      setRenameError('Give the event a name');
+      setEditError('Give the event a name');
+      return;
+    }
+    const budget = editBudget.trim();
+    if (budget && !(Number(budget) >= 0)) {
+      setEditError('The budget has to be a positive amount, or empty for none');
       return;
     }
     try {
-      await updateTag({ id: renameId, updates: { tag_name: name } }).unwrap();
-      setRenameId(null);
-      setRenameError(null);
+      await updateTag({
+        id: editId,
+        // null rather than omitted when the field is cleared: leaving the key
+        // out would keep the old budget, so there would be no way to remove one.
+        updates: { tag_name: name, budget: budget === '' ? null : Number(budget) },
+      }).unwrap();
+      setEditId(null);
+      setEditError(null);
     } catch (e: any) {
       // 409 when another event already carries the name - tag_name is unique,
       // so the message has to reach the dialog rather than closing it.
-      setRenameError(e?.data?.error ?? 'Could not rename the event');
+      setEditError(e?.data?.error ?? 'Could not save the event');
     }
   };
 
@@ -150,8 +165,8 @@ const Tags: React.FC = () => {
                     <TagProgress tagId={tag.id} budget={tag.budget ? Number(tag.budget) : null} />
                   </TableCell>
                   <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                    <Tooltip title="Rename">
-                      <IconButton size="small" onClick={() => openRename(tag.id, tag.tag_name)}>
+                    <Tooltip title="Edit">
+                      <IconButton size="small" onClick={() => openEdit(tag)}>
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -208,28 +223,39 @@ const Tags: React.FC = () => {
       </Dialog>
 
       <Dialog
-        open={renameId !== null}
-        onClose={() => setRenameId(null)}
+        open={editId !== null}
+        onClose={() => setEditId(null)}
         fullWidth
         maxWidth="xs"
       >
-        <DialogTitle>Rename event</DialogTitle>
+        <DialogTitle>Edit event</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
             margin="dense"
             label="Name"
-            value={renameName}
-            onChange={(e) => setRenameName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); }}
-            error={Boolean(renameError)}
-            helperText={renameError}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleEdit(); }}
+            error={Boolean(editError)}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Budget"
+            type="number"
+            placeholder="None"
+            value={editBudget}
+            onChange={(e) => setEditBudget(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleEdit(); }}
+            error={Boolean(editError)}
+            helperText={editError ?? 'Leave empty for no budget; the progress bar then just totals the spend.'}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRenameId(null)}>Cancel</Button>
-          <Button onClick={handleRename}>Save</Button>
+          <Button onClick={() => setEditId(null)}>Cancel</Button>
+          <Button onClick={handleEdit}>Save</Button>
         </DialogActions>
       </Dialog>
 

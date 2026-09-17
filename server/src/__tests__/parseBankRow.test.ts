@@ -88,44 +88,6 @@ describe('ASN', () => {
   });
 });
 
-describe('Rabobank', () => {
-  const row = {
-    'Datum': '2026-08-05',
-    'Naam tegenpartij': 'Coolblue',
-    'IBAN/BBAN': 'NL61RABO0128050403',
-    'Tegerekening IBAN/BBAN': 'NL91ABNA0417164300',
-    'Bedrag': '-89,99',
-    'Omschrijving-1': 'Bestelling 12345',
-  };
-
-  test('leaves an already-ISO date untouched', () => {
-    assert.equal(parseBankRow(row, 'Rabobank')!.date_str, '2026-08-05');
-  });
-
-  test('has no direction column, so the sign decides', () => {
-    assert.equal(parseBankRow(row, 'Rabobank')!.debit_credit, 'Debit');
-    assert.equal(parseBankRow(row, 'Rabobank')!.amount, 89.99);
-  });
-});
-
-describe('Rabobank credit card', () => {
-  const row = {
-    'Datum': '2026-08-05',
-    'Omschrijving': 'SHELL ROTTERDAM',
-    'Creditcard Nummer': '1234XXXXXXXX5678',
-    'Tegerekening IBAN': '',
-    'Bedrag': '-65,00',
-  };
-
-  test('maps the card number as the account', () => {
-    assert.equal(parseBankRow(row, 'Rabobank_CC')!.account, '1234XXXXXXXX5678');
-  });
-
-  test('carries no description column, leaving notifications null', () => {
-    assert.equal(parseBankRow(row, 'Rabobank_CC')!.notifications, null);
-  });
-});
-
 describe('ING savings', () => {
   const row = {
     'Datum': '20260805',
