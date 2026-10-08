@@ -8,6 +8,22 @@ Rules:
 - For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
 
+## shelly-nas standards
+
+This repo follows the shelly-nas standards from the plugin
+**`shelly-fundamentals@shelly-nas`** (repo `shelly-nas/shelly-fundamentals`,
+enabled in `.claude/settings.json`). Use its skills for stack choices
+(`stack-voorkeuren`), Docker and Traefik (`docker-traefik`), the release and
+deploy pipeline (`release-deploy`), schema changes (`database-migraties`) and
+commit messages (`conventional-commits`). FinanceApp is the reference those
+standards were derived from; where this repo already does something, keep doing
+it the way it does.
+
+**Exception - design:** the `design-richtlijnen` skill describes the newer Web
+App Template (Figtree, blue). FinanceApp keeps its own theme in
+`client/src/theme.ts` (Reddit Mono, mint green) until it is deliberately
+migrated. Style new UI here with that theme, not with the skill's tokens.
+
 ## Commit messages
 
 Versioning is automated: `release-please` derives the next version from the
