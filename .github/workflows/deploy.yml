@@ -55,7 +55,7 @@ jobs:
     name: Build and Push Server
     needs: release
     if: ${{ needs.release.outputs.released == 'true' }}
-    uses: shelly-nas/shared-workflows/.github/workflows/build-push.yml@main
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push-image.yml@main
     with:
       registry: ${{ vars.REGISTRY_URL }}
       # Both tags: the version is what production pins to, latest is the
@@ -69,7 +69,7 @@ jobs:
     name: Build and Push Client
     needs: release
     if: ${{ needs.release.outputs.released == 'true' }}
-    uses: shelly-nas/shared-workflows/.github/workflows/build-push.yml@main
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push-image.yml@main
     with:
       registry: ${{ vars.REGISTRY_URL }}
       image_tag: ${{ vars.REGISTRY_URL }}/finance-app-client:${{ needs.release.outputs.version }},${{ vars.REGISTRY_URL }}/finance-app-client:latest
@@ -81,7 +81,7 @@ jobs:
     name: Build and Push Database
     needs: release
     if: ${{ needs.release.outputs.released == 'true' }}
-    uses: shelly-nas/shared-workflows/.github/workflows/build-push.yml@main
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push-image.yml@main
     with:
       registry: ${{ vars.REGISTRY_URL }}
       image_tag: ${{ vars.REGISTRY_URL }}/finance-app-db:${{ needs.release.outputs.version }},${{ vars.REGISTRY_URL }}/finance-app-db:latest
@@ -93,7 +93,7 @@ jobs:
     name: Deploy from Registry
     needs: [release, build-server, build-client, build-db]
     if: ${{ success() && needs.release.outputs.released == 'true' }}
-    uses: shelly-nas/shared-workflows/.github/workflows/deploy.yml@main
+    uses: shelly-nas/shared-workflows/.github/workflows/deploy-production.yml@main
     with:
       registry: ${{ vars.REGISTRY_URL }}
       deploy_directory: /volume1/docker/finance-app
@@ -102,6 +102,10 @@ jobs:
       # then a known release, and a rollback is redeploying an earlier one.
       # Pending database migrations are applied by the server as it starts.
       image_tag: ${{ needs.release.outputs.version }}
+      # Once the commit on acc is part of this release, acc is torn down and
+      # its images and data cleaned up. A pull request still under review
+      # stays on acc.
+      acc_directory: /volume1/docker/finance-app-acc
     secrets:
       registry_username: ${{ vars.REGISTRY_USERNAME }}
       registry_password: ${{ secrets.REGISTRY_PASSWORD }}
