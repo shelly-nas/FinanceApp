@@ -62,19 +62,19 @@ version still selects.
 
 ## Database changes
 
-**Until 1.0.0 ships**, the schema lives in `database/init.sql` and reference data
-in `database/seed.sql`. Both run on the first start of an empty data volume.
-There is no installed database to migrate from, so a change goes straight into
-those files - wipe the volume and start again:
+The schema lives in `database/init.sql` and reference data in
+`database/seed.sql`. Both run only on the first start of an empty data volume,
+so they build fresh databases (local, CI, acc) but never touch production,
+which already holds data. Locally you can always start clean:
 
 ```bash
 docker compose down -v && docker compose up --build
 ```
 
-**After 1.0.0 is running somewhere with data in it**, that stops being enough:
-the entrypoint scripts are never re-run against an existing volume. From that
-point a schema change is a numbered file under `server/migrations/`, which the
-server applies on startup and records in `schema_migrations`:
+**Every schema change is therefore also a migration**: a numbered file under
+`server/migrations/`, which the server applies on startup and records in
+`schema_migrations`. Leaving out the migration is what broke the first 1.1.0
+release candidate - see `server/migrations/001_align_with_init_schema.sql`:
 
 ```
 server/migrations/001_add_something.sql
