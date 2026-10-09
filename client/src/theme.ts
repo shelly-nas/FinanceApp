@@ -261,21 +261,17 @@ export const themeSettings = (mode: PaletteMode = "light"): ThemeOptions => {
         styleOverrides: {
           root: { padding: "12px 24px", borderBottom: `1px solid ${t.border}`, fontSize: 14, color: t.textBody, whiteSpace: "nowrap" },
           head: { fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted },
+          // FinanceApp: compact density for <Table size="small">; dense money
+          // tables keep the template's type and colours with less padding.
+          sizeSmall: { padding: "8px 16px" },
         },
       },
       MuiTableRow: { styleOverrides: { root: { "&:hover": { background: t.surface2 } } } },
 
       // ---- FinanceApp additions ----------------------------------------
-      // Compact density for <Table size="small">: dense money tables keep the
-      // template's type and colours with less padding.
+      // The card's edge closes the table; a rule under the last row doubles it.
       MuiTable: {
-        styleOverrides: {
-          root: {
-            "& .MuiTableCell-sizeSmall": { padding: "8px 16px" },
-            // The card's edge closes the table; a rule under the last row doubles it.
-            "& tbody tr:last-of-type > td": { borderBottom: 0 },
-          },
-        },
+        styleOverrides: { root: { "& tbody tr:last-of-type > td": { borderBottom: 0 } } },
       },
       MuiTableSortLabel: {
         styleOverrides: { root: { "&.Mui-active": { color: t.text } } },

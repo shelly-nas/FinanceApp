@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Grid, Stack } from "@mui/material";
-import AccountsOverview from "@/scenes/dashboard/AccountOverview";
-import PeriodSummary from "@/scenes/dashboard/PeriodSummary";
+import { Stack } from "@mui/material";
+import KeyFigures from "@/scenes/dashboard/KeyFigures";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
 import DateRange from '@/scenes/dateRange';
@@ -30,21 +29,11 @@ const Dashboard: React.FC = () => {
           </>
         }
       />
-      <Grid container spacing={6}>
-        <Grid item xs={12} lg={4} xl={3.5}>
-          <Stack spacing={6} useFlexGap>
-            <AccountsOverview />
-            <PeriodSummary />
-          </Stack>
-        </Grid>
-
-        <Grid item xs={12} lg={8} xl={8.5}>
-          <Stack spacing={6} useFlexGap>
-            <SpendingBreakdown onCategorySelect={handleCategorySelect} />
-            <TransactionDetails selectedCategory={selectedCategory} />
-          </Stack>
-        </Grid>
-      </Grid>
+      <Stack spacing={6} useFlexGap>
+        <KeyFigures />
+        <SpendingBreakdown onCategorySelect={handleCategorySelect} />
+        <TransactionDetails selectedCategory={selectedCategory} />
+      </Stack>
     </>
   );
 };
