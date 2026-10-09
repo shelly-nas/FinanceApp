@@ -72,6 +72,9 @@ services:
       - default
     labels:
       - "traefik.enable=true"
+      # Two networks: tell Traefik which one it can reach, or it may pick
+      # the stack's default network and answer 504 Gateway Timeout.
+      - "traefik.docker.network=shelly-network"
       - "traefik.http.routers.finance-acc-api.rule=Host(`finance-acc.shelly-nas.nl`) && PathPrefix(`/api`)"
       - "traefik.http.routers.finance-acc-api.entrypoints=web"
       - "traefik.http.services.finance-acc-api.loadbalancer.server.port=3000"
@@ -89,6 +92,9 @@ services:
       - default
     labels:
       - "traefik.enable=true"
+      # Two networks: tell Traefik which one it can reach, or it may pick
+      # the stack's default network and answer 504 Gateway Timeout.
+      - "traefik.docker.network=shelly-network"
       - "traefik.http.routers.finance-acc.rule=Host(`finance-acc.shelly-nas.nl`)"
       - "traefik.http.routers.finance-acc.entrypoints=web"
       - "traefik.http.services.finance-acc.loadbalancer.server.port=80"
