@@ -1,25 +1,28 @@
-# Production stack.
+# Acceptance stack: finance-acc.shelly-nas.nl.
 #
-# IMAGE_TAG is the released version (1.2.3) and is written into .env by the
-# deploy workflow. Pinning it rather than tracking 'latest' is what makes a
-# rollback a change of one line here instead of a rebuild, and what keeps a
-# container restart from silently pulling a newer build.
+# Deployed by .github/workflows/acc.yml for every pull request, next to
+# production but separate from it: its own directory (/volume1/docker/
+# finance-app-acc), container names, Traefik routers and database. The last
+# pull request deployed wins.
 #
-# The schema is created by database/init.sql on the first start of an empty
-# volume. Once this is running with data in it, a schema change can no longer go
-# there: add a migration under server/migrations/ instead, which the server
-# applies on startup.
+# The images are the same ones production would get, tagged acc-<commit>.
+# The database is rebuilt on every deploy: an empty data directory runs
+# init.sql and seed.sql from the image, then the workflow loads
+# database/seed-demo.sql. No production data reaches acc.
+#
+# Keep this file in step with docker-compose.prod.yml; the only differences
+# should be names, host and this header.
 services:
   db:
     # Eigen image: het schema zit erin gebakken, omdat de deploy alleen dit
     # compose-bestand naar de host kopieert en een bind mount naar
     # ./database/ daar niet bestaat.
-    image: ${REGISTRY}/finance-app-db:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
-    container_name: finance-app-db
+    image: ${REGISTRY}/finance-app-db:${IMAGE_TAG:?IMAGE_TAG is verplicht}
+    container_name: finance-app-acc-db
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-financier}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is verplicht in productie}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is verplicht}
       POSTGRES_DB: ${DB_NAME:-finance}
       TZ: ${TZ:-Europe/Amsterdam}
     volumes:
@@ -37,8 +40,8 @@ services:
       start_period: 10s
 
   server:
-    image: ${REGISTRY}/finance-app-server:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
-    container_name: finance-app-server
+    image: ${REGISTRY}/finance-app-server:${IMAGE_TAG:?IMAGE_TAG is verplicht}
+    container_name: finance-app-acc-server
     restart: always
     environment:
       DB_HOST: db
@@ -48,7 +51,7 @@ services:
       DB_NAME: ${DB_NAME:-finance}
       SERVER_PORT: 3000
       TZ: ${TZ:-Europe/Amsterdam}
-      NODE_ENV: production
+      NODE_ENV: production  # Same build as production; acc differs only in data and host
     depends_on:
       db:
         condition: service_healthy
@@ -72,13 +75,13 @@ services:
       # Two networks: tell Traefik which one it can reach, or it may pick
       # the stack's default network and answer 504 Gateway Timeout.
       - "traefik.docker.network=shelly-network"
-      - "traefik.http.routers.finance-api.rule=Host(`finance.shelly-nas.nl`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.finance-api.entrypoints=web"
-      - "traefik.http.services.finance-api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.finance-acc-api.rule=Host(`finance-acc.shelly-nas.nl`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.finance-acc-api.entrypoints=web"
+      - "traefik.http.services.finance-acc-api.loadbalancer.server.port=3000"
 
   client:
-    image: ${REGISTRY}/finance-app-client:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
-    container_name: finance-app-client
+    image: ${REGISTRY}/finance-app-client:${IMAGE_TAG:?IMAGE_TAG is verplicht}
+    container_name: finance-app-acc-client
     restart: always
     environment:
       TZ: ${TZ:-Europe/Amsterdam}
@@ -92,9 +95,9 @@ services:
       # Two networks: tell Traefik which one it can reach, or it may pick
       # the stack's default network and answer 504 Gateway Timeout.
       - "traefik.docker.network=shelly-network"
-      - "traefik.http.routers.finance.rule=Host(`finance.shelly-nas.nl`)"
-      - "traefik.http.routers.finance.entrypoints=web"
-      - "traefik.http.services.finance.loadbalancer.server.port=80"
+      - "traefik.http.routers.finance-acc.rule=Host(`finance-acc.shelly-nas.nl`)"
+      - "traefik.http.routers.finance-acc.entrypoints=web"
+      - "traefik.http.services.finance-acc.loadbalancer.server.port=80"
 
 networks:
   shelly-network:

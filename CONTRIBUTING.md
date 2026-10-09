@@ -17,6 +17,21 @@ form. The prefix decides the bump:
 
 An optional scope narrows it: `fix(import): …`, `feat(tags): …`.
 
+### Reviewing a pull request on acc
+
+Every pull request to `main` is built and deployed to
+**http://finance-acc.shelly-nas.nl** by `.github/workflows/acc.yml`, and again on
+every push to it. Check the change there, then merge. There is one acc
+environment, so it shows whichever pull request was pushed last; to put another
+branch back on it, use *Actions → Deploy to Acceptance → Run workflow*.
+
+Acc gets a fresh database on every deploy: the schema and seed from the image,
+plus `database/seed-demo.sql`. It never holds production data, and anything you
+enter there is gone after the next deploy. The pull request's migrations run on
+that fresh database too.
+
+Release PRs from release-please are not deployed to acc.
+
 ### What happens after you merge to main
 
 1. `release-please` reads the commits since the last tag and opens (or updates) a
@@ -33,8 +48,11 @@ release PR is the single button, and it is the only manual step in the flow.
 
 ### Rolling back
 
-Set `IMAGE_TAG` in production's `.env` to an earlier version and bring the stack
-up. Both images are published per version, so nothing needs rebuilding.
+All images are published per version, so nothing needs rebuilding. The deploy
+deletes the `.env` in `/volume1/docker/finance-app` after every run (it holds
+secrets), so recreate it first: the same values the deploy workflow writes, with
+`IMAGE_TAG` set to the earlier version. Then `docker compose up -d` there, and
+delete the `.env` again.
 
 Note that a rollback does **not** undo database migrations: an older server
 against a newer schema works as long as the change was additive (a new column, a
