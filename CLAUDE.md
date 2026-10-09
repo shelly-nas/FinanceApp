@@ -4,15 +4,19 @@ This repo follows the shelly-nas standards from the plugin
 **`shelly-fundamentals@shelly-nas`** (repo `shelly-nas/shelly-fundamentals`,
 enabled in `.claude/settings.json`). Use its skills for stack choices
 (`stack-voorkeuren`), Docker and Traefik (`docker-traefik`), the release and
-deploy pipeline (`release-deploy`), schema changes (`database-migraties`) and
-commit messages (`conventional-commits`). FinanceApp is the reference those
-standards were derived from; where this repo already does something, keep doing
-it the way it does.
+deploy pipeline (`release-deploy`), schema changes (`database-migraties`),
+commit messages (`conventional-commits`) and UI (`design-richtlijnen`).
+FinanceApp is the reference those standards were derived from; where this repo
+already does something, keep doing it the way it does.
 
-**Exception - design:** the `design-richtlijnen` skill describes the newer Web
-App Template (Figtree, blue). FinanceApp keeps its own theme in
-`client/src/theme.ts` (Reddit Mono, mint green) until it is deliberately
-migrated. Style new UI here with that theme, not with the skill's tokens.
+**Design:** `client/src/theme.ts` is the skill's theme (Figtree, blue, 4px
+spacing - `sx={{ p: 6 }}` is 24px) plus a few FinanceApp additions, marked in
+the file. Build screens from the shared pieces rather than restyling MUI per
+page: `PageHeader` at the top of a page, `DashboardBox` for a card,
+`WidgetHeader` for a card's heading, `CardTable` for a table in a card,
+`Toast` for confirmations. One deliberate deviation from the guidelines:
+debits are shown in red (the `debit` typography variant), always with a minus
+sign, even though the guidelines reserve red for errors.
 
 ## Commit messages
 
