@@ -5,12 +5,11 @@
 -- POSTGRES_USER / POSTGRES_PASSWORD on the postgres image, so this file defines
 -- no roles and no credentials - only structure.
 --
--- Version 1.0.0 has not shipped, so there is no installed database to migrate
--- from and this is the schema as it has always been. Once 1.0.0 is running
--- somewhere with data in it, a change to the schema can no longer go here: this
--- script is not re-run against an existing volume. From that point on, add a
--- numbered file to server/migrations/ instead - the server applies those on
--- startup. See CONTRIBUTING.md.
+-- Production runs with data in it, so this script is never re-run there: it
+-- only builds fresh databases (local, CI, acc). Every schema change goes into
+-- BOTH this file and a numbered migration in server/migrations/, which the
+-- server applies on startup to existing databases. The two must end up with
+-- the same schema. See CONTRIBUTING.md.
 
 -- --------------------------------------------------------------------------
 -- Categories
