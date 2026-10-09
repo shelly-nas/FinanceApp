@@ -4,7 +4,6 @@ import {
   Divider, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
 import { useUploadTransactionsMutation, useImportBackupMutation } from '@/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,10 +17,6 @@ const SOURCE_LABELS: Record<string, string> = {
   ASN: 'ASN Bank',
   [BACKUP]: 'Complete backup (JSON)',
 };
-
-// Built the same way RTK Query builds its urls, so the download follows
-// VITE_BASE_URL if one is ever set instead of silently hitting the page origin.
-const exportHref = `${import.meta.env.VITE_BASE_URL ?? '/'}api/export`.replace(/([^:]\/)\/+/g, '$1');
 
 interface UploadButtonProps {
   onUploadSuccess: () => void;
@@ -184,27 +179,12 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onCl
 
           {isBackup && (
             <Alert severity="warning">
-              Restoring replaces everything currently stored. Export a backup
-              first if you want to keep it.
+              Restoring replaces everything currently stored. Use "Export
+              everything" in the sidebar first if you want to keep it.
             </Alert>
           )}
 
           {error && <Alert severity="error">{error}</Alert>}
-
-          <Divider />
-
-          {/* A plain link, not fetch-and-blob: the browser streams the file to
-              disk and honours the Content-Disposition filename, and nothing has
-              to hold the whole export in memory. */}
-          <Button
-            component="a"
-            href={exportHref}
-            variant="text"
-            startIcon={<DownloadIcon />}
-            sx={{ alignSelf: 'flex-start' }}
-          >
-            Export everything (JSON)
-          </Button>
         </DialogContent>
         <DialogActions>
           <Button variant="text" onClick={handleClose} disabled={loading}>Cancel</Button>

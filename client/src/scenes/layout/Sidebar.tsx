@@ -9,6 +9,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalanceOutlined';
 import CategoryIcon from '@mui/icons-material/CategoryOutlined';
 import { Link, useLocation } from 'react-router-dom';
 import ThemeModeToggle from '@/components/ThemeModeToggle';
+import ExportButton from '@/components/ExportButton';
 import { useGetEmptyCategoryTransactionsQuery } from '@/api';
 import { tokensFor } from '@/theme';
 
@@ -29,8 +30,9 @@ const isActive = (path: string, pathname: string) =>
 
 /**
  * The app's places, in the template's sidebar: name at the top, navigation in
- * the middle, the theme switch at the bottom. Actions live in each page's
- * header instead, so nothing here reads as a destination that is not one.
+ * the middle, the backup export and the theme switch at the bottom. Actions
+ * on a page's data live in that page's header; the export covers all of it,
+ * so it sits with the other app-wide control rather than on any one page.
  */
 const Sidebar: React.FC = () => {
   const { palette } = useTheme();
@@ -92,7 +94,7 @@ const Sidebar: React.FC = () => {
         </Box>
 
         <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1 }}>
-          {/* Items keep their 40px; only the list grows, pushing the theme switch down. */}
+          {/* Items keep their 40px; only the list grows, pushing the footer controls down. */}
           {NAV.map((item) => {
             const active = isActive(item.path, pathname);
             const showCount = item.path === '/transactions' && reviewCount > 0;
@@ -141,7 +143,10 @@ const Sidebar: React.FC = () => {
           })}
         </List>
 
-        <ThemeModeToggle />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <ExportButton />
+          <ThemeModeToggle />
+        </Box>
       </Box>
     </Box>
   );
