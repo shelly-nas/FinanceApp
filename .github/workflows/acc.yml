@@ -105,55 +105,7 @@ jobs:
       github.event.action == 'closed' &&
       !startsWith(github.head_ref, 'release-please--') &&
       github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: shelly
-    env:
-      ACC_DIR: /volume1/docker/finance-app-acc
-      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-    steps:
-      # Every push to a pull request is deployed, so acc runs its head commit -
-      # unless another pull request or a manual run has been deployed since.
-      # That one is under review and stays.
-      - name: Check that acc runs this pull request
-        id: check
-        run: |
-          project=$(basename "$ACC_DIR")
-          commit=$(docker ps -a --filter "label=com.docker.compose.project=$project" --format '{{.Image}}' \
-            | sed -n 's/.*:acc-\([0-9a-f]\{7,40\}\)$/\1/p' | head -n 1)
-          if [ -z "$commit" ]; then
-            echo "Acc is not running; nothing to tear down."
-          elif [ "$commit" = "$HEAD_SHA" ]; then
-            echo "Acc runs this pull request ($commit); tearing it down."
-            echo "teardown=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Acc runs $commit, not this pull request ($HEAD_SHA); leaving it up."
-          fi
-
-      # The same steps as the teardown in the shared production deploy. By
-      # compose label rather than `docker compose down`: the .env is deleted
-      # after the acc deploy, and the compose file will not load without it.
-      - name: Remove acc containers, networks and volumes
-        if: steps.check.outputs.teardown == 'true'
-        run: |
-          project=$(basename "$ACC_DIR")
-          docker ps -aq --filter "label=com.docker.compose.project=$project" | xargs -r docker rm -f
-          docker network ls -q --filter "label=com.docker.compose.project=$project" | xargs -r docker network rm
-          docker volume ls -q --filter "label=com.docker.compose.project=$project" | xargs -r docker volume rm
-
-      # The database files are owned by the postgres user (uid 70), which the
-      # runner cannot delete as itself; Docker runs as root and can.
-      - name: Remove the acc directory
-        if: steps.check.outputs.teardown == 'true'
-        run: |
-          if [ -d "$ACC_DIR" ]; then
-            docker run --rm -v "$ACC_DIR:/acc" alpine find /acc -mindepth 1 -delete
-            rmdir "$ACC_DIR"
-          fi
-
-      # The acc images are unused now; they can be pulled again if needed.
-      - name: Clean up unused images and volumes
-        if: steps.check.outputs.teardown == 'true'
-        run: |
-          docker image prune -af || true
-          docker volume ls -q --filter dangling=true | grep -E '^[0-9a-f]{64}$' | xargs -r docker volume rm || true
-          docker builder prune -f || true
-          docker system df || true
+    uses: shelly-nas/shared-workflows/.github/workflows/teardown-acceptance.yml@main
+    with:
+      acc_directory: /volume1/docker/finance-app-acc
+      commit: ${{ github.event.pull_request.head.sha }}
