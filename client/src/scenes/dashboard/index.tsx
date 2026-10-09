@@ -1,51 +1,40 @@
 import React, { useState } from "react";
-import { Grid, Box } from "@mui/material";
-import { useSearchParams } from "react-router-dom";
-import AccountsOverview from "@/scenes/dashboard/AccountOverview";
-import PeriodSummary from "@/scenes/dashboard/PeriodSummary";
+import { Stack } from "@mui/material";
+import KeyFigures from "@/scenes/dashboard/KeyFigures";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
 import DateRange from '@/scenes/dateRange';
-import ImportDialogs from "@/scenes/dashboard/ImportDialogs";
+import { useDateRange } from "@/scenes/dateRange/DateRangeContext";
+import PageHeader from "@/components/PageHeader";
+import ImportActions from "@/scenes/layout/ImportActions";
 
 const Dashboard: React.FC = () => {
-  const spacing: number = 1.5;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  // The action menu in the header opens these by navigating with ?import=...,
-  // which keeps the dialogs here, where their data lives, without a third
-  // column of buttons dressed up as dashboard panels.
-  const [searchParams, setSearchParams] = useSearchParams();
-  const importing = searchParams.get('import');
-
-  const closeImport = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('import');
-    setSearchParams(params, { replace: true });
-  };
+  const { firstDay } = useDateRange();
+  const month = firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(prevCategory => prevCategory === category ? null : category);
   };
 
   return (
-    <Box>
-      <DateRange />
-      <Grid container justifyContent="space-between" columnSpacing={spacing}>
-        {/* Left Grid */}
-        <Grid item xs={12} md={3.5}>
-          <AccountsOverview />
-          <PeriodSummary />
-        </Grid>
-
-        {/* Spending Breakdown */}
-        <Grid item xs={12} md={8.5}>
-          <SpendingBreakdown onCategorySelect={handleCategorySelect} />
-          <TransactionDetails selectedCategory={selectedCategory}/>
-        </Grid>
-      </Grid>
-
-      <ImportDialogs opened={importing} onClose={closeImport} />
-    </Box>
+    <>
+      <PageHeader
+        title="Dashboard"
+        subtitle={`Balances, income and spending for ${month}`}
+        actions={
+          <>
+            <DateRange />
+            <ImportActions withInvestments />
+          </>
+        }
+      />
+      <Stack spacing={6} useFlexGap>
+        <KeyFigures />
+        <SpendingBreakdown onCategorySelect={handleCategorySelect} />
+        <TransactionDetails selectedCategory={selectedCategory} />
+      </Stack>
+    </>
   );
 };
 

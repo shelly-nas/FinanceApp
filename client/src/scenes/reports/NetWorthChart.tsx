@@ -6,7 +6,9 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
 import ChartTooltip from '@/scenes/reports/ChartTooltip';
+import ChartLegend from '@/scenes/reports/ChartLegend';
 import {
   ACCOUNT_TYPE_COLORS, ACCOUNT_TYPE_ORDER, ACCOUNT_TYPE_LABELS,
   formatCurrency, formatCompact, formatMonthShort,
@@ -52,9 +54,9 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
 
   if (points.length === 0) {
     return (
-      <DashboardBox sx={{ p: 1.5, textAlign: 'left', mb: 1.5 }}>
-        <Typography variant="h3" sx={{ mb: 1 }}>Net worth</Typography>
-        <Typography variant="body1" sx={{ p: 2 }}>
+      <DashboardBox>
+        <WidgetHeader title="Net worth" />
+        <Typography variant="body2">
           No data for this period yet. Import a bank export, and add your accounts
           with their opening balances.
         </Typography>
@@ -75,14 +77,12 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
   );
 
   return (
-    <DashboardBox sx={{ p: 1.5, textAlign: 'left', mb: 1.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, flexWrap: 'wrap', mb: 1 }}>
-        <Typography variant="h3" sx={{ flexGrow: 1 }}>Net worth</Typography>
-      </Box>
+    <DashboardBox>
+      <WidgetHeader title="Net worth" subtitle="At each month end, by account type" />
 
       {/* The headline: where it stands now, and what the period did to it. */}
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, mb: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="h2" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 6, flexWrap: 'wrap' }}>
+        <Typography variant="h1" component="p" sx={{ fontVariantNumeric: 'tabular-nums' }}>
           {formatCurrency(latest.total)}
         </Typography>
         <Chip
@@ -92,7 +92,7 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
           color={rising ? 'success' : 'error'}
           variant="outlined"
         />
-        <Typography variant="body3" sx={{ opacity: 0.7 }}>
+        <Typography variant="body2">
           over {points.length} month{points.length === 1 ? '' : 's'}
         </Typography>
       </Box>
@@ -103,28 +103,24 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
             <CartesianGrid
               strokeDasharray="2 4"
               vertical={false}
-              stroke={palette.cosmetics.colorSecondary}
+              stroke={palette.divider}
             />
             <XAxis
               dataKey="month"
               tickFormatter={formatMonthShort}
-              tick={{ fill: palette.text.secondary, fontSize: 11 }}
+              tick={{ fill: palette.text.secondary, fontSize: 12 }}
               tickLine={false}
-              axisLine={{ stroke: palette.cosmetics.colorSecondary }}
+              axisLine={{ stroke: palette.divider }}
             />
             <YAxis
               tickFormatter={formatCompact}
-              tick={{ fill: palette.text.secondary, fontSize: 11 }}
+              tick={{ fill: palette.text.secondary, fontSize: 12 }}
               tickLine={false}
               axisLine={false}
               width={60}
             />
             <Tooltip content={<ChartTooltip showTotal />} cursor={{ stroke: palette.text.secondary, strokeWidth: 1 }} />
-            <Legend
-              iconType="square"
-              iconSize={10}
-              wrapperStyle={{ fontSize: 12, color: palette.text.secondary }}
-            />
+            <Legend content={<ChartLegend />} />
             {presentTypes.map((type) => (
               <Area
                 key={type}
@@ -132,13 +128,13 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
                 dataKey={KEY_BY_TYPE[type]}
                 name={ACCOUNT_TYPE_LABELS[type]}
                 stackId="networth"
-                stroke={ACCOUNT_TYPE_COLORS[type]}
                 fill={ACCOUNT_TYPE_COLORS[type]}
-                fillOpacity={0.75}
-                // A hairline in the surface colour separates the bands, so two
+                fillOpacity={0.85}
+                // A 2px line in the surface colour separates the bands, so two
                 // adjacent fills never read as one.
+                stroke={palette.background.paper}
                 strokeWidth={2}
-                activeDot={{ r: 4, strokeWidth: 2, stroke: palette.background.light }}
+                activeDot={{ r: 4, strokeWidth: 2, stroke: palette.background.paper }}
               />
             ))}
           </AreaChart>

@@ -1,12 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, Typography, Button, Select, MenuItem, Snackbar, Alert, Chip,
+  Box, Typography, Button, Select, MenuItem, Alert, Stack,
   CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
   TablePagination,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import DashboardBox from '@/components/DashboardBox';
+import PageHeader from '@/components/PageHeader';
+import Toast, { ToastMessage } from '@/components/Toast';
+import ImportActions from '@/scenes/layout/ImportActions';
 import TransactionTable from '@/components/TransactionTable';
 import FilterBar from '@/scenes/transactions/FilterBar';
 import TransferSuggestions from '@/scenes/transactions/TransferSuggestions';
@@ -69,7 +72,7 @@ const Transactions: React.FC = () => {
   const [savingIds, setSavingIds] = useState<number[]>([]);
   const [bulkCategory, setBulkCategory] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<TransactionRow | null>(null);
-  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   const { data: result, isFetching } = useSearchTransactionsQuery({
     ...filters,
@@ -132,7 +135,7 @@ const Transactions: React.FC = () => {
     setSavingIds((prev) => [...prev, row.id]);
     try {
       await updateTransaction({ id: row.id, [column]: value === '' ? null : value }).unwrap();
-      setToast({ message: 'Saved', severity: 'success' });
+      setToast({ message: 'Change saved', severity: 'success' });
     } catch {
       setToast({ message: 'Could not save that change, please try again.', severity: 'error' });
     } finally {
@@ -172,142 +175,129 @@ const Transactions: React.FC = () => {
   const toggleSelectAll = () =>
     setSelectedIds((prev) => (prev.length === rows.length ? [] : rows.map((r) => r.id)));
 
+  const range = total === 0
+    ? 'No matches'
+    : `${Math.min(page * pageSize + 1, total)}–${Math.min((page + 1) * pageSize, total)} of ${total}`;
+
   return (
-    <Box>
-      {typeof navState.imported === 'number' && (
-        <Alert severity={navState.skipped ? 'info' : 'success'} sx={{ mb: 1.5 }}>
-          {navState.imported} transactions imported
-          {navState.skipped
-            ? `, ${navState.skipped} skipped because they were already stored`
-            : ''}
-          {navState.markedInternal
-            ? `, ${navState.markedInternal} recognised as transfers between your own accounts.`
-            : '.'}
-        </Alert>
-      )}
+    <>
+      <PageHeader
+        title="Transactions"
+        subtitle="Search, correct and categorise every transaction"
+        actions={<ImportActions />}
+      />
 
-      <UnknownAccounts />
-      <OneSidedTransfers transactionIds={navState.transactionIds} />
-      <TransferSuggestions transactionIds={navState.transactionIds} />
-
-      <DashboardBox sx={{ p: 1.5, textAlign: 'left' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, gap: 1 }}>
-          <Typography variant="h3" sx={{ flexGrow: 1 }}>Transactions</Typography>
-          {isFetching && <CircularProgress size={16} />}
-          <Typography variant="body3">
-            {total === 0
-              ? 'No matches'
-              : `${Math.min(page * pageSize + 1, total)}–${Math.min((page + 1) * pageSize, total)} of ${total}`}
-          </Typography>
-        </Box>
-
-        <FilterBar
-          filters={filters}
-          onChange={changeFilters}
-          onReset={resetFilters}
-          categories={categories}
-          accounts={accounts ?? []}
-          tags={tags ?? []}
-          activeCount={activeFilterCount}
-        />
-
-        {/* Bulk bar: only present once something is selected. */}
-        {selectedIds.length > 0 && (
-          <Box
-            sx={{
-              display: 'flex', alignItems: 'center', gap: 1, mb: 1, p: 1,
-              borderRadius: 1, backgroundColor: 'action.hover',
-            }}
-          >
-            <Chip size="small" label={`${selectedIds.length} selected`} />
-            <Select
-              size="small"
-              displayEmpty
-              value={bulkCategory}
-              onChange={handleBulkCategory}
-              sx={{ minWidth: 220 }}
-            >
-              <MenuItem value="" disabled>Set category for all selected…</MenuItem>
-              {categories.map((name) => (
-                <MenuItem key={name} value={name}>{name}</MenuItem>
-              ))}
-            </Select>
-            <Button size="small" onClick={() => setSelectedIds([])}>Clear selection</Button>
-          </Box>
+      <Stack spacing={6} useFlexGap>
+        {typeof navState.imported === 'number' && (
+          <Alert severity={navState.skipped ? 'info' : 'success'}>
+            {navState.imported} transactions imported
+            {navState.skipped
+              ? `, ${navState.skipped} skipped because they were already stored`
+              : ''}
+            {navState.markedInternal
+              ? `, ${navState.markedInternal} recognised as transfers between your own accounts.`
+              : '.'}
+          </Alert>
         )}
 
-        {rows.length === 0 ? (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="body1">
+        <UnknownAccounts />
+        <OneSidedTransfers transactionIds={navState.transactionIds} />
+        <TransferSuggestions transactionIds={navState.transactionIds} />
+
+        <DashboardBox>
+          <FilterBar
+            filters={filters}
+            onChange={changeFilters}
+            onReset={resetFilters}
+            categories={categories}
+            accounts={accounts ?? []}
+            tags={tags ?? []}
+            activeCount={activeFilterCount}
+          />
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 4, minHeight: 40, flexWrap: 'wrap' }}>
+            {selectedIds.length > 0 ? (
+              // Bulk bar: only present once something is selected.
+              <>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>
+                  {selectedIds.length} selected
+                </Typography>
+                <Select
+                  displayEmpty
+                  value={bulkCategory}
+                  onChange={handleBulkCategory}
+                  inputProps={{ 'aria-label': 'Set category for all selected' }}
+                  sx={{ minWidth: 260 }}
+                >
+                  <MenuItem value="" disabled>Set category for all selected…</MenuItem>
+                  {categories.map((name) => (
+                    <MenuItem key={name} value={name}>{name}</MenuItem>
+                  ))}
+                </Select>
+                <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
+              </>
+            ) : (
+              <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                {range} · Click any cell to edit. Enter saves, Escape cancels.
+              </Typography>
+            )}
+            {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
+          </Box>
+
+          {rows.length === 0 ? (
+            <Typography variant="body1" sx={{ py: 6 }}>
               {filters.uncategorised && activeFilterCount === 1
                 ? 'Nothing needs a category. Every transaction has been classified.'
                 : activeFilterCount > 0
                   ? 'No transactions match these filters.'
                   : 'No transactions yet. Import a bank export to get started.'}
             </Typography>
-          </Box>
-        ) : (
-          <>
-            <TransactionTable
-              rows={rows}
-              editable
-              categories={categories}
-              sortBy={filters.sortBy}
-              sortDir={filters.sortDir}
-              onSort={handleSort}
-              onEdit={handleEdit}
-              onDelete={setDeleteTarget}
-              selectedIds={selectedIds}
-              onToggleSelect={toggleSelect}
-              onToggleSelectAll={toggleSelectAll}
-              savingIds={savingIds}
-            />
-            <TablePagination
-              component="div"
-              count={total}
-              page={page}
-              onPageChange={(_e, next) => { setPage(next); setSelectedIds([]); }}
-              rowsPerPage={pageSize}
-              rowsPerPageOptions={PAGE_SIZES}
-              onRowsPerPageChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
-            />
-          </>
-        )}
+          ) : (
+            <>
+              <TransactionTable
+                rows={rows}
+                editable
+                categories={categories}
+                sortBy={filters.sortBy}
+                sortDir={filters.sortDir}
+                onSort={handleSort}
+                onEdit={handleEdit}
+                onDelete={setDeleteTarget}
+                selectedIds={selectedIds}
+                onToggleSelect={toggleSelect}
+                onToggleSelectAll={toggleSelectAll}
+                savingIds={savingIds}
+              />
+              <TablePagination
+                component="div"
+                count={total}
+                page={page}
+                onPageChange={(_e, next) => { setPage(next); setSelectedIds([]); }}
+                rowsPerPage={pageSize}
+                rowsPerPageOptions={PAGE_SIZES}
+                onRowsPerPageChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
+                sx={{ mt: 2 }}
+              />
+            </>
+          )}
+        </DashboardBox>
+      </Stack>
 
-        <Typography variant="body3" sx={{ display: 'block', mt: 1, opacity: 0.7 }}>
-          Click any cell to edit. Enter saves, Escape cancels.
-        </Typography>
-      </DashboardBox>
-
-      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle>Delete transaction</DialogTitle>
+      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this transaction?</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
             {deleteTarget?.name_description} will be removed permanently.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>Delete</Button>
+          <Button variant="text" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button variant="outlined" color="error" onClick={handleDelete}>Delete transaction</Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar
-        open={toast !== null}
-        autoHideDuration={2500}
-        onClose={() => setToast(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToast(null)}
-          severity={toast?.severity ?? 'success'}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {toast?.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      <Toast toast={toast} onClose={() => setToast(null)} />
+    </>
   );
 };
 

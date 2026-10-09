@@ -1,39 +1,4 @@
-.fade {
-  transition: opacity 300ms ease-in-out, transform 5000ms ease-in-out, max-height 2000ms ease-in-out;
-  overflow: hidden; /* Ensure smooth height transition */
-}
-
-.fade.hide {
-  opacity: 0.5;
-}
-
-.fade.show {
-  opacity: 1;
-}
-
-.blur-text
-{
-  filter: blur(3px);
-}
-
-.ripple-container {
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.ripple-container .ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(115, 115, 115, 0.3);
-  transform: scale(0);
-  animation: ripple 0.8s linear;
-  pointer-events: none;
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
+/* Hides amounts until the user asks to see them (account overview). */
+.blur-text {
+  filter: blur(6px);
 }

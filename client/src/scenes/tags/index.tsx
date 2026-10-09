@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableHead, TableRow,
+  Box, Typography, TableBody, TableCell, TableHead, TableRow, Stack,
   LinearProgress, IconButton, Button, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, Chip, Tooltip, useTheme,
+  DialogContent, DialogActions, Chip, Tooltip,
 } from '@mui/material';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
@@ -10,6 +10,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DashboardBox from '@/components/DashboardBox';
+import PageHeader from '@/components/PageHeader';
+import CardTable from '@/components/CardTable';
 import {
   Tag,
   useGetTagsQuery,
@@ -29,7 +31,6 @@ const formatCurrency = (value: number) =>
  * holiday - which the monthly category breakdown cannot express.
  */
 const Tags: React.FC = () => {
-  const { palette } = useTheme();
   const { data: tags } = useGetTagsQuery();
   const [createTag] = useCreateTagMutation();
   const [updateTag] = useUpdateTagMutation();
@@ -111,87 +112,108 @@ const Tags: React.FC = () => {
   };
 
   return (
-    <Box>
-      <DashboardBox sx={{ mb: 1.5, p: 1.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h3" sx={{ flexGrow: 1 }}>Events</Typography>
-          <Button size="small" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
+    <>
+      <PageHeader
+        title="Events"
+        subtitle="Spending that spans months, like a holiday or a renovation. Select one to see where the money went."
+        actions={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
             New event
           </Button>
-        </Box>
+        }
+      />
 
-        {(!tags || tags.length === 0) ? (
-          <Typography variant="body3">
-            No events yet. Create one, then tag its transactions from the review screen.
-          </Typography>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Event</TableCell>
-                <TableCell align="right">Transactions</TableCell>
-                <TableCell align="right">Budget</TableCell>
-                <TableCell sx={{ width: '30%' }}>Progress</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tags.map((tag) => (
-                <TableRow
-                  key={tag.id}
-                  hover
-                  onClick={() => setSelectedTagId(tag.id === selectedTagId ? null : tag.id)}
-                  sx={{
-                    cursor: 'pointer',
-                    opacity: tag.is_closed ? 0.55 : 1,
-                    backgroundColor: selectedTagId === tag.id ? palette.grey[100] : 'inherit',
-                  }}
-                >
-                  <TableCell>
-                    <Chip
-                      size="small"
-                      label={tag.tag_name}
-                      sx={tag.color ? { backgroundColor: tag.color } : undefined}
-                    />
-                    {tag.is_closed && (
-                      <Typography variant="body3" sx={{ ml: 1 }}>closed</Typography>
-                    )}
-                  </TableCell>
-                  <TableCell align="right">{tag.transaction_count ?? 0}</TableCell>
-                  <TableCell align="right">
-                    {tag.budget ? formatCurrency(Number(tag.budget)) : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <TagProgress tagId={tag.id} budget={tag.budget ? Number(tag.budget) : null} />
-                  </TableCell>
-                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>
-                    <Tooltip title="Edit">
-                      <IconButton size="small" onClick={() => openEdit(tag)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title={tag.is_closed ? 'Reopen' : 'Close event'}>
-                      <IconButton
-                        size="small"
-                        onClick={() => updateTag({ id: tag.id, updates: { is_closed: !tag.is_closed } })}
-                      >
-                        {tag.is_closed ? <UnarchiveIcon fontSize="small" /> : <ArchiveIcon fontSize="small" />}
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton size="small" onClick={() => setDeleteId(tag.id)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+      <Stack spacing={6} useFlexGap>
+        <DashboardBox>
+          {(!tags || tags.length === 0) ? (
+            <Typography variant="body2">
+              No events yet. Create one, then tag its transactions on the Transactions page.
+            </Typography>
+          ) : (
+            <CardTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Event</TableCell>
+                  <TableCell align="right">Transactions</TableCell>
+                  <TableCell align="right">Budget</TableCell>
+                  <TableCell sx={{ width: '30%' }}>Progress</TableCell>
+                  <TableCell align="right"><span className="visually-hidden">Actions</span></TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </DashboardBox>
+              </TableHead>
+              <TableBody>
+                {tags.map((tag) => (
+                  <TableRow
+                    key={tag.id}
+                    hover
+                    selected={selectedTagId === tag.id}
+                    tabIndex={0}
+                    aria-selected={selectedTagId === tag.id}
+                    onClick={() => setSelectedTagId(tag.id === selectedTagId ? null : tag.id)}
+                    onKeyDown={(e) => {
+                      if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        setSelectedTagId(tag.id === selectedTagId ? null : tag.id);
+                      }
+                    }}
+                    sx={{
+                      cursor: 'pointer',
+                      // Selected: tinted row plus a bar at the start - two signals.
+                      '&.Mui-selected': { boxShadow: (theme) => `inset 3px 0 0 ${theme.palette.primary.main}` },
+                      '&:focus-visible': { outline: (theme) => `2px solid ${theme.palette.primary.main}`, outlineOffset: -2 },
+                    }}
+                  >
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box
+                          aria-hidden
+                          sx={{ width: 10, height: 10, borderRadius: 999, flexShrink: 0, bgcolor: tag.color ?? 'text.disabled' }}
+                        />
+                        <Typography
+                          component="span"
+                          sx={{ fontSize: 14, fontWeight: selectedTagId === tag.id ? 600 : 500, color: tag.is_closed ? 'text.secondary' : 'text.primary' }}
+                        >
+                          {tag.tag_name}
+                        </Typography>
+                        {tag.is_closed && <Chip size="small" variant="outlined" label="Closed" />}
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>{tag.transaction_count ?? 0}</TableCell>
+                    <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {tag.budget ? formatCurrency(Number(tag.budget)) : '—'}
+                    </TableCell>
+                    <TableCell>
+                      <TagProgress tagId={tag.id} budget={tag.budget ? Number(tag.budget) : null} />
+                    </TableCell>
+                    <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                      <Tooltip title="Edit">
+                        <IconButton size="small" aria-label={`Edit ${tag.tag_name}`} onClick={() => openEdit(tag)}>
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={tag.is_closed ? 'Reopen' : 'Close event'}>
+                        <IconButton
+                          size="small"
+                          aria-label={tag.is_closed ? `Reopen ${tag.tag_name}` : `Close ${tag.tag_name}`}
+                          onClick={() => updateTag({ id: tag.id, updates: { is_closed: !tag.is_closed } })}
+                        >
+                          {tag.is_closed ? <UnarchiveIcon fontSize="small" /> : <ArchiveIcon fontSize="small" />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton size="small" aria-label={`Delete ${tag.tag_name}`} onClick={() => setDeleteId(tag.id)}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </CardTable>
+          )}
+        </DashboardBox>
 
-      {selectedTagId !== null && <TagDetails tagId={selectedTagId} />}
+        {selectedTagId !== null && <TagDetails tagId={selectedTagId} />}
+      </Stack>
 
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>New event</DialogTitle>
@@ -199,7 +221,6 @@ const Tags: React.FC = () => {
           <TextField
             autoFocus
             fullWidth
-            margin="dense"
             label="Name"
             placeholder="Holiday Italy 2027"
             value={newName}
@@ -209,7 +230,6 @@ const Tags: React.FC = () => {
           />
           <TextField
             fullWidth
-            margin="dense"
             label="Budget (optional)"
             type="number"
             value={newBudget}
@@ -217,8 +237,8 @@ const Tags: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreate}>Create</Button>
+          <Button variant="text" onClick={() => setAddOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate}>Create event</Button>
         </DialogActions>
       </Dialog>
 
@@ -233,7 +253,6 @@ const Tags: React.FC = () => {
           <TextField
             autoFocus
             fullWidth
-            margin="dense"
             label="Name"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
@@ -242,7 +261,6 @@ const Tags: React.FC = () => {
           />
           <TextField
             fullWidth
-            margin="dense"
             label="Budget"
             type="number"
             placeholder="None"
@@ -254,13 +272,13 @@ const Tags: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditId(null)}>Cancel</Button>
-          <Button onClick={handleEdit}>Save</Button>
+          <Button variant="text" onClick={() => setEditId(null)}>Cancel</Button>
+          <Button variant="contained" onClick={handleEdit}>Save changes</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteId !== null} onClose={() => setDeleteId(null)}>
-        <DialogTitle>Delete event</DialogTitle>
+      <Dialog open={deleteId !== null} onClose={() => setDeleteId(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this event?</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
             The event and its tag assignments are removed. The transactions
@@ -268,11 +286,11 @@ const Tags: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteId(null)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>Delete</Button>
+          <Button variant="text" onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button variant="outlined" color="error" onClick={handleDelete}>Delete event</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
   );
 };
 
@@ -284,19 +302,22 @@ const TagProgress: React.FC<{ tagId: number; budget: number | null }> = ({ tagId
   const spent = Number(summary.total_spent) - Number(summary.total_received);
 
   if (!budget) {
-    return <Typography variant="body3">{formatCurrency(spent)}</Typography>;
+    return <Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(spent)}</Typography>;
   }
 
   const pct = Math.min((spent / budget) * 100, 100);
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
       <LinearProgress
         variant="determinate"
         value={pct}
         color={spent > budget ? 'error' : 'primary'}
-        sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
+        aria-label={spent > budget ? 'Over budget' : 'Spent of budget'}
+        sx={{ flexGrow: 1 }}
       />
-      <Typography variant="body3">{formatCurrency(spent)}</Typography>
+      <Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums', minWidth: 88, textAlign: 'right' }}>
+        {formatCurrency(spent)}
+      </Typography>
     </Box>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableHead, TableRow,
-  Button, IconButton, TextField, MenuItem, Tooltip, Chip, Alert, Snackbar,
+  Box, Typography, TableBody, TableCell, TableHead, TableRow,
+  Button, IconButton, TextField, MenuItem, Tooltip, Chip,
   Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -10,6 +10,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DashboardBox from '@/components/DashboardBox';
+import PageHeader from '@/components/PageHeader';
+import CardTable from '@/components/CardTable';
+import Toast, { ToastMessage } from '@/components/Toast';
 import {
   Category,
   useGetCategoriesQuery,
@@ -51,7 +54,7 @@ const Categories: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [edit, setEdit] = useState<Partial<Category>>({});
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
-  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   const handleCreate = async () => {
     if (!draft.category_name.trim()) {
@@ -106,21 +109,19 @@ const Categories: React.FC = () => {
   };
 
   return (
-    <Box>
-      <DashboardBox sx={{ p: 1.5, textAlign: 'left' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h3" sx={{ flexGrow: 1 }}>Categories</Typography>
-          <Button size="small" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
+    <>
+      <PageHeader
+        title="Categories"
+        subtitle="The colour is used in the spending breakdown. Fixed or variable splits the period summary; income or expense decides which side a category counts on."
+        actions={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}>
             New category
           </Button>
-        </Box>
+        }
+      />
 
-        <Typography variant="body3" sx={{ display: 'block', mb: 1 }}>
-          The colour is used in the spending breakdown. Fixed or variable splits the
-          period summary; income or expense decides which side a category counts on.
-        </Typography>
-
-        <Table size="small">
+      <DashboardBox>
+        <CardTable>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
@@ -128,7 +129,7 @@ const Categories: React.FC = () => {
               <TableCell>Fixed / variable</TableCell>
               <TableCell>Counts as</TableCell>
               <TableCell align="right">Transactions</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell align="right"><span className="visually-hidden">Actions</span></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -137,10 +138,11 @@ const Categories: React.FC = () => {
 
               return (
                 <TableRow key={category.id} hover>
-                  <TableCell>
+                  <TableCell sx={{ color: 'text.primary', fontWeight: 500 }}>
                     {isEditing ? (
                       <TextField
                         size="small"
+                        inputProps={{ 'aria-label': 'Name' }}
                         value={edit.category_name ?? ''}
                         onChange={(e) => setEdit((p) => ({ ...p, category_name: e.target.value }))}
                         helperText="Renaming updates every transaction using it"
@@ -154,18 +156,21 @@ const Categories: React.FC = () => {
                       <TextField
                         size="small"
                         type="color"
+                        inputProps={{ 'aria-label': 'Colour' }}
                         value={edit.color ?? '#8cc2b3'}
                         onChange={(e) => setEdit((p) => ({ ...p, color: e.target.value }))}
                         sx={{ width: 70 }}
                       />
                     ) : (
                       <Box
+                        aria-label={category.color ? `Colour ${category.color}` : 'No colour'}
                         sx={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: '4px',
+                          width: 24,
+                          height: 24,
+                          borderRadius: 1.5,
                           backgroundColor: category.color ?? 'transparent',
-                          border: '1px solid rgba(128,128,128,0.4)',
+                          border: 1,
+                          borderColor: 'divider',
                         }}
                       />
                     )}
@@ -175,6 +180,7 @@ const Categories: React.FC = () => {
                       <TextField
                         select
                         size="small"
+                        inputProps={{ 'aria-label': 'Fixed or variable' }}
                         value={edit.category_type ?? 'Variabel'}
                         onChange={(e) => setEdit((p) => ({ ...p, category_type: e.target.value }))}
                         sx={{ minWidth: 110 }}
@@ -192,6 +198,7 @@ const Categories: React.FC = () => {
                       <TextField
                         select
                         size="small"
+                        inputProps={{ 'aria-label': 'Counts as' }}
                         value={edit.income_outcome ?? 'Uitgaven'}
                         onChange={(e) => setEdit((p) => ({ ...p, income_outcome: e.target.value }))}
                         sx={{ minWidth: 120 }}
@@ -209,17 +216,17 @@ const Categories: React.FC = () => {
                       />
                     )}
                   </TableCell>
-                  <TableCell align="right">{category.transaction_count ?? 0}</TableCell>
+                  <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>{category.transaction_count ?? 0}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                     {isEditing ? (
                       <>
                         <Tooltip title="Save">
-                          <IconButton size="small" onClick={() => saveEdit(category.id)}>
+                          <IconButton size="small" aria-label="Save" onClick={() => saveEdit(category.id)}>
                             <CheckIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Cancel">
-                          <IconButton size="small" onClick={cancelEdit}>
+                          <IconButton size="small" aria-label="Cancel" onClick={cancelEdit}>
                             <CloseIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -227,12 +234,12 @@ const Categories: React.FC = () => {
                     ) : (
                       <>
                         <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => startEdit(category)}>
+                          <IconButton size="small" aria-label={`Edit ${category.category_name}`} onClick={() => startEdit(category)}>
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete">
-                          <IconButton size="small" onClick={() => setDeleteTarget(category)}>
+                          <IconButton size="small" aria-label={`Delete ${category.category_name}`} onClick={() => setDeleteTarget(category)}>
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -243,7 +250,7 @@ const Categories: React.FC = () => {
               );
             })}
           </TableBody>
-        </Table>
+        </CardTable>
       </DashboardBox>
 
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="xs">
@@ -252,24 +259,20 @@ const Categories: React.FC = () => {
           <TextField
             autoFocus
             fullWidth
-            margin="dense"
             label="Name"
             value={draft.category_name}
             onChange={(e) => setDraft((p) => ({ ...p, category_name: e.target.value }))}
           />
           <TextField
             fullWidth
-            margin="dense"
             type="color"
             label="Colour"
-            InputLabelProps={{ shrink: true }}
             value={draft.color}
             onChange={(e) => setDraft((p) => ({ ...p, color: e.target.value }))}
           />
           <TextField
             select
             fullWidth
-            margin="dense"
             label="Fixed or variable"
             helperText="Fixed costs recur at a set amount; variable ones you can influence"
             value={draft.category_type}
@@ -282,7 +285,6 @@ const Categories: React.FC = () => {
           <TextField
             select
             fullWidth
-            margin="dense"
             label="Counts as"
             value={draft.income_outcome}
             onChange={(e) => setDraft((p) => ({ ...p, income_outcome: e.target.value }))}
@@ -293,13 +295,13 @@ const Categories: React.FC = () => {
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreate}>Add</Button>
+          <Button variant="text" onClick={() => setAddOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate}>Add category</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle>Delete category</DialogTitle>
+      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this category?</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
             {deleteTarget?.transaction_count
@@ -308,27 +310,13 @@ const Categories: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>Delete</Button>
+          <Button variant="text" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button variant="outlined" color="error" onClick={handleDelete}>Delete category</Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar
-        open={toast !== null}
-        autoHideDuration={3000}
-        onClose={() => setToast(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToast(null)}
-          severity={toast?.severity ?? 'success'}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {toast?.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      <Toast toast={toast} onClose={() => setToast(null)} />
+    </>
   );
 };
 

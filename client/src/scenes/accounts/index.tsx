@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableHead, TableRow,
-  Button, IconButton, TextField, MenuItem, Select, Tooltip, Chip, Alert,
-  Dialog, DialogTitle, DialogContent, DialogActions, Snackbar,
+  Typography, TableBody, TableCell, TableHead, TableRow, Stack,
+  Button, IconButton, TextField, MenuItem, Select, Tooltip, Chip,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -11,6 +11,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DashboardBox from '@/components/DashboardBox';
+import PageHeader from '@/components/PageHeader';
+import WidgetHeader from '@/components/WidgetHeader';
+import CardTable from '@/components/CardTable';
+import Toast, { ToastMessage } from '@/components/Toast';
 import {
   Account,
   UnknownAccount,
@@ -71,7 +75,7 @@ const Accounts: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [edit, setEdit] = useState<Partial<Account>>({});
   const [deleteTarget, setDeleteTarget] = useState<Account | null>(null);
-  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   const openAdd = (prefill?: Partial<DraftAccount>) => {
     setDraft({ ...emptyDraft(), ...prefill });
@@ -153,178 +157,182 @@ const Accounts: React.FC = () => {
     });
 
   return (
-    <Box>
-      {/* Accounts seen in imports but not yet named */}
-      {unknown && unknown.length > 0 && (
-        <DashboardBox sx={{ mb: 1.5, p: 1.5, textAlign: 'left' }}>
-          <Typography variant="h3" sx={{ mb: 0.5 }}>
-            Seen in your transactions, not yet added
-          </Typography>
-          <Typography variant="body3" sx={{ display: 'block', mb: 1 }}>
-            These account numbers appear in imported transactions but have no entry
-            here, so they are missing from your balances and cannot be recognised
-            as transfers.
-          </Typography>
-
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Account number</TableCell>
-                <TableCell align="right">Transactions</TableCell>
-                <TableCell>Period</TableCell>
-                <TableCell>Last seen as</TableCell>
-                <TableCell align="right">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {unknown.map((account) => (
-                <TableRow key={account.details} hover>
-                  <TableCell sx={{ fontFamily: 'monospace' }}>{account.details}</TableCell>
-                  <TableCell align="right">{account.transaction_count}</TableCell>
-                  <TableCell>
-                    <Typography variant="body3">
-                      {account.first_seen?.slice(0, 10)} — {account.last_seen?.slice(0, 10)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body3">{account.last_description ?? '—'}</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button size="small" onClick={() => adopt(account)}>
-                      Add this account
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DashboardBox>
-      )}
-
-      <DashboardBox sx={{ p: 1.5, textAlign: 'left' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h3" sx={{ flexGrow: 1 }}>Accounts</Typography>
-          <Button size="small" startIcon={<AddIcon />} onClick={() => openAdd()}>
+    <>
+      <PageHeader
+        title="Accounts"
+        subtitle="The accounts your balances and transfers are built from"
+        actions={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openAdd()}>
             New account
           </Button>
-        </Box>
+        }
+      />
 
-        {(!accounts || accounts.length === 0) ? (
-          <Typography variant="body3">
-            No accounts yet. Add one, or import a bank export and adopt the accounts
-            it mentions.
-          </Typography>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Account number</TableCell>
-                <TableCell align="right">
-                  <Tooltip title="What the account held before the first imported transaction">
-                    <span>Opening balance</span>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right">Transactions</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {accounts.map((account) => {
-                const isEditing = editingId === account.id;
+      <Stack spacing={6} useFlexGap>
+        {/* Accounts seen in imports but not yet named */}
+        {unknown && unknown.length > 0 && (
+          <DashboardBox>
+            <WidgetHeader
+              title="Seen in your transactions, not yet added"
+              subtitle="These account numbers appear in imported transactions but have no entry here, so they are missing from your balances and cannot be recognised as transfers."
+              action={<Chip size="small" label={`${unknown.length} found`} />}
+            />
 
-                return (
-                  <TableRow key={account.id} hover>
+            <CardTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Account number</TableCell>
+                  <TableCell align="right">Transactions</TableCell>
+                  <TableCell>Period</TableCell>
+                  <TableCell>Last seen as</TableCell>
+                  <TableCell align="right"><span className="visually-hidden">Action</span></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {unknown.map((account) => (
+                  <TableRow key={account.details} hover>
+                    <TableCell sx={{ fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}>{account.details}</TableCell>
+                    <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>{account.transaction_count}</TableCell>
                     <TableCell>
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          value={edit.account_name ?? ''}
-                          onChange={(e) => setEdit((p) => ({ ...p, account_name: e.target.value }))}
-                        />
-                      ) : (
-                        account.account_name
-                      )}
+                      {account.first_seen?.slice(0, 10)} — {account.last_seen?.slice(0, 10)}
                     </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <Select
-                          size="small"
-                          value={edit.account_type ?? account.account_type}
-                          onChange={(e: SelectChangeEvent) =>
-                            setEdit((p) => ({ ...p, account_type: e.target.value as Account['account_type'] }))
-                          }
-                        >
-                          {ACCOUNT_TYPES.map((type) => (
-                            <MenuItem key={type} value={type}>{type}</MenuItem>
-                          ))}
-                        </Select>
-                      ) : (
-                        <Chip size="small" label={account.account_type} variant="outlined" />
-                      )}
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          value={edit.details ?? ''}
-                          onChange={(e) => setEdit((p) => ({ ...p, details: e.target.value }))}
-                          helperText="Exactly as the bank writes it"
-                        />
-                      ) : (
-                        account.details
-                      )}
-                    </TableCell>
+                    <TableCell>{account.last_description ?? '—'}</TableCell>
                     <TableCell align="right">
-                      {isEditing ? (
-                        <TextField
-                          size="small"
-                          type="number"
-                          value={edit.balance_when_created ?? ''}
-                          onChange={(e) => setEdit((p) => ({ ...p, balance_when_created: e.target.value }))}
-                        />
-                      ) : (
-                        formatCurrency(Number(account.balance_when_created ?? 0))
-                      )}
-                    </TableCell>
-                    <TableCell align="right">{account.transaction_count ?? 0}</TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                      {isEditing ? (
-                        <>
-                          <Tooltip title="Save">
-                            <IconButton size="small" onClick={() => saveEdit(account.id)}>
-                              <CheckIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Cancel">
-                            <IconButton size="small" onClick={cancelEdit}>
-                              <CloseIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      ) : (
-                        <>
-                          <Tooltip title="Edit">
-                            <IconButton size="small" onClick={() => startEdit(account)}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton size="small" onClick={() => setDeleteTarget(account)}>
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      )}
+                      <Button size="small" variant="outlined" onClick={() => adopt(account)}>
+                        Add this account
+                      </Button>
                     </TableCell>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </CardTable>
+          </DashboardBox>
         )}
-      </DashboardBox>
+
+        <DashboardBox>
+          <WidgetHeader title="Your accounts" subtitle="Click edit to correct a name, type, number or opening balance." />
+
+          {(!accounts || accounts.length === 0) ? (
+            <Typography variant="body2">
+              No accounts yet. Add one, or import a bank export and adopt the accounts
+              it mentions.
+            </Typography>
+          ) : (
+            <CardTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Account number</TableCell>
+                  <TableCell align="right">
+                    <Tooltip title="What the account held before the first imported transaction">
+                      <span>Opening balance</span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="right">Transactions</TableCell>
+                  <TableCell align="right"><span className="visually-hidden">Actions</span></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {accounts.map((account) => {
+                  const isEditing = editingId === account.id;
+
+                  return (
+                    <TableRow key={account.id} hover>
+                      <TableCell sx={{ color: 'text.primary', fontWeight: 500 }}>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            inputProps={{ 'aria-label': 'Name' }}
+                            value={edit.account_name ?? ''}
+                            onChange={(e) => setEdit((p) => ({ ...p, account_name: e.target.value }))}
+                          />
+                        ) : (
+                          account.account_name
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <Select
+                            size="small"
+                            inputProps={{ 'aria-label': 'Type' }}
+                            value={edit.account_type ?? account.account_type}
+                            onChange={(e: SelectChangeEvent) =>
+                              setEdit((p) => ({ ...p, account_type: e.target.value as Account['account_type'] }))
+                            }
+                          >
+                            {ACCOUNT_TYPES.map((type) => (
+                              <MenuItem key={type} value={type}>{type}</MenuItem>
+                            ))}
+                          </Select>
+                        ) : (
+                          <Chip size="small" label={account.account_type} variant="outlined" />
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            inputProps={{ 'aria-label': 'Account number' }}
+                            value={edit.details ?? ''}
+                            onChange={(e) => setEdit((p) => ({ ...p, details: e.target.value }))}
+                            helperText="Exactly as the bank writes it"
+                          />
+                        ) : (
+                          account.details
+                        )}
+                      </TableCell>
+                      <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            type="number"
+                            inputProps={{ 'aria-label': 'Opening balance' }}
+                            value={edit.balance_when_created ?? ''}
+                            onChange={(e) => setEdit((p) => ({ ...p, balance_when_created: e.target.value }))}
+                          />
+                        ) : (
+                          formatCurrency(Number(account.balance_when_created ?? 0))
+                        )}
+                      </TableCell>
+                      <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>{account.transaction_count ?? 0}</TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                        {isEditing ? (
+                          <>
+                            <Tooltip title="Save">
+                              <IconButton size="small" aria-label="Save" onClick={() => saveEdit(account.id)}>
+                                <CheckIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Cancel">
+                              <IconButton size="small" aria-label="Cancel" onClick={cancelEdit}>
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <>
+                            <Tooltip title="Edit">
+                              <IconButton size="small" aria-label={`Edit ${account.account_name}`} onClick={() => startEdit(account)}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton size="small" aria-label={`Delete ${account.account_name}`} onClick={() => setDeleteTarget(account)}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </CardTable>
+          )}
+        </DashboardBox>
+      </Stack>
 
       {/* Add */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="xs">
@@ -333,7 +341,6 @@ const Accounts: React.FC = () => {
           <TextField
             select
             fullWidth
-            margin="dense"
             label="Type"
             value={draft.account_type}
             onChange={(e) => setDraft((p) => ({ ...p, account_type: e.target.value as Account['account_type'] }))}
@@ -345,7 +352,6 @@ const Accounts: React.FC = () => {
           <TextField
             autoFocus
             fullWidth
-            margin="dense"
             label="Name"
             placeholder="Jelle's Betaalrekening"
             value={draft.account_name}
@@ -353,7 +359,6 @@ const Accounts: React.FC = () => {
           />
           <TextField
             fullWidth
-            margin="dense"
             label="Account number"
             placeholder="NL61RABO0128050403"
             helperText={
@@ -366,7 +371,6 @@ const Accounts: React.FC = () => {
           />
           <TextField
             fullWidth
-            margin="dense"
             type="number"
             label="Opening balance (optional)"
             helperText="What the account held before your first imported transaction."
@@ -375,14 +379,14 @@ const Accounts: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreate}>Add</Button>
+          <Button variant="text" onClick={() => setAddOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate}>Add account</Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete */}
-      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle>Delete account</DialogTitle>
+      <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this account?</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
             {deleteTarget?.transaction_count
@@ -391,27 +395,13 @@ const Accounts: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>Delete</Button>
+          <Button variant="text" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button variant="outlined" color="error" onClick={handleDelete}>Delete account</Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar
-        open={toast !== null}
-        autoHideDuration={3000}
-        onClose={() => setToast(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToast(null)}
-          severity={toast?.severity ?? 'success'}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {toast?.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      <Toast toast={toast} onClose={() => setToast(null)} />
+    </>
   );
 };
 

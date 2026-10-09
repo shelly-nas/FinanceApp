@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, TableSortLabel, IconButton, Tooltip, Select, MenuItem, Checkbox,
-  Typography, useTheme,
+  Typography,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,6 +12,16 @@ import TagPicker from '@/components/TagPicker';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
+
+/** Amounts are stored unsigned; the direction gives them their sign and colour. */
+const SignedAmount: React.FC<{ row: TransactionRow }> = ({ row }) => {
+  const isCredit = row.debit_credit === 'Credit';
+  return (
+    <Typography component="span" variant={isCredit ? 'credit' : 'debit'}>
+      {isCredit ? '+' : '−'}{formatCurrency(Number(row.amount))}
+    </Typography>
+  );
+};
 
 // One list drives both the header and the body. Deriving the body from
 // Object.keys(row) instead made the layout depend on the column order Postgres
@@ -28,11 +38,12 @@ interface Column {
 const COLUMNS: Column[] = [
   { key: 'date_str', label: 'Date', sortable: true, editable: true },
   { key: 'name_description', label: 'Description', sortable: true, editable: true },
-  { key: 'account', label: 'Account', sortable: true, editable: true },
-  { key: 'counterparty', label: 'Counterparty', editable: true },
+  // Right after the description, so the amount is on screen without scrolling.
+  { key: 'amount', label: 'Amount', sortable: true, align: 'right', editable: true },
   { key: 'category', label: 'Category', sortable: true, editable: true },
   { key: 'debit_credit', label: 'Type', sortable: true, editable: true },
-  { key: 'amount', label: 'Amount', sortable: true, align: 'right', editable: true },
+  { key: 'account', label: 'Account', sortable: true, editable: true },
+  { key: 'counterparty', label: 'Counterparty', editable: true },
   { key: 'notifications', label: 'Description text', editable: true },
 ];
 
@@ -73,7 +84,6 @@ const TransactionTable: React.FC<Props> = ({
   onToggleSelectAll,
   savingIds = [],
 }) => {
-  const { palette, typography } = useTheme();
   const [editing, setEditing] = useState<{ id: number; key: keyof TransactionRow } | null>(null);
   const [draft, setDraft] = useState<string>('');
 
@@ -120,7 +130,7 @@ const TransactionTable: React.FC<Props> = ({
           size="small"
           onChange={(e: SelectChangeEvent) => commit(row, 'category', e.target.value)}
           onClose={() => setTimeout(cancelEdit, 0)}
-          sx={{ width: '100%', backgroundColor: palette.background.light }}
+          sx={{ width: '100%' }}
         >
           {categories.map((name) => (
             <MenuItem key={name} value={name}>{name}</MenuItem>
@@ -138,7 +148,7 @@ const TransactionTable: React.FC<Props> = ({
           size="small"
           onChange={(e: SelectChangeEvent) => commit(row, 'debit_credit', e.target.value)}
           onClose={() => setTimeout(cancelEdit, 0)}
-          sx={{ width: '100%', backgroundColor: palette.background.light }}
+          sx={{ width: '100%' }}
         >
           <MenuItem value="Debit">Debit</MenuItem>
           <MenuItem value="Credit">Credit</MenuItem>
@@ -156,24 +166,37 @@ const TransactionTable: React.FC<Props> = ({
           size="small"
           autoFocus
           type={column.key === 'amount' ? 'number' : column.key === 'date_str' ? 'date' : 'text'}
-          sx={{ width: '100%', backgroundColor: palette.background.light }}
+          sx={{ width: '100%' }}
         />
       );
     }
 
     if (column.key === 'amount') {
-      return formatCurrency(Number(row.amount));
+      return <SignedAmount row={row} />;
     }
 
     if (column.key === 'category' && row.category === null) {
-      return <Typography variant="body3" sx={{ opacity: 0.5 }}>needs a category</Typography>;
+      return (
+        <Typography component="span" variant="body2" sx={{ fontStyle: 'italic' }}>
+          Needs a category
+        </Typography>
+      );
     }
 
     return row[column.key] as React.ReactNode;
   };
 
   return (
-    <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+    // Scrolls sideways inside its card rather than squeezing nine columns.
+    <TableContainer
+      sx={{
+        overflowX: 'auto',
+        mx: -6,
+        width: 'auto',
+        '& td:first-of-type, & th:first-of-type': { pl: 6 },
+        '& td:last-of-type, & th:last-of-type': { pr: 6 },
+      }}
+    >
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -191,7 +214,6 @@ const TransactionTable: React.FC<Props> = ({
               <TableCell
                 key={String(column.key)}
                 align={column.align ?? 'left'}
-                sx={{ ...typography.body1, fontWeight: 'bold' }}
               >
                 {column.sortable && onSort ? (
                   <TableSortLabel
@@ -206,9 +228,11 @@ const TransactionTable: React.FC<Props> = ({
                 )}
               </TableCell>
             ))}
-            <TableCell sx={{ ...typography.body1, fontWeight: 'bold' }}>Tags</TableCell>
+            <TableCell>Tags</TableCell>
             {editable && onDelete && (
-              <TableCell sx={{ ...typography.body1, fontWeight: 'bold' }}>Delete</TableCell>
+              <TableCell align="right">
+                <span className="visually-hidden">Delete</span>
+              </TableCell>
             )}
           </TableRow>
         </TableHead>
@@ -234,17 +258,21 @@ const TransactionTable: React.FC<Props> = ({
                   align={column.align ?? 'left'}
                   onClick={() => startEdit(row, column)}
                   sx={{
-                    ...typography.body2,
                     cursor: editable && column.editable ? 'pointer' : 'default',
                     minWidth: column.key === 'notifications' ? 240 : undefined,
+                    fontVariantNumeric: column.key === 'amount' ? 'tabular-nums' : undefined,
+                    // The cell under the pointer is the one a click edits.
                     '&:hover': editable && column.editable
-                      ? { backgroundColor: palette.secondary[100], borderRadius: 2 }
+                      ? { boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.primary.main}`, borderRadius: 1 }
                       : undefined,
                   }}
                 >
                   {column.key === 'date_str' && row.is_internal ? (
                     <Tooltip title="Transfer between your own accounts - excluded from income and expenses">
-                      <SwapHorizIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', opacity: 0.6 }} />
+                      <SwapHorizIcon
+                        aria-label="Transfer between own accounts"
+                        sx={{ fontSize: 16, mr: 1, verticalAlign: 'text-bottom', color: 'text.secondary' }}
+                      />
                     </Tooltip>
                   ) : null}
                   {renderCell(row, column)}
@@ -258,9 +286,9 @@ const TransactionTable: React.FC<Props> = ({
                 )}
               </TableCell>
               {editable && onDelete && (
-                <TableCell>
+                <TableCell align="right">
                   <Tooltip title="Delete transaction">
-                    <IconButton size="small" onClick={() => onDelete(row)}>
+                    <IconButton size="small" aria-label="Delete transaction" onClick={() => onDelete(row)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>

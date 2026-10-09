@@ -1,160 +1,329 @@
+// shelly-nas MUI theme - the Web App Template expressed as MUI theme options.
+// Copied from the design-richtlijnen skill in shelly-nas/shelly-fundamentals;
+// change the shared values there first, then here.
+//
+// Type mapping: h1 = Display, h2 = Title, h3 = Heading, body1 = Body,
+// body2 = Small, overline = Label.
+//
+// FinanceApp additions, marked below: the credit/debit amount variants, a
+// compact table density, toggle buttons, progress bars, dialogs and tooltips,
+// none of which the template covers. Debits are red here even though the
+// guidelines reserve red for errors - a deliberate exception for money going
+// out, which reads as a warning at a glance.
 import { PaletteMode } from "@mui/material";
 import { ThemeOptions } from "@mui/material/styles";
 import "@/expanded-theme";
 
-export const tokens = {
-    grey: {
-      100: "#f0f0f3",
-      200: "#e1e2e7",
-      300: "#d1d3da",
-      400: "#c2c5ce",
-      500: "#b3b6c2",
-      600: "#8f929b",
-      700: "#6b6d74",
-      800: "#48494e",
-      900: "#242427",
-    },
-    primary: {
-      // light green
-      100: "#d0fcf4",
-      200: "#a0f9e9",
-      300: "#71f5de",
-      400: "#41f2d3",
-      500: "#12efc8",
-      600: "#0ebfa0",
-      700: "#0b8f78",
-      800: "#076050",
-      900: "#043028",
-    },
-    secondary: {
-      // yellow
-      100: "#fcf0dd",
-      200: "#fae1bb",
-      300: "#f7d299",
-      400: "#f5c377",
-      500: "#f2b455",
-      600: "#c29044",
-      700: "#916c33",
-      800: "#614822",
-      900: "#302411",
-    },
-    background: {
-      light: "#ffffff",
-      main: "#fbfbfb",
-    },
-  };
+const light = {
+  bg: "#F8F9FB",
+  surface: "#FFFFFF",
+  surface2: "#F2F4F7",
+  surface3: "#E6E9EF",
+  border: "#E1E5EB",
+  borderStrong: "#C9D0DA",
+  text: "#12161C",
+  textBody: "#343B48",
+  textMuted: "#5F6878",
+  textDisabled: "#8A93A3",
+  primary: "#1F4FC4",
+  primaryHover: "#1B3F9C",
+  primaryActive: "#1A3477",
+  primarySoft: "#EEF4FF",
+  primarySoft2: "#DCE7FE",
+  onPrimary: "#FFFFFF",
+  focus: "#2F64E0",
+  success: "#1A7F4B",
+  successSoft: "#E7F6EE",
+  warning: "#9A5200",
+  warningSoft: "#FFF4DB",
+  error: "#C8322B",
+  errorSoft: "#FDECEB",
+  shadow1: "0 1px 2px rgba(18,22,28,.06), 0 1px 3px rgba(18,22,28,.08)",
+  shadow2: "0 8px 24px rgba(18,22,28,.12)",
+};
 
-  // Dark mode reuses the same hues but flips the grey ramp so that the
-  // low keys stay "closest to the text colour" and the high keys stay
-  // "closest to the surface", which is how components consume them.
-  const darkGrey = {
-    100: "#e6e7ea",
-    200: "#c9cbd1",
-    300: "#a7aab3",
-    400: "#878b95",
-    500: "#6b6f79",
-    600: "#565a63",
-    700: "#3f434b",
-    800: "#2b2e34",
-    900: "#191b1f",
-  };
+const dark: typeof light = {
+  bg: "#0F1217",
+  surface: "#171B22",
+  surface2: "#1F242D",
+  surface3: "#282E39",
+  border: "#2A303B",
+  borderStrong: "#3A4250",
+  text: "#EEF0F4",
+  textBody: "#C9CFD9",
+  textMuted: "#9AA3B2",
+  textDisabled: "#646D7C",
+  primary: "#7EA2F0",
+  primaryHover: "#98B5F4",
+  primaryActive: "#B1C7F7",
+  primarySoft: "#1C2742",
+  primarySoft2: "#24335A",
+  onPrimary: "#0F1217",
+  focus: "#98B5F4",
+  success: "#5BC48A",
+  successSoft: "#14291E",
+  warning: "#E9B85A",
+  warningSoft: "#2E2412",
+  error: "#F0817A",
+  errorSoft: "#33191A",
+  // Shadows disappear on dark grounds; elevation comes from lighter surfaces.
+  shadow1: "none",
+  shadow2: "none",
+};
 
-  const darkBackground = {
-    light: "#1e2126",
-    main: "#15171b",
-  };
+export const tokensFor = (mode: PaletteMode) => (mode === "dark" ? dark : light);
 
-  // mui theme settings
-  export const themeSettings = (mode: PaletteMode = "light"): ThemeOptions => {
-    const isDark = mode === "dark";
-    const grey = isDark ? darkGrey : tokens.grey;
-    const background = isDark ? darkBackground : tokens.background;
+const fontFamily = ["Figtree", "system-ui", "-apple-system", "Segoe UI", "sans-serif"].join(",");
 
-    // Body/heading text keys, inverted for dark so contrast is preserved.
-    const textStrong = isDark ? grey[100] : grey[800];
-    const textMuted = isDark ? grey[300] : grey[600];
+export const themeSettings = (mode: PaletteMode = "light"): ThemeOptions => {
+  const t = tokensFor(mode);
+  const focusRing = `0 0 0 2px ${t.surface}, 0 0 0 4px ${t.focus}`;
 
-    return {
+  return {
     palette: {
       mode,
-      primary: {
-        ...tokens.primary,
-        main: isDark ? tokens.primary[500] : tokens.primary[600],
-        light: tokens.primary[500],
-      },
-      secondary: {
-        ...tokens.secondary,
-        main: tokens.secondary[500],
-      },
-      grey: {
-        ...grey,
-      },
-      background: {
-        default: background.main,
-        paper: background.light,
-        light: background.light,
-      },
-      text: {
-        primary: textStrong,
-        secondary: textMuted,
-      },
-      cosmetics: {
-        radius: 5,
-        colorPrimary: isDark ? grey[700] : tokens.grey[200],
-        colorSecondary: isDark ? grey[800] : tokens.grey[100],
-        width: 1,
-        borderStyle: "Solid",
-        spacing: 1
-      }
+      primary: { main: t.primary, dark: t.primaryActive, light: t.primarySoft2, contrastText: t.onPrimary },
+      success: { main: t.success, light: t.successSoft, contrastText: t.onPrimary },
+      warning: { main: t.warning, light: t.warningSoft, contrastText: t.onPrimary },
+      error: { main: t.error, light: t.errorSoft, contrastText: t.onPrimary },
+      info: { main: t.primary, light: t.primarySoft, contrastText: t.onPrimary },
+      background: { default: t.bg, paper: t.surface },
+      text: { primary: t.text, secondary: t.textMuted, disabled: t.textDisabled },
+      divider: t.border,
+      action: { hover: t.surface2, selected: t.primarySoft, disabledBackground: t.surface3, disabled: t.textDisabled },
     },
+    // MUI multiplies this: theme.spacing(1) = 4px, spacing(4) = 16px, spacing(8) = 32px.
+    spacing: 4,
+    shape: { borderRadius: 8 },
     typography: {
-      fontFamily: ["Reddit Mono", "monospace"].join(","),
-      fontSize: 12,
-      h1: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 32,
-        fontWeight: "bold",
-        color: textStrong,
-      },
-      h2: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 13,
-        fontWeight: "bold",
-        textTransform: "uppercase",
-        color: textStrong,
-      },
-      h3: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 13,
-        fontWeight: "bold",
-        textTransform: "uppercase",
-        color: textMuted,
-      },
-      body1: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 12,
-        color: textStrong,
-      },
-      body2: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 12,
-        color: textStrong,
-      },
-      body3: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 12,
-        color: textMuted,
-      },
-      credit: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 12,
-        color: isDark ? tokens.primary[400] : tokens.primary[600],
-      },
-      debit: {
-        fontFamily: ["Reddit Mono", "monospace"].join(","),
-        fontSize: 12,
-        color: isDark ? "#ff7a5e" : "#E35335",
-      },
+      fontFamily,
+      fontSize: 14,
+      h1: { fontSize: 32, fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.025em", color: t.text },
+      h2: { fontSize: 24, fontWeight: 600, lineHeight: 1.2, letterSpacing: "-0.02em", color: t.text },
+      h3: { fontSize: 20, fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.015em", color: t.text },
+      body1: { fontSize: 16, lineHeight: 1.5, color: t.textBody },
+      body2: { fontSize: 14, lineHeight: 1.5, color: t.textMuted },
+      overline: { fontSize: 12, fontWeight: 600, lineHeight: 1.35, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted },
+      caption: { fontSize: 12, lineHeight: 1.4, color: t.textMuted },
+      button: { fontSize: 14, fontWeight: 600, textTransform: "none", lineHeight: 1 },
+      // FinanceApp: signed amounts. Colour plus the sign, never colour alone.
+      credit: { fontSize: 14, fontWeight: 600, color: t.success, fontVariantNumeric: "tabular-nums" },
+      debit: { fontSize: 14, fontWeight: 600, color: t.error, fontVariantNumeric: "tabular-nums" },
     },
-    };
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: { body: { WebkitFontSmoothing: "antialiased" } },
+      },
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: {
+            height: 40,
+            padding: "0 16px",
+            borderRadius: 8,
+            gap: 8,
+            whiteSpace: "nowrap",
+            transition: "background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .05s ease",
+            "&:active": { transform: "translateY(1px)" },
+            "&.Mui-focusVisible": { boxShadow: focusRing },
+            "&.Mui-disabled": { background: t.surface3, borderColor: "transparent", color: t.textDisabled },
+          },
+          sizeSmall: { height: 32, padding: "0 12px", borderRadius: 6 },
+          sizeLarge: { height: 48, padding: "0 24px", fontSize: 16 },
+          // Primary = <Button variant="contained">
+          containedPrimary: {
+            "&:hover": { background: t.primaryHover },
+            "&:active": { background: t.primaryActive },
+          },
+          // Secondary = <Button variant="outlined">
+          outlined: {
+            borderColor: t.borderStrong,
+            "&:hover": { background: t.primarySoft, borderColor: t.primarySoft2 },
+            "&:active": { background: t.primarySoft2 },
+          },
+          // Quiet = <Button variant="text">, in body color
+          text: {
+            color: t.textBody,
+            "&:hover": { background: t.surface2, color: t.text },
+            "&:active": { background: t.surface3 },
+          },
+          // Destructive = <Button variant="outlined" color="error">
+          outlinedError: {
+            color: t.error,
+            borderColor: t.borderStrong,
+            "&:hover": { background: t.errorSoft, borderColor: t.error },
+          },
+        },
+      },
+      MuiIconButton: {
+        styleOverrides: { root: { borderRadius: 8, "&.Mui-focusVisible": { boxShadow: focusRing } } },
+      },
+      MuiOutlinedInput: {
+        // FinanceApp: the label sits above the field, so the outline needs no
+        // gap cut out for it.
+        defaultProps: { notched: false },
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            background: t.surface,
+            fontSize: 16,
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: t.borderStrong },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: t.textDisabled },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: t.focus, borderWidth: 1 },
+            "&.Mui-focused": { boxShadow: `0 0 0 3px ${t.primarySoft2}` },
+            "&.Mui-error .MuiOutlinedInput-notchedOutline": { borderColor: t.error },
+            "&.Mui-error.Mui-focused": { boxShadow: `0 0 0 3px ${t.errorSoft}` },
+            "&.Mui-disabled": { background: t.surface2 },
+          },
+          input: { height: 40, padding: "0 12px", boxSizing: "border-box" },
+          multiline: { padding: "8px 12px" },
+        },
+      },
+      // Label above the field, never floating inside it.
+      MuiInputLabel: {
+        defaultProps: { shrink: true },
+        styleOverrides: {
+          root: { position: "relative", transform: "none", marginBottom: 8, fontSize: 14, fontWeight: 600, color: t.text },
+        },
+      },
+      // FinanceApp: a select sits at the same 40px as a text field, its value
+      // centred and clear of the chevron.
+      MuiSelect: {
+        styleOverrides: {
+          select: {
+            display: "flex", alignItems: "center", boxSizing: "border-box",
+            height: 40, minHeight: 0, paddingTop: 0, paddingBottom: 0, paddingRight: "36px !important",
+          },
+        },
+      },
+      MuiFormHelperText: { styleOverrides: { root: { marginLeft: 0, marginTop: 8, fontSize: 12 } } },
+      MuiCard: {
+        defaultProps: { elevation: 0 },
+        styleOverrides: { root: { borderRadius: 12, border: `1px solid ${t.border}`, boxShadow: t.shadow1, backgroundImage: "none" } },
+      },
+      MuiCardContent: { styleOverrides: { root: { padding: 24, "&:last-child": { paddingBottom: 24 } } } },
+      MuiPaper: { styleOverrides: { root: { backgroundImage: "none" } } },
+      MuiMenu: { styleOverrides: { paper: { borderRadius: 8, boxShadow: t.shadow2, border: `1px solid ${t.border}`, background: t.surface2 } } },
+      MuiDialog: { styleOverrides: { paper: { borderRadius: 12 } } },
+      MuiChip: {
+        // Status badges: <Chip size="small" color="success" label="Paid" />
+        styleOverrides: { root: { height: 24, borderRadius: 999, fontSize: 12, fontWeight: 600 } },
+      },
+      MuiAlert: {
+        styleOverrides: {
+          root: { borderRadius: 8, padding: "12px 16px", fontSize: 14, color: t.textBody },
+          standardInfo: { background: t.primarySoft },
+          standardSuccess: { background: t.successSoft },
+          standardWarning: { background: t.warningSoft },
+          standardError: { background: t.errorSoft },
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          root: { minHeight: 44, borderBottom: `1px solid ${t.border}` },
+          indicator: { height: 2, borderRadius: 2, background: t.primary },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            minHeight: 44, minWidth: 0, padding: 0, marginRight: 24,
+            textTransform: "none", fontSize: 14, fontWeight: 500, color: t.textMuted,
+            "&:hover": { color: t.text },
+            "&.Mui-selected": { color: t.text, fontWeight: 600 },
+          },
+        },
+      },
+      MuiSwitch: {
+        styleOverrides: {
+          root: { width: 40, height: 24, padding: 0 },
+          switchBase: {
+            padding: 3,
+            "&.Mui-checked": { transform: "translateX(16px)", color: "#FFFFFF" },
+            "&.Mui-checked + .MuiSwitch-track": { background: t.primary, opacity: 1 },
+          },
+          thumb: { width: 18, height: 18, boxShadow: "0 1px 2px rgba(0,0,0,.2)" },
+          track: { borderRadius: 999, background: t.borderStrong, opacity: 1 },
+        },
+      },
+      MuiListItemButton: {
+        // Sidebar navigation items
+        styleOverrides: {
+          root: {
+            height: 40, borderRadius: 8, padding: "0 12px", gap: 12, fontSize: 14, fontWeight: 500, color: t.textBody,
+            "&:hover": { background: t.surface2, color: t.text },
+            "&.Mui-selected": { background: t.primarySoft, color: t.primary, fontWeight: 600 },
+            "&.Mui-selected:hover": { background: t.primarySoft },
+          },
+        },
+      },
+      MuiTableCell: {
+        styleOverrides: {
+          root: { padding: "12px 24px", borderBottom: `1px solid ${t.border}`, fontSize: 14, color: t.textBody, whiteSpace: "nowrap" },
+          head: { fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: t.textMuted },
+          // FinanceApp: compact density for <Table size="small">; dense money
+          // tables keep the template's type and colours with less padding.
+          sizeSmall: { padding: "8px 16px" },
+        },
+      },
+      MuiTableRow: { styleOverrides: { root: { "&:hover": { background: t.surface2 } } } },
+
+      // ---- FinanceApp additions ----------------------------------------
+      // The card's edge closes the table; a rule under the last row doubles it.
+      MuiTable: {
+        styleOverrides: { root: { "& tbody tr:last-of-type > td": { borderBottom: 0 } } },
+      },
+      MuiTableSortLabel: {
+        styleOverrides: { root: { "&.Mui-active": { color: t.text } } },
+      },
+      MuiToggleButtonGroup: {
+        styleOverrides: { root: { gap: 4 } },
+      },
+      // Selected = tinted fill plus primary text in semibold: two signals.
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            height: 40, padding: "0 12px", gap: 6, borderRadius: 8,
+            border: `1px solid ${t.borderStrong}`,
+            textTransform: "none", fontSize: 14, fontWeight: 500, color: t.textBody,
+            "&:hover": { background: t.surface2, color: t.text },
+            "&.Mui-selected": { background: t.primarySoft, color: t.primary, fontWeight: 600, borderColor: t.primarySoft2 },
+            "&.Mui-selected:hover": { background: t.primarySoft2 },
+            "&.Mui-focusVisible": { boxShadow: focusRing },
+            "&.MuiToggleButtonGroup-grouped": { borderRadius: 8, border: `1px solid ${t.borderStrong}` },
+            "&.MuiToggleButtonGroup-grouped.Mui-selected": { borderColor: t.primarySoft2 },
+          },
+          sizeSmall: { height: 32, padding: "0 10px", borderRadius: 6 },
+        },
+      },
+      MuiLinearProgress: {
+        styleOverrides: { root: { height: 8, borderRadius: 999, background: t.surface3 }, bar: { borderRadius: 999 } },
+      },
+      MuiDialogTitle: {
+        styleOverrides: { root: { padding: "24px 24px 8px", fontSize: 20, fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.015em", color: t.text } },
+      },
+      MuiDialogContent: {
+        styleOverrides: { root: { padding: "8px 24px", display: "flex", flexDirection: "column", gap: 16 } },
+      },
+      MuiDialogActions: {
+        styleOverrides: { root: { padding: "16px 24px 24px", gap: 8, "& > :not(:first-of-type)": { marginLeft: 0 } } },
+      },
+      MuiTooltip: {
+        styleOverrides: { tooltip: { fontSize: 12, fontWeight: 500, borderRadius: 6, padding: "6px 10px", background: mode === "dark" ? t.surface3 : "#12161C" } },
+      },
+      MuiCheckbox: {
+        styleOverrides: { root: { color: t.borderStrong, "&.Mui-focusVisible": { boxShadow: focusRing } } },
+      },
+      MuiDivider: { styleOverrides: { root: { borderColor: t.border } } },
+      MuiSnackbarContent: {
+        styleOverrides: {
+          root: mode === "dark"
+            ? { borderRadius: 12, background: t.surface3, color: t.text, border: `1px solid ${t.borderStrong}`, boxShadow: "none" }
+            : { borderRadius: 12, background: "#12161C", color: "#F2F4F7", boxShadow: "0 8px 24px rgba(18,22,28,.24)" },
+        },
+      },
+      MuiSkeleton: { styleOverrides: { root: { borderRadius: 6, background: t.surface2 } } },
+      MuiAvatar: { styleOverrides: { root: { background: t.primarySoft2, color: t.primary, fontWeight: 700 } } },
+    },
   };
+};

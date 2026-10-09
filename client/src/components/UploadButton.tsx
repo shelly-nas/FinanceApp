@@ -1,44 +1,33 @@
 import React, { useState } from 'react';
 import {
   Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel,
-  Box, Modal, Divider, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
+  Divider, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import DownloadIcon from '@mui/icons-material/Download';
 import { useUploadTransactionsMutation, useImportBackupMutation } from '@/api';
-import DashboardBox from '@/components/DashboardBox';
 import { useNavigate } from 'react-router-dom';
 
 // Sentinel in the same dropdown as the banks: the file to pick is chosen the
 // same way whether it is a bank export or a backup, so it belongs in one list.
 const BACKUP = '__BACKUP__';
 
-// Built the same way RTK Query builds its urls, so the download follows
-// VITE_BASE_URL if one is ever set instead of silently hitting the page origin.
-const exportHref = `${import.meta.env.VITE_BASE_URL ?? '/'}api/export`.replace(/([^:]\/)\/+/g, '$1');
+const SOURCE_LABELS: Record<string, string> = {
+  ING_NL: 'ING (NL)',
+  ING_SAVINGS_NL: 'ING Savings (NL)',
+  ASN: 'ASN Bank',
+  [BACKUP]: 'Complete backup (JSON)',
+};
 
 interface UploadButtonProps {
   onUploadSuccess: () => void;
-  /** Opened from the header's action menu rather than by its own button. */
-  openExternally?: boolean;
-  onCloseExternally?: () => void;
+  /** Opened by the page headers' import action. */
+  open: boolean;
+  onClose: () => void;
 }
 
-const UploadButton: React.FC<UploadButtonProps> = ({
-  onUploadSuccess,
-  openExternally,
-  onCloseExternally,
-}) => {
-  const { palette } = useTheme();
+const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onClose }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [ownOpen, setOwnOpen] = useState(false);
-
-  // Controlled from outside when the menu opened it, self-controlled otherwise.
-  const isControlled = openExternally !== undefined;
-  const open = isControlled ? Boolean(openExternally) : ownOpen;
   const [bank, setBank] = useState('');
   const [error, setError] = useState<string | null>(null);
   // Held between picking a backup file and confirming what to do with it.
@@ -151,130 +140,74 @@ const UploadButton: React.FC<UploadButtonProps> = ({
     setError(null);
   };
 
-  const handleOpen = () => {
-    setOwnOpen(true);
-    setError(null); // Reset error state
-  };
-
   const handleClose = () => {
-    setOwnOpen(false);
-    onCloseExternally?.();
+    setError(null);
+    onClose();
   };
 
   return (
     <>
-      {!isControlled && (
-        <Button
-          sx={{
-            width: '100%',
-            color: palette.secondary[500],
-            '&:hover': {
-              backgroundColor: palette.action.hover
-            }
-          }}
-          onClick={handleOpen}
-        >
-          <CloudUploadIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
-        </Button>
-      )}
+      <Dialog open={open} onClose={loading ? undefined : handleClose} fullWidth maxWidth="xs">
+        <DialogTitle>Import data</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Pick the bank the export came from, then choose the file. Rows already
+            stored are recognised and skipped.
+          </Typography>
 
-      <Modal open={open} onClose={handleClose}>
-        <DashboardBox sx={{ ...style, width: 340 }}>
-          <Typography variant="h3">Import data</Typography>
-          <FormControl fullWidth sx={{ mt: 1.5 }}>
+          <FormControl fullWidth>
             <InputLabel id="bank-select-label">Source</InputLabel>
             <Select
               labelId="bank-select-label"
               id="bank-select"
               value={bank}
-              label="Source"
               onChange={handleBankChange}
-              sx={{ textAlign: 'left' }} // Ensures the text is left-aligned
+              displayEmpty
+              renderValue={(value) =>
+                value === ''
+                  ? <Typography component="span" color="text.disabled">Choose a source</Typography>
+                  : SOURCE_LABELS[value]
+              }
             >
-              <MenuItem value="ING_NL">ING (NL)</MenuItem>
-              <MenuItem value="ING_SAVINGS_NL">ING Savings (NL)</MenuItem>
-              <MenuItem value="ASN">ASN Bank</MenuItem>
+              <MenuItem value="ING_NL">{SOURCE_LABELS.ING_NL}</MenuItem>
+              <MenuItem value="ING_SAVINGS_NL">{SOURCE_LABELS.ING_SAVINGS_NL}</MenuItem>
+              <MenuItem value="ASN">{SOURCE_LABELS.ASN}</MenuItem>
               <Divider />
-              <MenuItem value={BACKUP}>Complete backup (JSON)</MenuItem>
+              <MenuItem value={BACKUP}>{SOURCE_LABELS[BACKUP]}</MenuItem>
             </Select>
           </FormControl>
 
           {isBackup && (
-            <Alert severity="warning" sx={{ mt: 1.5, textAlign: 'left' }}>
-              Restoring replaces everything currently stored. Export a backup
-              first if you want to keep it.
+            <Alert severity="warning">
+              Restoring replaces everything currently stored. Use "Export
+              everything" in the sidebar first if you want to keep it.
             </Alert>
           )}
 
-          <div style={{ marginTop: 5, opacity: bank ? 1 : 0.5 }}>
-            <input
-              accept={isBackup ? '.json,application/json' : '.csv'}
-              style={{ display: 'none' }}
-              id="upload-file"
-              type="file"
-              onChange={handleFileUpload}
-              disabled={!bank}
-            />
-            <label htmlFor="upload-file">
-              <Button
-                variant="contained"
-                sx={{
-                  mt: 2,
-                  width: '100%',
-                  backgroundColor: palette.secondary.main,
-                  color: '#fff',
-                  '&:hover': {
-                    backgroundColor: palette.secondary.dark
-                  }
-                }}
-                component="span" // Make the button act as a span for the file input
-                disabled={!bank}
-              >
-                {isBackup ? 'Select backup & restore' : 'Select file & submit'}
-              </Button>
-
-            </label>
-          </div>
-
-          <Divider sx={{ mt: 2, mb: 1.5 }} />
-
-          {/* A plain link, not fetch-and-blob: the browser streams the file to
-              disk and honours the Content-Disposition filename, and nothing has
-              to hold the whole export in memory. */}
-          <Button
-            component="a"
-            href={exportHref}
-            startIcon={<DownloadIcon />}
-            sx={{ width: '100%', textTransform: 'none' }}
-          >
-            Export everything (JSON)
-          </Button>
-
-          {loading && (
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                zIndex: 9999,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
+          {error && <Alert severity="error">{error}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={handleClose} disabled={loading}>Cancel</Button>
+          <input
+            accept={isBackup ? '.json,application/json' : '.csv'}
+            style={{ display: 'none' }}
+            id="upload-file"
+            type="file"
+            onChange={handleFileUpload}
+            disabled={!bank || loading}
+          />
+          <label htmlFor="upload-file">
+            <Button
+              variant="contained"
+              component="span" // Make the button act as a span for the file input
+              disabled={!bank || loading}
+              startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
             >
-              <CircularProgress sx={{ color: palette.secondary[400] }} />
-            </Box>
-          )}
-          {error && (
-            <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-              {error}
-            </Typography>
-          )}
-        </DashboardBox>
-      </Modal>
+              {loading ? 'Importing…' : isBackup ? 'Choose backup…' : 'Choose file…'}
+            </Button>
+          </label>
+        </DialogActions>
+      </Dialog>
 
       {/* Confirmed before the request, not after: a replace cannot be undone,
           and "merge" is offered here because it is the only other sensible
@@ -282,37 +215,28 @@ const UploadButton: React.FC<UploadButtonProps> = ({
       <Dialog open={pendingFile !== null} onClose={() => setPendingFile(null)} maxWidth="xs" fullWidth>
         <DialogTitle>Restore this backup?</DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ mb: 1.5 }}>
+          <Typography variant="body1">
             {pendingFile?.name}
           </Typography>
-          <Alert severity="warning" sx={{ mb: 1.5 }}>
+          <Alert severity="warning">
             <strong>Replace</strong> deletes everything currently stored first,
             leaving exactly what is in the backup.
           </Alert>
-          <Typography variant="body3">
+          <Typography variant="body2">
             <strong>Merge</strong> keeps what is there and adds what is missing.
             Transactions already stored are recognised and skipped.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPendingFile(null)}>Cancel</Button>
-          <Button onClick={() => handleRestore('merge')}>Merge</Button>
-          <Button color="error" onClick={() => handleRestore('replace')}>
-            Replace
+          <Button variant="text" onClick={() => setPendingFile(null)}>Cancel</Button>
+          <Button variant="outlined" color="error" onClick={() => handleRestore('replace')}>
+            Replace everything
           </Button>
+          <Button variant="contained" onClick={() => handleRestore('merge')}>Merge</Button>
         </DialogActions>
       </Dialog>
     </>
   );
-};
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  boxShadow: 24,
-  p: 1.5
 };
 
 export default UploadButton;

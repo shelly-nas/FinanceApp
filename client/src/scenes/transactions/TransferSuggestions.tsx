@@ -1,10 +1,12 @@
 import React from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableHead, TableRow,
-  Button, Chip, Tooltip, useTheme,
+  Typography, TableBody, TableCell, TableHead, TableRow,
+  Button, Chip, Tooltip,
 } from '@mui/material';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import CheckIcon from '@mui/icons-material/Check';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
+import CardTable from '@/components/CardTable';
 import {
   TransferCandidate,
   useGetTransferCandidatesQuery,
@@ -35,7 +37,6 @@ interface Props {
  * the same day are indistinguishable from a transfer, so the user decides.
  */
 const TransferSuggestions: React.FC<Props> = ({ transactionIds }) => {
-  const { palette } = useTheme();
   const { data: candidates } = useGetTransferCandidatesQuery(
     transactionIds ? { ids: transactionIds } : {},
   );
@@ -61,20 +62,14 @@ const TransferSuggestions: React.FC<Props> = ({ transactionIds }) => {
     });
 
   return (
-    <DashboardBox sx={{ mb: 1.5, p: 1.5, textAlign: 'left' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <SwapHorizIcon sx={{ color: palette.secondary[400] }} />
-        <Typography variant="h3" sx={{ flexGrow: 1 }}>
-          Transfers between your own accounts
-        </Typography>
-        <Chip size="small" label={`${candidates.length} found`} />
-      </Box>
-      <Typography variant="body3" sx={{ display: 'block', mb: 1 }}>
-        These pairs look like one movement counted twice. Confirming keeps them out
-        of your income and expenses and files them under Overboekingen.
-      </Typography>
+    <DashboardBox>
+      <WidgetHeader
+        title="Transfers between your own accounts"
+        subtitle="These pairs look like one movement counted twice. Confirming keeps them out of your income and expenses and files them under Overboekingen."
+        action={<Chip size="small" label={`${candidates.length} found`} />}
+      />
 
-      <Table size="small">
+      <CardTable>
         <TableHead>
           <TableRow>
             <TableCell>From</TableCell>
@@ -88,23 +83,23 @@ const TransferSuggestions: React.FC<Props> = ({ transactionIds }) => {
           {candidates.map((c) => (
             <TableRow key={`${c.from_transaction_id}-${c.to_transaction_id}`} hover>
               <TableCell>
-                <Typography variant="body2">
+                <Typography sx={{ fontSize: 14, color: 'text.primary' }}>
                   {accountLabel(c.from_account_name, c.from_account)}
                 </Typography>
-                <Typography variant="body3">
+                <Typography variant="body2">
                   {formatDate(c.from_date)} · {c.from_description ?? '—'}
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="body2">
+                <Typography sx={{ fontSize: 14, color: 'text.primary' }}>
                   {accountLabel(c.to_account_name, c.to_account)}
                 </Typography>
-                <Typography variant="body3">
+                <Typography variant="body2">
                   {formatDate(c.to_date)} · {c.to_description ?? '—'}
                 </Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                <Typography sx={{ fontSize: 14, color: 'text.primary', fontVariantNumeric: 'tabular-nums' }}>
                   {formatCurrency(Number(c.amount))}
                 </Typography>
               </TableCell>
@@ -118,24 +113,25 @@ const TransferSuggestions: React.FC<Props> = ({ transactionIds }) => {
                 >
                   <Chip
                     size="small"
+                    icon={c.match_basis === 'iban' ? <CheckIcon /> : undefined}
                     label={c.match_basis === 'iban' ? 'Certain' : 'Likely'}
-                    color={c.match_basis === 'iban' ? 'success' : 'default'}
-                    variant={c.match_basis === 'iban' ? 'filled' : 'outlined'}
+                    color={c.match_basis === 'iban' ? 'success' : 'warning'}
+                    variant="outlined"
                   />
                 </Tooltip>
               </TableCell>
               <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                <Button size="small" onClick={() => handleConfirm(c)}>
-                  Confirm
-                </Button>
-                <Button size="small" color="inherit" onClick={() => handleReject(c)}>
+                <Button size="small" variant="text" onClick={() => handleReject(c)} sx={{ mr: 2 }}>
                   Not a transfer
+                </Button>
+                <Button size="small" variant="outlined" onClick={() => handleConfirm(c)}>
+                  Confirm
                 </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </CardTable>
     </DashboardBox>
   );
 };

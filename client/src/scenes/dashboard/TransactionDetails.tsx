@@ -1,10 +1,9 @@
 import React from 'react';
-import { Typography, useTheme, Box, IconButton, Tooltip } from '@mui/material';
+import { Typography, Button } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
-import EditIcon from '@mui/icons-material/Edit';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import TransactionTable from '@/components/TransactionTable';
-import '@/styles.css'; // Import your CSS styles for transitions
 import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 import { useSearchTransactionsQuery } from '@/api';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +13,6 @@ interface TransactionDetailsProps {
 }
 
 const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory }) => {
-  const { typography } = useTheme();
   const { firstDay, lastDay } = useDateRange();
   const navigate = useNavigate();
 
@@ -45,33 +43,30 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
   };
 
   return (
-    <DashboardBox sx={{ mb: 1.5 }} className="content-box">
+    <DashboardBox>
       <WidgetHeader
-        title="Transaction Details"
+        title={selectedCategory ? `Transactions in ${selectedCategory}` : 'Transactions'}
+        subtitle={
+          selectedCategory
+            ? `${transactions.length} this month`
+            : undefined
+        }
         action={
           selectedCategory ? (
-            <Tooltip title="Open these in the transactions screen">
-              <IconButton size="small" onClick={handleEditTransactions}>
-                <EditIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
+            <Button variant="outlined" size="small" startIcon={<OpenInNewIcon />} onClick={handleEditTransactions}>
+              Edit in Transactions
+            </Button>
           ) : undefined
         }
       />
 
-      <Box>
-        {selectedCategory ? (
-          <Box className="fade show">
-            <TransactionTable rows={transactions} />
-          </Box>
-        ) : (
-          <Box className="fade hide" sx={{ p: 2 }}>
-            <Typography variant="body1">
-              Please select a category from the Spending Breakdown income or expenses table to view the transactions.
-            </Typography>
-          </Box>
-        )}
-      </Box>
+      {selectedCategory ? (
+        <TransactionTable rows={transactions} />
+      ) : (
+        <Typography variant="body2">
+          Select a category in the spending breakdown to list its transactions here.
+        </Typography>
+      )}
     </DashboardBox>
   );
 };
