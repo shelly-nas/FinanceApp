@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
 import { formatCurrency, formatMonth } from '@/scenes/reports/chartTheme';
+import { tokensFor } from '@/theme';
 
 interface Entry {
   name?: string;
@@ -26,6 +27,7 @@ interface Props {
  */
 const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal }) => {
   const { palette } = useTheme();
+  const t = tokensFor(palette.mode);
 
   if (!active || !payload || payload.length === 0) return null;
 
@@ -40,23 +42,23 @@ const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal }) =>
   return (
     <Box
       sx={{
-        backgroundColor: palette.background.light,
-        border: `1px solid ${palette.cosmetics.colorPrimary}`,
-        borderRadius: 1,
-        px: 1.25,
-        py: 1,
-        boxShadow: 3,
-        minWidth: 180,
+        backgroundColor: palette.mode === 'dark' ? t.surface3 : t.surface,
+        border: `1px solid ${palette.divider}`,
+        borderRadius: 2,
+        px: 3,
+        py: 2.5,
+        boxShadow: t.shadow2,
+        minWidth: 200,
       }}
     >
-      <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>
+      <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary', mb: 2 }}>
         {label ? formatMonth(label) : ''}
       </Typography>
 
       {rows.map((entry) => (
         <Box
           key={String(entry.dataKey ?? entry.name)}
-          sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}
         >
           <Box
             sx={{
@@ -67,8 +69,8 @@ const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal }) =>
               flexShrink: 0,
             }}
           />
-          <Typography variant="body3" sx={{ flexGrow: 1 }}>{entry.name}</Typography>
-          <Typography variant="body3" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Typography variant="body2" sx={{ flexGrow: 1 }}>{entry.name}</Typography>
+          <Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}>
             {formatCurrency(entry.value ?? 0)}
           </Typography>
         </Box>
@@ -78,14 +80,14 @@ const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal }) =>
         <Box
           sx={{
             display: 'flex',
-            gap: 2,
-            mt: 0.5,
-            pt: 0.5,
-            borderTop: `1px solid ${palette.cosmetics.colorSecondary}`,
+            gap: 4,
+            mt: 2,
+            pt: 2,
+            borderTop: `1px solid ${palette.divider}`,
           }}
         >
-          <Typography variant="body3" fontWeight="bold" sx={{ flexGrow: 1 }}>Total</Typography>
-          <Typography variant="body3" fontWeight="bold" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary', flexGrow: 1 }}>Total</Typography>
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary', fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(total)}
           </Typography>
         </Box>

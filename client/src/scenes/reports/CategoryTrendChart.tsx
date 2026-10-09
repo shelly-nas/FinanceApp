@@ -9,7 +9,9 @@ import {
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
 import ChartTooltip from '@/scenes/reports/ChartTooltip';
+import ChartLegend from '@/scenes/reports/ChartLegend';
 import {
   formatCurrency, formatCompact, formatMonthShort, monthsBetween,
 } from '@/scenes/reports/chartTheme';
@@ -119,9 +121,9 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, categories })
 
   if (rows.length === 0 || series.length === 0) {
     return (
-      <DashboardBox sx={{ p: 1.5, textAlign: 'left', mb: 1.5 }}>
-        <Typography variant="h3" sx={{ mb: 1 }}>Spending by category</Typography>
-        <Typography variant="body1" sx={{ p: 2 }}>
+      <DashboardBox>
+        <WidgetHeader title="Spending by category" />
+        <Typography variant="body2">
           No categorised spending in this period.
         </Typography>
       </DashboardBox>
@@ -134,48 +136,54 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, categories })
   );
 
   const axisProps = {
-    tick: { fill: palette.text.secondary, fontSize: 11 },
+    tick: { fill: palette.text.secondary, fontSize: 12 },
     tickLine: false,
   };
 
   return (
-    <DashboardBox sx={{ p: 1.5, textAlign: 'left', mb: 1.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-        <Typography variant="h3" sx={{ flexGrow: 1 }}>Spending by category</Typography>
-        {Object.values(labels).includes(OTHER) && (
-          <Chip size="small" variant="outlined" label={`Top ${MAX_SERIES} shown, rest as Other`} />
-        )}
-        <ToggleButtonGroup
-          size="small"
-          exclusive
-          value={form}
-          onChange={(_e, next) => next && setForm(next)}
-        >
-          <ToggleButton value="bar" aria-label="Stacked bars">
-            <BarChartIcon fontSize="small" sx={{ mr: 0.5 }} /> Composition
-          </ToggleButton>
-          <ToggleButton value="line" aria-label="Lines">
-            <ShowChartIcon fontSize="small" sx={{ mr: 0.5 }} /> Trend
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-
-      <Typography variant="body3" sx={{ display: 'block', mb: 1.5 }}>
-        {formatCurrency(periodTotal)} across {rows.length} month{rows.length === 1 ? '' : 's'} ·{' '}
-        {form === 'bar'
-          ? 'what each month consisted of'
-          : 'each category followed across months'}
-      </Typography>
+    <DashboardBox>
+      <WidgetHeader
+        title="Spending by category"
+        subtitle={
+          <>
+            {formatCurrency(periodTotal)} across {rows.length} month{rows.length === 1 ? '' : 's'} ·{' '}
+            {form === 'bar'
+              ? 'what each month consisted of'
+              : 'each category followed across months'}
+          </>
+        }
+        action={
+          <>
+            {Object.values(labels).includes(OTHER) && (
+              <Chip size="small" variant="outlined" label={`Top ${MAX_SERIES} shown, rest as Other`} />
+            )}
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={form}
+              onChange={(_e, next) => next && setForm(next)}
+              aria-label="Chart form"
+            >
+              <ToggleButton value="bar">
+                <BarChartIcon fontSize="small" aria-hidden /> Composition
+              </ToggleButton>
+              <ToggleButton value="line">
+                <ShowChartIcon fontSize="small" aria-hidden /> Trend
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </>
+        }
+      />
 
       <Box sx={{ width: '100%', height: 340 }}>
         <ResponsiveContainer>
           {form === 'bar' ? (
             <BarChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.cosmetics.colorSecondary} />
-              <XAxis dataKey="month" tickFormatter={formatMonthShort} {...axisProps} axisLine={{ stroke: palette.cosmetics.colorSecondary }} />
+              <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.divider} />
+              <XAxis dataKey="month" tickFormatter={formatMonthShort} {...axisProps} axisLine={{ stroke: palette.divider }} />
               <YAxis tickFormatter={formatCompact} {...axisProps} axisLine={false} width={60} />
               <Tooltip content={<ChartTooltip showTotal />} cursor={{ fill: palette.action.hover }} />
-              <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 12, color: palette.text.secondary }} />
+              <Legend content={<ChartLegend />} />
               {series.map((name) => (
                 <Bar
                   key={name}
@@ -183,20 +191,20 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, categories })
                   name={labels[name]}
                   stackId="spend"
                   fill={colors[name] ?? OTHER_COLOR}
-                  // A hairline in the surface colour keeps adjacent segments
+                  // A 2px line in the surface colour keeps adjacent segments
                   // from reading as one block.
-                  stroke={palette.background.light}
-                  strokeWidth={1}
+                  stroke={palette.background.paper}
+                  strokeWidth={2}
                 />
               ))}
             </BarChart>
           ) : (
             <LineChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.cosmetics.colorSecondary} />
-              <XAxis dataKey="month" tickFormatter={formatMonthShort} {...axisProps} axisLine={{ stroke: palette.cosmetics.colorSecondary }} />
+              <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.divider} />
+              <XAxis dataKey="month" tickFormatter={formatMonthShort} {...axisProps} axisLine={{ stroke: palette.divider }} />
               <YAxis tickFormatter={formatCompact} {...axisProps} axisLine={false} width={60} />
               <Tooltip content={<ChartTooltip />} cursor={{ stroke: palette.text.secondary, strokeWidth: 1 }} />
-              <Legend iconType="line" iconSize={12} wrapperStyle={{ fontSize: 12, color: palette.text.secondary }} />
+              <Legend content={<ChartLegend />} />
               {series.map((name) => (
                 <Line
                   key={name}
@@ -209,7 +217,7 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, categories })
                   stroke={colors[name] ?? OTHER_COLOR}
                   strokeWidth={2}
                   dot={{ r: 3, strokeWidth: 0 }}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: palette.background.light }}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: palette.background.paper }}
                 />
               ))}
             </LineChart>

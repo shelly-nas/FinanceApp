@@ -2,7 +2,8 @@
  * Chart palette and formatters.
  *
  * The three account-type colours were validated with the dataviz palette checker
- * against both the light and the dark chart surface: lightness band, chroma
+ * against both the light (#FFFFFF) and the dark (#171B22) card surface of the
+ * shelly-nas theme: lightness band, chroma
  * floor, colour-blind separation of every adjacent pair, and 3:1 contrast against
  * the surface all pass in both modes. One set serves both, so a viewer switching
  * theme sees the same series in the same colour.

@@ -1,8 +1,10 @@
 import React from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, Divider,
+  Box, Typography, TableBody, TableCell, TableHead, TableRow,
 } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
+import CardTable from '@/components/CardTable';
 import { useGetTagSummaryQuery } from '@/api';
 
 const formatCurrency = (value: number) =>
@@ -31,10 +33,10 @@ const TagDetails: React.FC<{ tagId: number }> = ({ tagId }) => {
   );
 
   return (
-    <DashboardBox sx={{ p: 1.5 }}>
-      <Typography variant="h3" gutterBottom>{summary.tag_name}</Typography>
+    <DashboardBox>
+      <WidgetHeader title={summary.tag_name} subtitle="Where the money for this event went" />
 
-      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 1.5 }}>
+      <Box sx={{ display: 'flex', gap: 8, flexWrap: 'wrap', mb: 8 }}>
         <Stat label="Total spent" value={formatCurrency(netSpent)} />
         {budget !== null && (
           <>
@@ -42,6 +44,7 @@ const TagDetails: React.FC<{ tagId: number }> = ({ tagId }) => {
             <Stat
               label={netSpent > budget ? 'Over budget' : 'Left'}
               value={formatCurrency(Math.abs(budget - netSpent))}
+              tone={netSpent > budget ? 'error' : undefined}
             />
           </>
         )}
@@ -56,12 +59,10 @@ const TagDetails: React.FC<{ tagId: number }> = ({ tagId }) => {
         )}
       </Box>
 
-      <Divider sx={{ mb: 1.5 }} />
-
-      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: '1 1 260px' }}>
-          <Typography variant="h3" gutterBottom>By category</Typography>
-          <Table size="small">
+      <Box sx={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <Box sx={{ flex: '1 1 260px', minWidth: 0 }}>
+          <Typography variant="overline" component="h3" sx={{ display: 'block', mb: 2 }}>By category</Typography>
+          <CardTable>
             <TableHead>
               <TableRow>
                 <TableCell>Category</TableCell>
@@ -70,37 +71,39 @@ const TagDetails: React.FC<{ tagId: number }> = ({ tagId }) => {
             </TableHead>
             <TableBody>
               {summary.by_category.map((row) => (
-                <TableRow key={row.category ?? 'uncategorised'}>
+                <TableRow key={row.category ?? 'uncategorised'} hover>
                   <TableCell>{row.category ?? 'Uncategorised'}</TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
                     {formatCurrency(Number(row.total_amount))}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </CardTable>
         </Box>
 
-        <Box sx={{ flex: '1 1 260px' }}>
-          <Typography variant="h3" gutterBottom>Across months</Typography>
+        <Box sx={{ flex: '1 1 260px', minWidth: 0 }}>
+          <Typography variant="overline" component="h3" sx={{ display: 'block', mb: 2 }}>Across months</Typography>
           {summary.by_month.map((row) => {
             const amount = Number(row.total_amount);
             return (
-              <Box key={row.month} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                <Typography variant="body3" sx={{ minWidth: 72 }}>
+              <Box key={row.month} sx={{ display: 'flex', alignItems: 'center', gap: 3, py: 1.5 }}>
+                <Typography variant="body2" sx={{ minWidth: 72 }}>
                   {formatMonth(row.month)}
                 </Typography>
                 <Box
                   sx={{
                     height: 8,
-                    borderRadius: 4,
+                    borderRadius: 999,
                     flexGrow: 0,
                     width: `${(Math.abs(amount) / monthMax) * 100}%`,
                     minWidth: 2,
                     backgroundColor: summary.color ?? 'primary.main',
                   }}
                 />
-                <Typography variant="body3">{formatCurrency(amount)}</Typography>
+                <Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                  {formatCurrency(amount)}
+                </Typography>
               </Box>
             );
           })}
@@ -110,10 +113,16 @@ const TagDetails: React.FC<{ tagId: number }> = ({ tagId }) => {
   );
 };
 
-const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+const Stat: React.FC<{ label: string; value: string; tone?: 'error' }> = ({ label, value, tone }) => (
   <Box>
-    <Typography variant="body3">{label}</Typography>
-    <Typography variant="h2">{value}</Typography>
+    <Typography variant="overline" component="p">{label}</Typography>
+    <Typography
+      variant="h3"
+      component="p"
+      sx={{ mt: 1, fontVariantNumeric: 'tabular-nums', color: tone === 'error' ? 'error.main' : undefined }}
+    >
+      {value}
+    </Typography>
   </Box>
 );
 

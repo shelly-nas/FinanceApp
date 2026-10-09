@@ -1,11 +1,11 @@
-import { IconButton, Tooltip, useTheme } from '@mui/material';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import { Button } from '@mui/material';
+import LightModeIcon from '@mui/icons-material/LightModeOutlined';
+import DarkModeIcon from '@mui/icons-material/DarkModeOutlined';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightnessOutlined';
 import { useColorMode } from '@/theme/ColorModeContext';
 
+/** Cycles system, light and dark; the label says which one is active. */
 const ThemeModeToggle = () => {
-  const { palette } = useTheme();
   const { mode, toggleMode } = useColorMode();
 
   const icon = {
@@ -21,15 +21,16 @@ const ThemeModeToggle = () => {
   }[mode];
 
   return (
-    <Tooltip title={label}>
-      <IconButton
-        onClick={toggleMode}
-        aria-label={`${label} - click to change theme`}
-        sx={{ color: palette.grey[700] }}
-      >
-        {icon}
-      </IconButton>
-    </Tooltip>
+    <Button
+      variant="text"
+      fullWidth
+      startIcon={icon}
+      onClick={toggleMode}
+      aria-label={`${label} - click to change theme`}
+      sx={{ justifyContent: 'flex-start', px: 3, fontWeight: 500 }}
+    >
+      {label}
+    </Button>
   );
 };
 

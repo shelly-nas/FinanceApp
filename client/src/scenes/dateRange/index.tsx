@@ -1,40 +1,45 @@
-// DateFilter.tsx
 import React from 'react';
-import { Divider, Typography, useTheme } from '@mui/material';
-import FlexBetween from '@/components/FlexBetween';
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ArrowButton from '@/components/ArrowButton';
-import DateRangeBox from '@/scenes/dateRange/DateRangeBox';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useDateRange } from '@/scenes/dateRange/DateRangeContext';
 
+/** The dashboard's month, stepped one month at a time. */
 const DateRange: React.FC = () => {
-  const { palette } = useTheme();
-  const { firstDay, lastDay, incrementMonth, decrementMonth } = useDateRange();
+  const { firstDay, incrementMonth, decrementMonth } = useDateRange();
+  const label = firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
   return (
-    <FlexBetween mb="0.25rem" p="0.5rem 0rem">
-      {/* LEFT SIDE */}
-      <FlexBetween gap="0.75rem">
-        <DateRangeBox>
-          <ArrowButton onClick={decrementMonth}>
-            <ArrowLeftIcon sx={{fontSize: 20}} />
-          </ArrowButton>
-          <Divider color={palette.cosmetics.colorPrimary} orientation="vertical" flexItem />
-          <FlexBetween gap="0.75rem" paddingLeft="10px" paddingRight="10px">
-            <CalendarMonthIcon sx={{fontSize: 16}} />
-            <Typography variant="h2">
-              {`${firstDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} TO ${lastDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
-            </Typography>
-          </FlexBetween>
-          <Divider color={palette.cosmetics.colorPrimary} orientation="vertical" flexItem/>
-          <ArrowButton onClick={incrementMonth}>
-            <ArrowRightIcon sx={{fontSize: 20}} />
-          </ArrowButton>
-        </DateRangeBox>
-      </FlexBetween>
-    </FlexBetween>
+    <Box
+      role="group"
+      aria-label="Month"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        height: 40,
+        border: 1,
+        borderColor: 'divider',
+        borderRadius: 2,
+        bgcolor: 'background.paper',
+      }}
+    >
+      <Tooltip title="Previous month">
+        <IconButton size="small" onClick={decrementMonth} aria-label="Previous month" sx={{ mx: 0.5 }}>
+          <ChevronLeftIcon />
+        </IconButton>
+      </Tooltip>
+      <Typography
+        aria-live="polite"
+        sx={{ minWidth: 128, textAlign: 'center', fontSize: 14, fontWeight: 600, color: 'text.primary' }}
+      >
+        {label}
+      </Typography>
+      <Tooltip title="Next month">
+        <IconButton size="small" onClick={incrementMonth} aria-label="Next month" sx={{ mx: 0.5 }}>
+          <ChevronRightIcon />
+        </IconButton>
+      </Tooltip>
+    </Box>
   );
 };
 

@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import {
-  Typography, Divider, Box, List, ListItem, ListItemText, Collapse,
-  useTheme, ListItemButton, IconButton, Tooltip,
-} from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { IconButton, Tooltip, Typography } from '@mui/material';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityIcon from '@mui/icons-material/VisibilityOutlined';
 import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
+import { AmountGroup, AmountGroups, TotalRow } from '@/components/AmountList';
 import { AccountBalance, useGetAccountOverviewQuery } from '@/api';
 import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
+import '@/styles.css';
 
 const groupByAccountType = (accounts: AccountBalance[]) =>
   accounts.reduce((acc, account) => {
@@ -23,29 +21,23 @@ const formatCurrency = (value: number) =>
 /**
  * Balances at the end of the selected month.
  *
- * Unlike the banner, this follows the month filter: with August selected it
- * answers "where did this stand at the end of August", so it lines up with the
- * income, expenses and breakdown beside it. The banner above stays on today, as
- * the fixed reference.
+ * This follows the month filter: with August selected it answers "where did
+ * this stand at the end of August", so it lines up with the income, expenses
+ * and breakdown beside it.
  */
 const AccountsOverview: React.FC = () => {
-  const { palette, typography } = useTheme();
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [visible, setVisible] = useState(false);
   const { lastDay } = useDateRange();
 
   const asOf = formatDate(lastDay);
   const { data: results } = useGetAccountOverviewQuery({ asOf });
-  const categories = results ?? [];
-  const groupedCategories = groupByAccountType(categories);
+  const accounts = results ?? [];
+  const grouped = groupByAccountType(accounts);
 
-  const visibilityStyle = visible ? '' : 'blur-text';
+  const blur = visible ? undefined : 'blur-text';
 
-  const handleToggle = (category: string) => {
-    setOpen((prev) => ({ ...prev, [category]: !prev[category] }));
-  };
-
-  const netWorth = categories.reduce((total, c) => total + parseFloat(c.current_balance), 0);
+  const netWorth = accounts.reduce((total, c) => total + parseFloat(c.current_balance), 0);
 
   // A month that has not finished yet has no meaningful "end of month" balance,
   // so say what the figure actually is.
@@ -55,62 +47,49 @@ const AccountsOverview: React.FC = () => {
     : lastDay.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <DashboardBox sx={{ mb: 1.5 }}>
+    <DashboardBox>
       <WidgetHeader
-        title="Account Overview"
-        subtitle={`as of ${asOfLabel}`}
+        title="Accounts"
+        subtitle={`Balances as of ${asOfLabel}`}
         action={
           <Tooltip title={visible ? 'Hide amounts' : 'Show amounts'}>
-            <IconButton size="small" onClick={() => setVisible(!visible)}>
-              {visible
-                ? <VisibilityOffIcon sx={{ color: typography.h3.color, fontSize: 18 }} />
-                : <VisibilityIcon sx={{ color: typography.h3.color, fontSize: 18 }} />}
+            <IconButton
+              size="small"
+              onClick={() => setVisible(!visible)}
+              aria-label={visible ? 'Hide amounts' : 'Show amounts'}
+              aria-pressed={visible}
+            >
+              {visible ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
         }
       />
-      <List sx={{ ml: -1.5 }}>
-        {Object.keys(groupedCategories).map((categoryType) => (
-          <div key={categoryType}>
-            <ListItemButton onClick={() => handleToggle(categoryType)} sx={{ py: 0.5 }}>
-              {open[categoryType] ? <ExpandLess /> : <ExpandMore />}
-              <ListItemText
-                primary={`${categoryType} (${groupedCategories[categoryType].length})`}
-                primaryTypographyProps={{ variant: 'body2' }}
-              />
-              <Typography variant="body2" className={visibilityStyle}>
-                {formatCurrency(
-                  groupedCategories[categoryType].reduce((sum, item) => sum + parseFloat(item.current_balance), 0),
-                )}
-              </Typography>
-            </ListItemButton>
-            <Collapse in={open[categoryType]} timeout="auto" unmountOnExit>
-              <List disablePadding>
-                {groupedCategories[categoryType].map((item) => (
-                  <ListItem key={item.details ?? item.account_name} sx={{ pl: 3, py: 0 }}>
-                    <ListItemText
-                      primary={'└ ' + item.account_name}
-                      primaryTypographyProps={{ variant: 'body3' }}
-                    />
-                    <Typography variant="body3" className={visibilityStyle}>
-                      {formatCurrency(parseFloat(item.current_balance))}
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
-          </div>
+      <AmountGroups>
+        {Object.keys(grouped).map((type) => (
+          <AmountGroup
+            key={type}
+            label={`${type} (${grouped[type].length})`}
+            amount={formatCurrency(grouped[type].reduce((sum, item) => sum + parseFloat(item.current_balance), 0))}
+            lines={grouped[type].map((item) => ({
+              key: item.details ?? item.account_name,
+              label: item.account_name,
+              amount: formatCurrency(parseFloat(item.current_balance)),
+            }))}
+            open={Boolean(open[type])}
+            onToggle={() => setOpen((prev) => ({ ...prev, [type]: !prev[type] }))}
+            amountClassName={blur}
+          />
         ))}
-      </List>
-      <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1, mb: 1 }} />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mr: 2, ml: 1, mt: 1 }}>
-        <Typography variant="body1" fontWeight="bold">
-          Estd. Net Worth
-        </Typography>
-        <Typography variant="body1" className={visibilityStyle} fontWeight="bold">
+      </AmountGroups>
+      <TotalRow label="Estimated net worth" first>
+        <Typography
+          component="span"
+          className={blur}
+          sx={{ fontSize: 16, fontWeight: 700, color: 'text.primary', fontVariantNumeric: 'tabular-nums' }}
+        >
           {formatCurrency(netWorth)}
         </Typography>
-      </Box>
+      </TotalRow>
     </DashboardBox>
   );
 };

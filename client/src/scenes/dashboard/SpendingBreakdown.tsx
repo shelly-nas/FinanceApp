@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Typography, Divider, useTheme } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import SortableSpendingTable from './SortableSpendingTable';
 import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
@@ -34,7 +35,6 @@ function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: 
 }
 
 const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect }) => {
-  const { palette } = useTheme();
   const { firstDay, lastDay } = useDateRange();
 
   const { data: results } = useGetCategorySumsQuery({
@@ -54,6 +54,9 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
     return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
   };
 
+  // Both bars share one scale, so the longer side is visibly longer.
+  const scale = Math.max(totalIncome, totalExpenses) || 1;
+
   const handleRowClick = (category: string, table: 'income' | 'expenses') => {
     setSelectedCategory(selectedCategory === category ? null : category);
     setSelectedTable(table);
@@ -61,65 +64,58 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
   };
 
   return (
-    <DashboardBox sx={{ mb: 1.5 }}>
-      <Typography variant="h3">Spending Breakdown</Typography>
-      <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 1, mb: 1 }} />
-
-      {/* INCOME PROGRESSBAR */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 1, mt: 2 }}>
-        <Typography variant="body1" fontWeight="bold">
-          INCOME
-        </Typography>
-        <Typography variant="credit" fontWeight="bold" sx={{ mr: 1 }}>
-          {formatCurrency(totalIncome)}
-        </Typography>
-      </Box>
-      <MultiColorProgress
-        segments={result.income.map(item => ({
-          value: (item.total_amount / (totalIncome > totalExpenses ? totalIncome : totalExpenses)) * 100,
-          color: item.color,
-          name: item.category,
-        }))}
-        height={18}
+    <DashboardBox>
+      <WidgetHeader
+        title="Spending breakdown"
+        subtitle="Select a category to see its transactions below"
       />
 
-      {/* EXPENSES PROGRESSBAR */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 1, mt: 2 }}>
-        <Typography variant="body1" fontWeight="bold">
-          EXPENSES
-        </Typography>
-        <Typography variant="body2" fontWeight="bold" sx={{ mr: 1 }}>
-          {formatCurrency(totalExpenses)}
-        </Typography>
-      </Box>
-      <MultiColorProgress
-        segments={result.expenses.map(item => ({
-          value: (item.total_amount / (totalIncome > totalExpenses ? totalIncome : totalExpenses)) * 100,
-          color: item.color,
-          name: item.category,
-        }))}
-        height={18}
-      />
+      <Stack spacing={4} useFlexGap sx={{ mb: 6 }}>
+        <Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 2 }}>
+            <Typography variant="overline">Income</Typography>
+            <Typography variant="credit">+{formatCurrency(totalIncome)}</Typography>
+          </Box>
+          <MultiColorProgress
+            segments={result.income.map(item => ({
+              value: (item.total_amount / scale) * 100,
+              color: item.color,
+              name: item.category,
+            }))}
+          />
+        </Box>
 
-      <Divider color={palette.cosmetics.colorSecondary} sx={{ mt: 2, mb: 1 }} />
+        <Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 2 }}>
+            <Typography variant="overline">Expenses</Typography>
+            <Typography variant="debit">−{formatCurrency(totalExpenses)}</Typography>
+          </Box>
+          <MultiColorProgress
+            segments={result.expenses.map(item => ({
+              value: (item.total_amount / scale) * 100,
+              color: item.color,
+              name: item.category,
+            }))}
+          />
+        </Box>
+      </Stack>
 
-      {/* INCOME TABLE */}
-      <SortableSpendingTable
-        title="INCOME"
-        items={result.income}
-        totalAmount={totalIncome}
-        onRowClick={(category) => handleRowClick(category, 'income')}
-        selectedCategory={selectedTable === 'income' ? selectedCategory : null}
-      />
-
-      {/* EXPENSES TABLE */}
-      <SortableSpendingTable
-        title="EXPENSES"
-        items={result.expenses}
-        totalAmount={totalExpenses}
-        onRowClick={(category) => handleRowClick(category, 'expenses')}
-        selectedCategory={selectedTable === 'expenses' ? selectedCategory : null}
-      />
+      <Stack spacing={6} useFlexGap>
+        <SortableSpendingTable
+          title="Income"
+          items={result.income}
+          totalAmount={totalIncome}
+          onRowClick={(category) => handleRowClick(category, 'income')}
+          selectedCategory={selectedTable === 'income' ? selectedCategory : null}
+        />
+        <SortableSpendingTable
+          title="Expenses"
+          items={result.expenses}
+          totalAmount={totalExpenses}
+          onRowClick={(category) => handleRowClick(category, 'expenses')}
+          selectedCategory={selectedTable === 'expenses' ? selectedCategory : null}
+        />
+      </Stack>
     </DashboardBox>
   );
 };

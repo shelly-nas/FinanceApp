@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, Typography, ToggleButton, ToggleButtonGroup, TextField, MenuItem,
-  Select, OutlinedInput, FormControl, InputLabel, Chip,
+  Box, ToggleButton, ToggleButtonGroup, TextField, MenuItem,
+  Select, OutlinedInput, FormControl, InputLabel, Chip, Stack,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import DashboardBox from '@/components/DashboardBox';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import PageHeader from '@/components/PageHeader';
 import NetWorthChart from '@/scenes/reports/NetWorthChart';
 import CategoryTrendChart from '@/scenes/reports/CategoryTrendChart';
 import { useGetCategoryListQuery } from '@/api';
@@ -67,90 +68,88 @@ const Reports: React.FC = () => {
   const endsThisMonth = range.endDate.slice(0, 7) === toIso(new Date()).slice(0, 7);
 
   return (
-    <Box>
-      <DashboardBox sx={{ p: 1.5, mb: 1.5, textAlign: 'left' }}>
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography variant="h3" sx={{ mr: 1 }}>Reports</Typography>
+    <>
+      <PageHeader title="Reports" subtitle="How things developed over a period, rather than what one month did" />
 
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={preset}
-            onChange={(_e, value) => value && applyPreset(value)}
+      {/* Filters in one row above the charts; both charts follow them. */}
+      <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-end', flexWrap: 'wrap', mb: 6 }}>
+        <ToggleButtonGroup
+          exclusive
+          value={preset}
+          onChange={(_e, value) => value && applyPreset(value)}
+          aria-label="Period"
+        >
+          {PRESETS.map((option) => (
+            <ToggleButton key={option.months} value={String(option.months)}>
+              {option.label}
+            </ToggleButton>
+          ))}
+          <ToggleButton value="ytd">This year</ToggleButton>
+        </ToggleButtonGroup>
+
+        <TextField
+          type="date"
+          label="From"
+          value={range.startDate}
+          onChange={(e) => {
+            setPreset('custom');
+            setRange((prev) => ({ ...prev, startDate: e.target.value }));
+          }}
+          sx={{ minWidth: 150 }}
+        />
+        <TextField
+          type="date"
+          label="To"
+          value={range.endDate}
+          onChange={(e) => {
+            setPreset('custom');
+            setRange((prev) => ({ ...prev, endDate: e.target.value }));
+          }}
+          sx={{ minWidth: 150 }}
+        />
+
+        <FormControl sx={{ minWidth: 180 }}>
+          <InputLabel id="report-category-filter">Categories</InputLabel>
+          <Select
+            multiple
+            labelId="report-category-filter"
+            input={<OutlinedInput />}
+            displayEmpty
+            value={selectedCategories}
+            onChange={(e: SelectChangeEvent<string[]>) =>
+              setSelectedCategories(
+                typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value,
+              )
+            }
+            renderValue={(selected) =>
+              selected.length === 0 ? 'All' : `${selected.length} selected`
+            }
           >
-            {PRESETS.map((option) => (
-              <ToggleButton key={option.months} value={String(option.months)}>
-                {option.label}
-              </ToggleButton>
+            {categories.map((name) => (
+              <MenuItem key={name} value={name}>{name}</MenuItem>
             ))}
-            <ToggleButton value="ytd">This year</ToggleButton>
-          </ToggleButtonGroup>
+          </Select>
+        </FormControl>
 
-          <TextField
-            size="small"
-            type="date"
-            label="From"
-            InputLabelProps={{ shrink: true }}
-            value={range.startDate}
-            onChange={(e) => {
-              setPreset('custom');
-              setRange((prev) => ({ ...prev, startDate: e.target.value }));
-            }}
-            sx={{ minWidth: 150 }}
+        {endsThisMonth && (
+          <Chip
+            variant="outlined"
+            icon={<InfoIcon />}
+            label="This month is still running"
+            sx={{ ml: 'auto', height: 40, borderRadius: 2, px: 1 }}
           />
-          <TextField
-            size="small"
-            type="date"
-            label="To"
-            InputLabelProps={{ shrink: true }}
-            value={range.endDate}
-            onChange={(e) => {
-              setPreset('custom');
-              setRange((prev) => ({ ...prev, endDate: e.target.value }));
-            }}
-            sx={{ minWidth: 150 }}
-          />
+        )}
+      </Box>
 
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel id="report-category-filter">Categories</InputLabel>
-            <Select
-              multiple
-              labelId="report-category-filter"
-              input={<OutlinedInput label="Categories" />}
-              value={selectedCategories}
-              onChange={(e: SelectChangeEvent<string[]>) =>
-                setSelectedCategories(
-                  typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value,
-                )
-              }
-              renderValue={(selected) =>
-                selected.length === 0 ? 'All' : `${selected.length} selected`
-              }
-            >
-              {categories.map((name) => (
-                <MenuItem key={name} value={name}>{name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {endsThisMonth && (
-            <Chip
-              size="small"
-              variant="outlined"
-              label="This month is still running"
-              sx={{ ml: 'auto' }}
-            />
-          )}
-        </Box>
-      </DashboardBox>
-
-      <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
-      <CategoryTrendChart
-        startDate={range.startDate}
-        endDate={range.endDate}
-        categories={selectedCategories.length > 0 ? selectedCategories : undefined}
-      />
-    </Box>
+      <Stack spacing={6} useFlexGap>
+        <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
+        <CategoryTrendChart
+          startDate={range.startDate}
+          endDate={range.endDate}
+          categories={selectedCategories.length > 0 ? selectedCategories : undefined}
+        />
+      </Stack>
+    </>
   );
 };
 

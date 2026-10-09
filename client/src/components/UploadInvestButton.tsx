@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Button, Typography, TextField, Modal, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, CircularProgress, MenuItem, FormControl, InputLabel, Select, SelectChangeEvent, IconButton, InputAdornment } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import LineAxisIcon from '@mui/icons-material/LineAxis';
+import {
+  Button, Typography, TextField, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Box, CircularProgress, MenuItem, FormControl, InputLabel, Select,
+  SelectChangeEvent, IconButton, InputAdornment, Dialog, DialogTitle, DialogContent,
+  DialogActions, Alert, Tooltip,
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
-import DashboardBox from './DashboardBox';
 import { useGetInvestmentAccountsQuery, useUploadInvestmentsMutation } from '@/api';
 
 export interface Investment {
@@ -15,20 +18,15 @@ export interface Investment {
 }
 
 interface UploadInvestButtonProps {
-  /** Opened from the header's action menu rather than by its own button. */
-  openExternally?: boolean;
-  onCloseExternally?: () => void;
+  /** Opened by the page headers' investments action. */
+  open: boolean;
+  onClose: () => void;
 }
 
-const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
-  openExternally,
-  onCloseExternally,
-}) => {
-  const { palette } = useTheme();
-  const [ownOpen, setOwnOpen] = useState(false);
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
 
-  const isControlled = openExternally !== undefined;
-  const open = isControlled ? Boolean(openExternally) : ownOpen;
+const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({ open, onClose }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [dateStr, setDateStr] = useState('');
   const [nameDescription, setNameDescription] = useState('');
@@ -37,22 +35,15 @@ const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [, setPopupActiveDate] = useState<string | null>(null);
 
   const { data: results } = useGetInvestmentAccountsQuery();
   const accounts = results || [];
   const [postUploadInvestments] = useUploadInvestmentsMutation();
 
-  const handleOpen = () => {
-    setOwnOpen(true);
-    setPopupActiveDate(new Date().toISOString().split('T')[0]); // Store the current date when the popup is opened
-  };
-
   const handleClose = () => {
-    setOwnOpen(false);
-    setError(null); // Clear error when modal is closed
-    setSuccess(null); // Clear success message when modal is closed
-    onCloseExternally?.();
+    setError(null);
+    setSuccess(null);
+    onClose();
   };
 
   const handleAddInvestmentToList = () => {
@@ -80,11 +71,11 @@ const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
       const result = await postUploadInvestments(investments).unwrap();
 
       if (result) {
-        setSuccess('Investments uploaded successfully');
+        setSuccess('Balances saved');
         setInvestments([]); // Clear the list of investments
         setTimeout(() => {
           handleClose();
-        }, 5000); // Close the popup after 5 seconds
+        }, 2400);
       } else {
         setError('Error uploading investments');
       }
@@ -95,60 +86,49 @@ const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
     }
   };
 
+  const canAdd = Boolean(account && dateStr && balance !== '');
+
   return (
-    <>
-      {!isControlled && (
-        <Button
-          sx={{
-            width: '100%',
-            color: palette.secondary[500],
-            '&:hover': {
-              backgroundColor: palette.action.hover
-            }
-          }}
-          onClick={handleOpen}
-        >
-          <LineAxisIcon sx={{ fontSize: 40, color: palette.secondary[400] }} />
-        </Button>
-      )}
+    <Dialog open={open} onClose={loading ? undefined : handleClose} fullWidth maxWidth="sm">
+      <DialogTitle>Update investments</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2">
+          Add the balance of each investment account on a date, then save them
+          together.
+        </Typography>
 
-      <Modal open={open} onClose={handleClose}>
-        <DashboardBox sx={{ ...style, width: 300 }}>
-          <Typography variant="h3">Add Investment</Typography>
-
-          <TextField
-            label="Date"
-            type="date"
-            value={dateStr}
-            onChange={(e) => setDateStr(e.target.value)}
-            fullWidth
-            sx={{ mt: 2 }}
-            InputLabelProps={{ shrink: true }}
-            inputProps={{ pattern: "\\d{4}-\\d{2}-\\d{2}" }}
-          />
-
-          {accounts.length === 0 ? (
-            // Investment accounts appear in no bank export, so unlike checking
-            // and savings accounts they cannot be discovered from an import -
-            // there is nothing to pick until one is created by hand.
-            <Box sx={{ mt: 2, textAlign: 'left' }}>
-              <Typography variant="body3" sx={{ display: 'block', mb: 1 }}>
-                No investment accounts yet. Add one first — they never appear in a
-                bank export, so they have to be created by hand.
-              </Typography>
-              <Button size="small" component={Link} to="/accounts" onClick={handleClose}>
-                Add an investment account
+        {accounts.length === 0 ? (
+          // Investment accounts appear in no bank export, so unlike checking
+          // and savings accounts they cannot be discovered from an import -
+          // there is nothing to pick until one is created by hand.
+          <Alert
+            severity="info"
+            action={
+              <Button size="small" variant="outlined" component={Link} to="/accounts" onClick={handleClose}>
+                Add account
               </Button>
-            </Box>
-          ) : (
-            <FormControl fullWidth sx={{ mt: 2 }}>
+            }
+          >
+            No investment accounts yet. They never appear in a bank export, so
+            they have to be created by hand.
+          </Alert>
+        ) : (
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 4 }}>
+            <TextField
+              label="Date"
+              type="date"
+              value={dateStr}
+              onChange={(e) => setDateStr(e.target.value)}
+              fullWidth
+              inputProps={{ pattern: "\\d{4}-\\d{2}-\\d{2}" }}
+            />
+
+            <FormControl fullWidth>
               <InputLabel id="account-select-label">Account</InputLabel>
               <Select
                 labelId="account-select-label"
                 value={account}
                 onChange={(e: SelectChangeEvent) => setAccount(e.target.value as string)}
-                label="Account"
-                sx={{ textAlign: 'left' }}
               >
                 {accounts.map((acc: any) => (
                   <MenuItem key={acc.details} value={acc.details}>
@@ -157,74 +137,48 @@ const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
                 ))}
               </Select>
             </FormControl>
-          )}
 
-          <TextField
-            label="Name/Description"
-            value={nameDescription}
-            onChange={(e) => setNameDescription(e.target.value)}
-            placeholder="<account> saldo eind januari"
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+            <TextField
+              label="Description (optional)"
+              value={nameDescription}
+              onChange={(e) => setNameDescription(e.target.value)}
+              placeholder="Saldo eind januari"
+              fullWidth
+            />
 
-          <TextField
-            label="Balance (€)"
-            type="number"
-            value={balance}
-            onChange={(e) => setBalance(e.target.value)}
-            fullWidth
-            sx={{ mt: 2 }}
-            InputProps={{
-              startAdornment: <InputAdornment position="start">€</InputAdornment>,
-            }}
-          />
-
-          <Button
-            variant="contained"
-            sx={{
-              mt: 2,
-              width: '100%',
-              backgroundColor: palette.secondary.main,
-              color: '#fff',
-              '&:hover': {
-                backgroundColor: palette.secondary.dark
-              }
-            }}
-            onClick={handleAddInvestmentToList}
-            disabled={loading || !account || !dateStr || balance === ''}
-          >
-            Add to List
-          </Button>
-
-          {loading && (
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                zIndex: 9999,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+            <TextField
+              label="Balance"
+              type="number"
+              value={balance}
+              onChange={(e) => setBalance(e.target.value)}
+              fullWidth
+              InputProps={{
+                startAdornment: <InputAdornment position="start">€</InputAdornment>,
               }}
-            >
-              <CircularProgress sx={{ color: palette.secondary[400] }} />
-            </Box>
-          )}
+            />
+          </Box>
+        )}
 
-          <TableContainer component={Paper} sx={{ mt: 4 }}>
-            <Table>
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleAddInvestmentToList}
+          disabled={loading || !canAdd}
+          sx={{ alignSelf: 'flex-start' }}
+        >
+          Add to list
+        </Button>
+
+        {investments.length > 0 && (
+          <TableContainer sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}>
+            <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell>Date</TableCell>
                   <TableCell>Account</TableCell>
-                  <TableCell>Name/Description</TableCell>
-                  <TableCell>Balance</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell align="right">Balance</TableCell>
+                  <TableCell align="right"><span className="visually-hidden">Remove</span></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -232,61 +186,44 @@ const UploadInvestButton: React.FC<UploadInvestButtonProps> = ({
                   <TableRow key={index}>
                     <TableCell>{investment.date_str}</TableCell>
                     <TableCell>{investment.account}</TableCell>
-                    <TableCell>{investment.name_description}</TableCell>
-                    <TableCell>{investment.balance}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={() => handleRemoveInvestment(index)}>
-                        <DeleteIcon />
-                      </IconButton>
+                    <TableCell>{investment.name_description || '—'}</TableCell>
+                    <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {formatCurrency(investment.balance)}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Remove from list">
+                        <IconButton size="small" aria-label="Remove from list" onClick={() => handleRemoveInvestment(index)}>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+        )}
 
-          <Button
-            variant="contained"
-            sx={{
-              mt: 2,
-              width: '100%',
-              backgroundColor: palette.secondary.main,
-              color: '#fff',
-              '&:hover': {
-                backgroundColor: palette.secondary.dark
-              }
-            }}
-            onClick={handleSubmitInvestments}
-            disabled={loading || investments.length === 0}
-          >
-            Submit Investments
-          </Button>
-
-          {!loading && error && (
-            <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-              {error}
-            </Typography>
-          )}
-
-          {!loading && success && (
-            <Typography variant="body2" color="success" sx={{ mt: 2 }}>
-              {success}
-            </Typography>
-          )}
-
-        </DashboardBox>
-      </Modal>
-    </>
+        {!loading && error && <Alert severity="error">{error}</Alert>}
+        {!loading && success && <Alert severity="success">{success}</Alert>}
+      </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={handleClose} disabled={loading}>Cancel</Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmitInvestments}
+          disabled={loading || investments.length === 0}
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
+        >
+          {loading
+            ? 'Saving…'
+            : investments.length === 0
+              ? 'Save balances'
+              : `Save ${investments.length} balance${investments.length === 1 ? '' : 's'}`}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
-};
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  boxShadow: 24,
-  p: 1.5
 };
 
 export default UploadInvestButton;

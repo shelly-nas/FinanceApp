@@ -1,8 +1,8 @@
-import React from 'react';
-import { Typography, Divider, Box, List, ListItem, ListItemText, Collapse, useTheme, ListItemButton } from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Typography } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
+import { AmountGroup, AmountGroups, TotalRow } from '@/components/AmountList';
 import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
 import { useGetIncomeExpensesSumQuery } from '@/api';
 
@@ -38,7 +38,6 @@ function splitIncomeExpense(items: unknown[]): { incomeItems: ExchangeType[] , e
 }
 
 const PeriodSummary: React.FC<Props> = () => {
-  const { palette } = useTheme();
   const [openIncome, setOpenIncome] = useState(true);
   const [openExpenses, setOpenExpenses] = useState(true);
   const { firstDay, lastDay } = useDateRange();
@@ -72,89 +71,42 @@ const PeriodSummary: React.FC<Props> = () => {
   };
 
   return (
-    <DashboardBox sx={{ mb: 1.5 }}>
-      <Typography mb={palette.cosmetics.spacing} variant="h3">Period Summary</Typography>
-      <Divider color={palette.cosmetics.colorSecondary} sx={{mt: 1, mb:1 }} />
-      <List sx={{ml: -1.5}}>
-        <ListItemButton onClick={handleIncomeToggle} sx={{py: 0.5 }}>
-          {openIncome ? <ExpandLess /> : <ExpandMore />}
-          <ListItemText 
-            primary="Total Income Earned" 
-            primaryTypographyProps={{ variant: 'body2' }}
-          />
-          <Typography variant="body2">
-            {formatCurrency(totalIncome)}
-          </Typography>
-        </ListItemButton>
-        <Collapse in={openIncome} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {result.incomeItems.map((item) => (
-              <ListItem key={item.name} sx={{ pl: 3, py: 0 }}>
-                <ListItemText 
-                  primary={"└ "+item.name} 
-                  primaryTypographyProps={{ variant: 'body3' }}
-                />
-                {/* {item.info && (
-                  <Tooltip title={item.info}>
-                    <IconButton size="small">
-                      <Info fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )} */}
-                <Typography variant="body3">{formatCurrency(item.amount)}</Typography>
-              </ListItem>
-            ))}
-          </List>
-        </Collapse>
-
-        <ListItemButton onClick={handleExpensesToggle} sx={{py: 0.5 }}>
-          {openExpenses ? <ExpandLess /> : <ExpandMore />}
-          <ListItemText 
-            primary="Total Expenses" 
-            primaryTypographyProps={{ variant: 'body2' }}
-          />
-          <Typography variant="body2">
-            {formatCurrency(totalExpenses)}
-          </Typography>
-        </ListItemButton>
-        <Collapse in={openExpenses} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {result.expenseItems.map((item) => (
-              <ListItem key={item.name} sx={{ pl: 3, py: 0 }}>
-                <ListItemText 
-                  primary={"└ "+item.name} 
-                  primaryTypographyProps={{ variant: 'body3' }}
-                />
-                {/* {item.info && (
-                  <Tooltip title={item.info}>
-                    <IconButton size="small">
-                      <Info fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )} */}
-                <Typography variant="body3">{formatCurrency(item.amount)}</Typography>
-              </ListItem>
-            ))}
-          </List>
-        </Collapse>
-      </List>
-      <Divider color={palette.cosmetics.colorSecondary} sx={{mt: 1, mb:1 }} />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mr:2, ml:1, mt:1 }}>
-        <Typography variant="body1" fontWeight="bold">
-          Net Income
+    <DashboardBox>
+      <WidgetHeader title="Period summary" subtitle="Income and expenses this month" />
+      <AmountGroups>
+        <AmountGroup
+          label="Income"
+          amount={formatCurrency(totalIncome)}
+          lines={result.incomeItems.map((item) => ({
+            key: item.name,
+            label: item.name,
+            amount: formatCurrency(item.amount),
+          }))}
+          open={openIncome}
+          onToggle={handleIncomeToggle}
+        />
+        <AmountGroup
+          label="Expenses"
+          amount={formatCurrency(totalExpenses)}
+          lines={result.expenseItems.map((item) => ({
+            key: item.name,
+            label: item.name,
+            amount: formatCurrency(item.amount),
+          }))}
+          open={openExpenses}
+          onToggle={handleExpensesToggle}
+        />
+      </AmountGroups>
+      <TotalRow label="Net income" first>
+        <Typography variant={netIncome < 0 ? 'debit' : 'credit'}>
+          {netIncome > 0 ? '+' : ''}{formatCurrency(netIncome)}
         </Typography>
-        <Typography variant={netIncome < 0 ? "debit" : "credit"} fontWeight="bold">
-          {formatCurrency(netIncome)}
-        </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mr:2, ml:1, mt:1 }}>
-        <Typography variant="body1" fontWeight="bold">
-          Current Savings Rate
-        </Typography>
-        <Typography variant={currentSavingsRate < 0 ? "debit" : "credit"} fontWeight="bold">
+      </TotalRow>
+      <TotalRow label="Savings rate">
+        <Typography variant={currentSavingsRate < 0 ? 'debit' : 'credit'}>
           {formatPercentage(currentSavingsRate)}
         </Typography>
-      </Box>
+      </TotalRow>
     </DashboardBox>
   );
 };

@@ -1,10 +1,11 @@
 import React from 'react';
 import {
-  Box, Typography, Table, TableBody, TableCell, TableHead, TableRow,
-  Button, Chip, Tooltip, useTheme,
+  Typography, TableBody, TableCell, TableHead, TableRow,
+  Button, Chip, Tooltip,
 } from '@mui/material';
-import CallMadeIcon from '@mui/icons-material/CallMade';
 import DashboardBox from '@/components/DashboardBox';
+import WidgetHeader from '@/components/WidgetHeader';
+import CardTable from '@/components/CardTable';
 import {
   OneSidedTransfer,
   useGetOneSidedTransfersQuery,
@@ -33,7 +34,6 @@ interface Props {
  * and counted naively the monthly deposit is the largest expense of the month.
  */
 const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
-  const { palette } = useTheme();
   const { data: transfers } = useGetOneSidedTransfersQuery(
     transactionIds ? { ids: transactionIds } : {},
   );
@@ -44,21 +44,14 @@ const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
   const label = (name: string | null, details: string | null) => name ?? details ?? 'Unknown';
 
   return (
-    <DashboardBox sx={{ mb: 1.5, p: 1.5, textAlign: 'left' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <CallMadeIcon sx={{ color: palette.secondary[400] }} />
-        <Typography variant="h3" sx={{ flexGrow: 1 }}>
-          Moved between your own accounts
-        </Typography>
-        <Chip size="small" label={`${transfers.length} found`} />
-      </Box>
-      <Typography variant="body3" sx={{ display: 'block', mb: 1 }}>
-        The other account is one of yours, so this is money moved rather than
-        spent. It is kept out of your income and expenses, and still counts in the
-        balances. Put one back if it was a real payment.
-      </Typography>
+    <DashboardBox>
+      <WidgetHeader
+        title="Moved between your own accounts"
+        subtitle="The other account is one of yours, so this is money moved rather than spent. It is kept out of your income and expenses, and still counts in the balances. Put one back if it was a real payment."
+        action={<Chip size="small" label={`${transfers.length} found`} />}
+      />
 
-      <Table size="small">
+      <CardTable>
         <TableHead>
           <TableRow>
             <TableCell>Date</TableCell>
@@ -72,8 +65,8 @@ const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
           {transfers.map((transfer: OneSidedTransfer) => (
             <TableRow key={transfer.id} hover>
               <TableCell>
-                <Typography variant="body2">{transfer.date_str?.slice(0, 10)}</Typography>
-                <Typography variant="body3">{transfer.name_description ?? '—'}</Typography>
+                <Typography sx={{ fontSize: 14, color: 'text.primary' }}>{transfer.date_str?.slice(0, 10)}</Typography>
+                <Typography variant="body2">{transfer.name_description ?? '—'}</Typography>
               </TableCell>
               <TableCell>
                 <Typography variant="body2">
@@ -94,7 +87,7 @@ const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
               </TableCell>
               <TableCell align="right">
                 <Tooltip title="Count this as ordinary spending again">
-                  <Button size="small" color="inherit" onClick={() => unmarkInternal(transfer.id)}>
+                  <Button size="small" variant="outlined" onClick={() => unmarkInternal(transfer.id)}>
                     Not a transfer
                   </Button>
                 </Tooltip>
@@ -102,7 +95,7 @@ const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </CardTable>
     </DashboardBox>
   );
 };

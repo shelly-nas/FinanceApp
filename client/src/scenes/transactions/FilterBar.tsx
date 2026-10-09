@@ -6,6 +6,7 @@ import {
 import type { SelectChangeEvent } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import CheckIcon from '@mui/icons-material/Check';
 import { SearchFilters, TransactionAccount, Tag } from '@/api';
 
 interface Props {
@@ -30,17 +31,17 @@ const FilterBar: React.FC<Props> = ({
   const multiValue = (value: unknown) => (typeof value === 'string' ? value.split(',') : (value as string[]));
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 1.5 }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'flex-end', mb: 6 }}>
       <TextField
-        size="small"
-        placeholder="Search description, counterparty, account"
+        label="Search"
+        placeholder="Description, counterparty or account"
         value={filters.query ?? ''}
         onChange={(e) => onChange({ query: e.target.value })}
-        sx={{ minWidth: 280, flexGrow: 1 }}
+        sx={{ minWidth: 280, flexGrow: 1, flexBasis: '100%' }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SearchIcon fontSize="small" />
+              <SearchIcon fontSize="small" aria-hidden />
             </InputAdornment>
           ),
           endAdornment: filters.query ? (
@@ -53,15 +54,16 @@ const FilterBar: React.FC<Props> = ({
         }}
       />
 
-      <FormControl size="small" sx={{ minWidth: 170 }}>
+      <FormControl sx={{ minWidth: 170 }}>
         <InputLabel id="category-filter">Category</InputLabel>
         <Select
           multiple
           labelId="category-filter"
-          input={<OutlinedInput label="Category" />}
+          input={<OutlinedInput />}
           value={filters.categories ?? []}
           onChange={(e: SelectChangeEvent<string[]>) => onChange({ categories: multiValue(e.target.value) })}
-          renderValue={(selected) => `${selected.length} selected`}
+          displayEmpty
+          renderValue={(selected) => (selected.length === 0 ? 'Any' : `${selected.length} selected`)}
         >
           {categories.map((name) => (
             <MenuItem key={name} value={name}>{name}</MenuItem>
@@ -69,15 +71,16 @@ const FilterBar: React.FC<Props> = ({
         </Select>
       </FormControl>
 
-      <FormControl size="small" sx={{ minWidth: 170 }}>
+      <FormControl sx={{ minWidth: 170 }}>
         <InputLabel id="account-filter">Account</InputLabel>
         <Select
           multiple
           labelId="account-filter"
-          input={<OutlinedInput label="Account" />}
+          input={<OutlinedInput />}
           value={filters.accounts ?? []}
           onChange={(e: SelectChangeEvent<string[]>) => onChange({ accounts: multiValue(e.target.value) })}
-          renderValue={(selected) => `${selected.length} selected`}
+          displayEmpty
+          renderValue={(selected) => (selected.length === 0 ? 'Any' : `${selected.length} selected`)}
         >
           {accounts.map((account) => (
             <MenuItem key={account.details} value={account.details}>
@@ -87,17 +90,18 @@ const FilterBar: React.FC<Props> = ({
         </Select>
       </FormControl>
 
-      <FormControl size="small" sx={{ minWidth: 150 }}>
+      <FormControl sx={{ minWidth: 150 }}>
         <InputLabel id="tag-filter">Event</InputLabel>
         <Select
           multiple
           labelId="tag-filter"
-          input={<OutlinedInput label="Event" />}
+          input={<OutlinedInput />}
           value={(filters.tagIds ?? []).map(String)}
           onChange={(e: SelectChangeEvent<string[]>) =>
             onChange({ tagIds: multiValue(e.target.value).map(Number) })
           }
-          renderValue={(selected) => `${selected.length} selected`}
+          displayEmpty
+          renderValue={(selected) => (selected.length === 0 ? 'Any' : `${selected.length} selected`)}
         >
           {tags.map((tag) => (
             <MenuItem key={tag.id} value={String(tag.id)}>{tag.tag_name}</MenuItem>
@@ -107,8 +111,8 @@ const FilterBar: React.FC<Props> = ({
 
       <TextField
         select
-        size="small"
         label="Direction"
+        SelectProps={{ displayEmpty: true }}
         value={filters.debitCredit ?? ''}
         onChange={(e) => onChange({ debitCredit: (e.target.value || undefined) as 'Debit' | 'Credit' | undefined })}
         sx={{ minWidth: 120 }}
@@ -119,63 +123,61 @@ const FilterBar: React.FC<Props> = ({
       </TextField>
 
       <TextField
-        size="small"
         type="date"
         label="From"
-        InputLabelProps={{ shrink: true }}
         value={filters.startDate ?? ''}
         onChange={(e) => onChange({ startDate: e.target.value || undefined })}
-        sx={{ minWidth: 145 }}
+        sx={{ minWidth: 160 }}
       />
       <TextField
-        size="small"
         type="date"
         label="To"
-        InputLabelProps={{ shrink: true }}
         value={filters.endDate ?? ''}
         onChange={(e) => onChange({ endDate: e.target.value || undefined })}
-        sx={{ minWidth: 145 }}
+        sx={{ minWidth: 160 }}
       />
 
       <TextField
-        size="small"
         type="number"
         label="Min €"
         value={filters.minAmount ?? ''}
         onChange={(e) => onChange({ minAmount: e.target.value === '' ? undefined : Number(e.target.value) })}
-        sx={{ width: 100 }}
+        sx={{ width: 112 }}
       />
       <TextField
-        size="small"
         type="number"
         label="Max €"
         value={filters.maxAmount ?? ''}
         onChange={(e) => onChange({ maxAmount: e.target.value === '' ? undefined : Number(e.target.value) })}
-        sx={{ width: 100 }}
+        sx={{ width: 112 }}
       />
 
       <Tooltip title="Rows the classifier was not confident enough to label">
         <Chip
           label="Needs a category"
-          size="small"
-          color={filters.uncategorised ? 'secondary' : 'default'}
+          icon={filters.uncategorised ? <CheckIcon /> : undefined}
+          color={filters.uncategorised ? 'primary' : 'default'}
           variant={filters.uncategorised ? 'filled' : 'outlined'}
+          aria-pressed={Boolean(filters.uncategorised)}
           onClick={() => onChange({ uncategorised: !filters.uncategorised })}
+          sx={{ height: 40, borderRadius: 2, px: 1 }}
         />
       </Tooltip>
 
       <Tooltip title="Transfers between your own accounts are hidden by default">
         <Chip
           label="Include transfers"
-          size="small"
-          color={filters.includeInternal ? 'secondary' : 'default'}
+          icon={filters.includeInternal ? <CheckIcon /> : undefined}
+          color={filters.includeInternal ? 'primary' : 'default'}
           variant={filters.includeInternal ? 'filled' : 'outlined'}
+          aria-pressed={Boolean(filters.includeInternal)}
           onClick={() => onChange({ includeInternal: !filters.includeInternal })}
+          sx={{ height: 40, borderRadius: 2, px: 1 }}
         />
       </Tooltip>
 
       {activeCount > 0 && (
-        <Button size="small" onClick={onReset}>Clear filters</Button>
+        <Button variant="text" onClick={onReset}>Clear filters</Button>
       )}
     </Box>
   );
