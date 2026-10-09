@@ -32,11 +32,12 @@ that fresh database too.
 
 Release PRs from release-please are not deployed to acc.
 
-Acc is taken down by the production deploy once the change on it has been
-released: its containers, data and directory are removed. If acc holds a pull
-request that is not in the release yet, it stays up. Every deploy, acc and
-production, then removes images no container uses, dangling anonymous volumes
-and build cache from the NAS.
+Acc is taken down as soon as its pull request is merged or closed: its
+containers, data and directory are removed. If acc holds a different pull
+request by then, it stays up. As a fallback, the production deploy also takes
+acc down once the change on it has been released - that covers a branch put on
+acc by hand. Every deploy, acc and production, then removes images no
+container uses, dangling anonymous volumes and build cache from the NAS.
 
 ### What happens after you merge to main
 
