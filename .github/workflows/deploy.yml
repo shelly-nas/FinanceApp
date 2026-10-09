@@ -19,7 +19,17 @@ on:
   push:
     branches:
       - main
+  # "Run workflow" with a version builds and deploys that already-released
+  # version again: a redeploy, a rollback, or a release whose build failed.
+  # Run it on the tag (or on main when main is that release) so the images are
+  # built from the released code.
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Released version to build and deploy (e.g. 1.1.0); empty for the normal release flow'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: write
@@ -30,9 +40,10 @@ jobs:
     name: Prepare or publish release
     runs-on: ubuntu-latest
     outputs:
-      # 'true' only on the run that merges the release PR.
-      released: ${{ steps.release.outputs.release_created }}
-      version: ${{ steps.release.outputs.version }}
+      # 'true' on the run that merges the release PR, or when a version is
+      # given by hand.
+      released: ${{ steps.release.outputs.release_created == 'true' || inputs.version != '' }}
+      version: ${{ inputs.version || steps.release.outputs.version }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
