@@ -1,9 +1,10 @@
--- Demo data for local testing. NEVER loaded in production.
+-- Demo data for local testing and acceptance. NEVER loaded in production.
 --
--- Mounted as 03-demo.sql by docker-compose.yml only. The production image
+-- Mounted as 03-demo.sql by docker-compose.yml locally, and loaded into the
+-- freshly reset acc database by .github/workflows/acc.yml. The database image
 -- (database/Dockerfile) copies init.sql and seed.sql by name and deliberately
--- does not copy this file, so there is no path by which it can reach a
--- deployed database.
+-- does not copy this file, so there is no path by which it can reach the
+-- production database.
 --
 -- Runs after seed.sql on the first start of an empty data volume, so the
 -- categories the transactions reference already exist.
