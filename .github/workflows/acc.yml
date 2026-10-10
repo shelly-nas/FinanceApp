@@ -8,21 +8,27 @@ name: Deploy to Acceptance
 # Acc gets a fresh database on every deploy - schema, seed and
 # database/seed-demo.sql - and never production data. Nothing here releases
 # or touches production; that stays with deploy.yml and the release PR.
+#
+# When the pull request is merged or closed, acc is torn down - but only if it
+# still runs that pull request. Nothing is left running between the merge and
+# the release; the release itself is reviewed on production.
 
 on:
   pull_request:
     branches:
       - main
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 # A newer push supersedes a deploy in progress; acc only ever shows one branch.
+# A teardown never cancels a deploy: it waits its turn, and then only removes
+# acc if the deploy that ran was this pull request's.
 concurrency:
   group: acc-deploy
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event.action != 'closed' }}
 
 jobs:
   prepare:
@@ -32,7 +38,8 @@ jobs:
     # Pull requests from forks never reach the self-hosted runner.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (!startsWith(github.head_ref, 'release-please--') &&
+      (github.event.action != 'closed' &&
+       !startsWith(github.head_ref, 'release-please--') &&
        github.event.pull_request.head.repo.full_name == github.repository)
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
@@ -91,3 +98,14 @@ jobs:
         DB_USER=${{ vars.DB_USER }}
         DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         TZ=${{ vars.TZ || 'Europe/Amsterdam' }}
+
+  teardown-acc:
+    name: Tear down acc
+    if: >-
+      github.event.action == 'closed' &&
+      !startsWith(github.head_ref, 'release-please--') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    uses: shelly-nas/shared-workflows/.github/workflows/teardown-acceptance.yml@main
+    with:
+      acc_directory: /volume1/docker/finance-app-acc
+      commit: ${{ github.event.pull_request.head.sha }}
