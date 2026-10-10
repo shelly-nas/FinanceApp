@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.2.0](https://github.com/shelly-nas/FinanceApp/compare/v1.1.0...v1.2.0) (2026-10-10)
+
+
+### Features
+
+* **client:** adopt the shelly-nas design guidelines ([ffa8c56](https://github.com/shelly-nas/FinanceApp/commit/ffa8c56794a72215963dad21ade2c49aa518bc45))
+* **client:** adopt the shelly-nas design guidelines ([0634aa6](https://github.com/shelly-nas/FinanceApp/commit/0634aa6f0be7c5354d96e666dc319b2fc6c1de4f))
+* **client:** give export everything its own button in the sidebar ([e3b300a](https://github.com/shelly-nas/FinanceApp/commit/e3b300a191a60894246b57903602fc001d2d3dc2))
+* **client:** show the month's key figures as tiles above the dashboard ([f2d4063](https://github.com/shelly-nas/FinanceApp/commit/f2d4063033af294b5dfa2e7ad4681f0a2ffdc3c9))
+
+
+### Documentation
+
+* describe acc teardown and NAS cleanup ([11f35a7](https://github.com/shelly-nas/FinanceApp/commit/11f35a720bbef270e66a5f184bbd9105007f6bae))
+* describe the design system FinanceApp now follows ([e31e9fc](https://github.com/shelly-nas/FinanceApp/commit/e31e9fcc8428d39b5acac4539904abbebb33f681))
+
+
+### Build & Deployment
+
+* allow building and deploying an already-released version ([b366928](https://github.com/shelly-nas/FinanceApp/commit/b3669285181f01dc2280244b2d4fbbc30b6cd92b))
+* allow building and deploying an already-released version ([b39fab0](https://github.com/shelly-nas/FinanceApp/commit/b39fab0da0c5b63b5dcac8added366821b9ee085))
+* run CI through the shared ci-node-postgres workflow ([be76121](https://github.com/shelly-nas/FinanceApp/commit/be76121e0ced0a61ebc127227f03b57aa1ddc04c))
+* shared CI workflow, renamed shared workflows and acc teardown ([a886439](https://github.com/shelly-nas/FinanceApp/commit/a886439147109ecb8afb8de2e544b54317cdb655))
+* tear down acc through the shared teardown-acceptance workflow ([8fd35f3](https://github.com/shelly-nas/FinanceApp/commit/8fd35f31598a3240808cb5817abf84499a05e070))
+* tear down acc when its pull request is merged or closed ([0539f8e](https://github.com/shelly-nas/FinanceApp/commit/0539f8eb55934d21845b4b8842d9bf351600977e))
+* tear down acc when pull request closes ([4537c11](https://github.com/shelly-nas/FinanceApp/commit/4537c11c320df0d8c2fa55688e300716d14dd815))
+* use the renamed shared workflows and tear down acc once released ([066d7ac](https://github.com/shelly-nas/FinanceApp/commit/066d7acc60ecb75673651a7c6d40735554a719fd))
+
 ## [1.1.0](https://github.com/shelly-nas/FinanceApp/compare/v1.0.0...v1.1.0) (2026-10-09)
 
 
