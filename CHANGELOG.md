@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/shelly-nas/FinanceApp/compare/v1.2.0...v1.2.1) (2026-10-11)
+
+
+### Bug Fixes
+
+* **layout:** collapse the sidebar into a menu drawer on mobile ([5771d7e](https://github.com/shelly-nas/FinanceApp/commit/5771d7eb32ffa0bd91d84bf61a4c196de859adee))
+
 ## [1.2.0](https://github.com/shelly-nas/FinanceApp/compare/v1.1.0...v1.2.0) (2026-10-10)
 
 
