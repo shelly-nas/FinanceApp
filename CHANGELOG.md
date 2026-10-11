@@ -5,7 +5,6 @@
 
 ### Bug Fixes
 
-* **layout:** collapse the sidebar into a menu drawer on mobile ([609a1ff](https://github.com/shelly-nas/FinanceApp/commit/609a1ff7de8310f18296773c9a894b7afdc6e09f))
 * **layout:** collapse the sidebar into a menu drawer on mobile ([5771d7e](https://github.com/shelly-nas/FinanceApp/commit/5771d7eb32ffa0bd91d84bf61a4c196de859adee))
 
 ## [1.2.0](https://github.com/shelly-nas/FinanceApp/compare/v1.1.0...v1.2.0) (2026-10-10)
