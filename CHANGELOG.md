@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/shelly-nas/FinanceApp/compare/v1.2.1...v1.2.2) (2026-10-20)
+
+
+### Build & Deployment
+
+* enforce a coverage minimum in CI ([#23](https://github.com/shelly-nas/FinanceApp/issues/23)) ([b802c21](https://github.com/shelly-nas/FinanceApp/commit/b802c21a765f6b92c2cac85402d752a60e27632b))
+
 ## [1.2.1](https://github.com/shelly-nas/FinanceApp/compare/v1.2.0...v1.2.1) (2026-10-11)
 
 
