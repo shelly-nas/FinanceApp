@@ -221,11 +221,77 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
       assert.equal(Number(savings.current_balance), 5500, '5000 opening + 500 moved in');
     });
   });
+
+  describe('getCashflowHistory', () => {
+    test('splits each month into income and spending', async () => {
+      await FinanceManager.addTransactions([
+        row({ date_str: '2026-07-10', category: 'Vast Inkomen', debit_credit: 'Credit', amount: 3000 }),
+        row({ date_str: '2026-07-12', amount: 400 }),
+        row({ date_str: '2026-08-10', category: 'Vast Inkomen', debit_credit: 'Credit', amount: 3000 }),
+        row({ date_str: '2026-08-12', amount: 600 }),
+      ]);
+
+      const history = await FinanceManager.getCashflowHistory('2026-07-01', '2026-08-31');
+
+      assert.deepEqual(
+        history.map((m: any) => [m.month, Number(m.income), Number(m.expenses)]),
+        [['2026-07', 3000, 400], ['2026-08', 3000, 600]],
+      );
+    });
+
+    test('nets a refund against spending rather than counting it as income', async () => {
+      await FinanceManager.addTransactions([
+        row({ amount: 100 }),
+        row({ debit_credit: 'Credit', amount: 30, name_description: 'Refund' }),
+      ]);
+
+      const [august] = await FinanceManager.getCashflowHistory('2026-08-01', '2026-08-31');
+      assert.equal(Number(august.income), 0);
+      assert.equal(Number(august.expenses), 70);
+    });
+
+    test('leaves out a month without transactions instead of reporting zero', async () => {
+      await FinanceManager.addTransactions([row({ date_str: '2026-08-12' })]);
+
+      const history = await FinanceManager.getCashflowHistory('2026-06-01', '2026-08-31');
+      assert.deepEqual(history.map((m: any) => m.month), ['2026-08']);
+    });
+
+    test('excludes a confirmed internal transfer', async () => {
+      const { createdIds } = await FinanceManager.addTransactions([
+        row({ category: 'Sparen, Beleggen', counterparty: SAVINGS, amount: 500 }),
+        row({ category: 'Variabel Inkomen', account: SAVINGS, counterparty: CHECKING, debit_credit: 'Credit', amount: 500 }),
+      ]);
+      await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
+
+      assert.deepEqual(await FinanceManager.getCashflowHistory('2026-08-01', '2026-08-31'), []);
+    });
+  });
+
+  describe('getNetWorthHistory', () => {
+    test('flags the months before the first transaction as having no data', async () => {
+      await FinanceManager.addTransactions([row({ date_str: '2026-08-12' })]);
+
+      const history = await FinanceManager.getNetWorthHistory('2026-06-01', '2026-09-30');
+      assert.deepEqual(
+        history.map((m: any) => [m.month, m.has_data]),
+        [['2026-06', false], ['2026-07', false], ['2026-08', true], ['2026-09', true]],
+      );
+    });
+  });
 });
 
 describe('searchTransactions', { skip: !hasDatabase && 'no database configured' }, () => {
   before(async () => {
     await ensureSchema();
+    // Start from an empty table: rows left by the suites above would otherwise
+    // be counted in every total asserted here.
+    const client = await dbContext.connect();
+    try {
+      await client.query('TRUNCATE transfers, transaction_tags, transactions RESTART IDENTITY CASCADE');
+    } finally {
+      client.release();
+    }
     await FinanceManager.addTransactions([
       row({ name_description: 'Albert Heijn Rotterdam', amount: 42.15, date_str: '2026-08-05', notifications: 'pinbetaling' }),
       row({ name_description: 'Jumbo', amount: 18.40, date_str: '2026-08-12', notifications: 'pin' }),

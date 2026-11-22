@@ -325,6 +325,25 @@ router.get('/reports/category-history', async (req: Request, res: Response, next
   }
 });
 
+// Income and spending per month over a range, for the cash flow chart.
+router.get('/reports/cashflow', async (req: Request, res: Response, next: NextFunction) => {
+  const { startDate, endDate } = req.query;
+  const isDate = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+  if (!isDate(startDate) || !isDate(endDate)) {
+    return res.status(400).json({ error: 'startDate and endDate are required, in YYYY-MM-DD form' });
+  }
+  if ((startDate as string) > (endDate as string)) {
+    return res.status(400).json({ error: 'startDate must not be after endDate' });
+  }
+
+  try {
+    res.status(200).json(await FinanceManager.getCashflowHistory(startDate as string, endDate as string));
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Net worth at each month end over a range, for the history chart.
 router.get('/net-worth-history', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;

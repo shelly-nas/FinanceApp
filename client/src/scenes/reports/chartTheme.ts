@@ -27,6 +27,16 @@ export const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   Investments: 'Investments',
 };
 
+/**
+ * Income and spending in the cash flow chart. Deliberately neither green nor
+ * red: those are status colours, and spending is not an error. Validated like
+ * the account colours, against both card surfaces.
+ */
+export const CASHFLOW_COLORS = {
+  income: '#7b5cc4',
+  expenses: '#c2553a',
+} as const;
+
 export const formatCurrency = (value: number) =>
   new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
 
@@ -50,21 +60,4 @@ export const formatMonth = (month: string) => {
 export const formatMonthShort = (month: string) => {
   const [year, m] = month.split('-');
   return new Date(Number(year), Number(m) - 1, 1).toLocaleDateString('en-GB', { month: 'short' });
-};
-
-/** Every month from start to end inclusive, so gaps can be filled. */
-export const monthsBetween = (start: string, end: string): string[] => {
-  const months: string[] = [];
-  const [startYear, startMonth] = start.split('-').map(Number);
-  const [endYear, endMonth] = end.split('-').map(Number);
-
-  let cursor = new Date(startYear, startMonth - 1, 1);
-  const last = new Date(endYear, endMonth - 1, 1);
-
-  while (cursor <= last) {
-    months.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`);
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
-  }
-
-  return months;
 };

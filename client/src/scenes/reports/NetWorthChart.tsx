@@ -1,18 +1,18 @@
-import React, { useMemo } from 'react';
-import { Box, Typography, Chip, useTheme } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import React, { useMemo, useState } from 'react';
+import { Box, Typography, ToggleButton, useTheme } from '@mui/material';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
 import ChartTooltip from '@/scenes/reports/ChartTooltip';
 import ChartLegend from '@/scenes/reports/ChartLegend';
+import StatRow from '@/scenes/reports/StatRow';
 import {
   ACCOUNT_TYPE_COLORS, ACCOUNT_TYPE_ORDER, ACCOUNT_TYPE_LABELS,
   formatCurrency, formatCompact, formatMonthShort,
 } from '@/scenes/reports/chartTheme';
+import { trendSlope } from '@/scenes/reports/reportMath';
 import { NetWorthPoint, useGetNetWorthHistoryQuery } from '@/api';
 
 interface Props {
@@ -27,28 +27,32 @@ const KEY_BY_TYPE: Record<string, keyof NetWorthPoint> = {
 };
 
 /**
- * Net worth per month end, stacked by account type.
+ * Net worth per month end, as a single line - read like a price chart.
  *
- * Stacked rather than three separate lines because the parts genuinely sum to
- * the whole, and the question behind the chart - "is my net worth growing" - is
- * answered by the top edge while the bands say where the growth came from.
+ * The y-axis fits the data instead of starting at zero: the question is how
+ * the figure moved, and on a zero-based axis a year of saving is a flat line
+ * near the top. The account-type split is one toggle away, as lines rather
+ * than a stack, so each part can be read against the same axis.
  *
- * The headline is the latest figure with its change over the period beside it,
- * because that is the sentence a reader wants before they read any shape.
+ * Months before the first imported movement are left out: their value would
+ * only be the opening balance carried backwards, which nobody observed.
  */
 const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
   const { palette } = useTheme();
+  const [byType, setByType] = useState(false);
   const { data: history } = useGetNetWorthHistoryQuery({ startDate, endDate });
 
   const points = useMemo(
     () =>
-      (history ?? []).map((point) => ({
-        month: point.month,
-        checking: Number(point.checking ?? 0),
-        savings: Number(point.savings ?? 0),
-        investments: Number(point.investments ?? 0),
-        total: Number(point.net_worth),
-      })),
+      (history ?? [])
+        .filter((point) => point.has_data)
+        .map((point) => ({
+          month: point.month,
+          checking: Number(point.checking ?? 0),
+          savings: Number(point.savings ?? 0),
+          investments: Number(point.investments ?? 0),
+          total: Number(point.net_worth),
+        })),
     [history],
   );
 
@@ -56,88 +60,100 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
     return (
       <DashboardBox>
         <WidgetHeader title="Net worth" />
-        <Typography variant="body2">
-          No data for this period yet. Import a bank export, and add your accounts
-          with their opening balances.
-        </Typography>
+        <Typography variant="body2">No data for this period.</Typography>
       </DashboardBox>
     );
   }
 
-  const latest = points[points.length - 1];
-  const first = points[0];
-  const change = latest.total - first.total;
-  const changePct = first.total !== 0 ? (change / Math.abs(first.total)) * 100 : 0;
-  const rising = change >= 0;
+  const totals = points.map((p) => p.total);
+  const latest = totals[totals.length - 1];
+  const change = latest - totals[0];
+  const changePct = totals[0] !== 0 ? (change / Math.abs(totals[0])) * 100 : null;
+  const slope = trendSlope(totals);
 
-  // Only the types actually present: an empty band would add a legend entry for
-  // something the reader has none of.
   const presentTypes = ACCOUNT_TYPE_ORDER.filter((type) =>
     points.some((point) => point[KEY_BY_TYPE[type] as 'checking'] !== 0),
   );
 
+  const axisTick = { fill: palette.text.secondary, fontSize: 12 };
+
   return (
     <DashboardBox>
-      <WidgetHeader title="Net worth" subtitle="At each month end, by account type" />
+      <WidgetHeader
+        title="Net worth"
+        subtitle="At each month end"
+        action={
+          <ToggleButton
+            size="small"
+            value="byType"
+            selected={byType}
+            onChange={() => setByType((on) => !on)}
+            disabled={presentTypes.length < 2}
+          >
+            By account type
+          </ToggleButton>
+        }
+      />
 
-      {/* The headline: where it stands now, and what the period did to it. */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 6, flexWrap: 'wrap' }}>
-        <Typography variant="h1" component="p" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-          {formatCurrency(latest.total)}
-        </Typography>
-        <Chip
-          size="small"
-          icon={rising ? <TrendingUpIcon /> : <TrendingDownIcon />}
-          label={`${rising ? '+' : ''}${formatCurrency(change)} (${changePct.toFixed(1)}%)`}
-          color={rising ? 'success' : 'error'}
-          variant="outlined"
-        />
-        <Typography variant="body2">
-          over {points.length} month{points.length === 1 ? '' : 's'}
-        </Typography>
-      </Box>
+      <StatRow
+        stats={[
+          { label: 'Now', value: formatCurrency(latest), emphasis: true },
+          {
+            label: 'Change',
+            value: `${change >= 0 ? '+' : ''}${formatCurrency(change)}${
+              changePct === null ? '' : ` (${changePct >= 0 ? '+' : ''}${changePct.toFixed(1)}%)`
+            }`,
+          },
+          { label: 'High', value: formatCurrency(Math.max(...totals)) },
+          { label: 'Low', value: formatCurrency(Math.min(...totals)) },
+          { label: 'Trend / month', value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}` },
+          { label: 'Months', value: String(points.length) },
+        ]}
+      />
 
-      <Box sx={{ width: '100%', height: 300 }}>
+      <Box sx={{ width: '100%', height: 280 }}>
         <ResponsiveContainer>
-          <AreaChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-            <CartesianGrid
-              strokeDasharray="2 4"
-              vertical={false}
-              stroke={palette.divider}
-            />
+          <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
+            <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.divider} />
             <XAxis
               dataKey="month"
               tickFormatter={formatMonthShort}
-              tick={{ fill: palette.text.secondary, fontSize: 12 }}
+              tick={axisTick}
               tickLine={false}
               axisLine={{ stroke: palette.divider }}
             />
             <YAxis
+              domain={['auto', 'auto']}
               tickFormatter={formatCompact}
-              tick={{ fill: palette.text.secondary, fontSize: 12 }}
+              tick={axisTick}
               tickLine={false}
               axisLine={false}
-              width={60}
+              width={64}
             />
-            <Tooltip content={<ChartTooltip showTotal />} cursor={{ stroke: palette.text.secondary, strokeWidth: 1 }} />
-            <Legend content={<ChartLegend />} />
-            {presentTypes.map((type) => (
-              <Area
+            <Tooltip content={<ChartTooltip />} cursor={{ stroke: palette.text.secondary, strokeWidth: 1 }} />
+            {byType && <Legend content={<ChartLegend />} />}
+            <Line
+              type="linear"
+              dataKey="total"
+              name="Net worth"
+              stroke={palette.primary.main}
+              strokeWidth={2}
+              dot={points.length === 1 ? { r: 4 } : false}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: palette.background.paper }}
+            />
+            {byType && presentTypes.map((type) => (
+              <Line
                 key={type}
-                type="monotone"
+                type="linear"
                 dataKey={KEY_BY_TYPE[type]}
                 name={ACCOUNT_TYPE_LABELS[type]}
-                stackId="networth"
-                fill={ACCOUNT_TYPE_COLORS[type]}
-                fillOpacity={0.85}
-                // A 2px line in the surface colour separates the bands, so two
-                // adjacent fills never read as one.
-                stroke={palette.background.paper}
-                strokeWidth={2}
-                activeDot={{ r: 4, strokeWidth: 2, stroke: palette.background.paper }}
+                stroke={ACCOUNT_TYPE_COLORS[type]}
+                strokeWidth={1.5}
+                dot={false}
+                activeDot={{ r: 3, strokeWidth: 2, stroke: palette.background.paper }}
               />
             ))}
-          </AreaChart>
+          </LineChart>
         </ResponsiveContainer>
       </Box>
     </DashboardBox>

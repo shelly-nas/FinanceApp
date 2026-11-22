@@ -196,6 +196,14 @@ export interface NetWorthPoint {
   checking: string | null;
   savings: string | null;
   investments: string | null;
+  /** False before the first imported movement: the balance is only the opening figure. */
+  has_data: boolean;
+}
+
+export interface CashflowPoint {
+  month: string;
+  income: string;
+  expenses: string;
 }
 
 export interface Category {
@@ -462,6 +470,15 @@ export const api = createApi({
       },
       providesTags: ["categoryHistory"],
     }),
+    getCashflowHistory: build.query<CashflowPoint[], { startDate: string; endDate: string }>({
+      query: ({ startDate, endDate }) => ({
+        url: `api/reports/cashflow`,
+        params: { startDate, endDate },
+      }),
+      // Moves with the same edits as the category history: an import, a
+      // recategorisation, a confirmed transfer.
+      providesTags: ["categoryHistory"],
+    }),
     getCategories: build.query<Category[], void>({
       query: () => ({ url: `api/categories` }),
       providesTags: ["categories"],
@@ -632,6 +649,7 @@ export const {
   useBulkSetTagMutation,
   useGetNetWorthHistoryQuery,
   useGetCategoryHistoryQuery,
+  useGetCashflowHistoryQuery,
   useGetCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,

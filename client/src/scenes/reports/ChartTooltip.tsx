@@ -8,6 +8,8 @@ interface Entry {
   value?: number;
   color?: string;
   dataKey?: string | number;
+  /** The whole data row the hovered point belongs to. */
+  payload?: Record<string, unknown>;
 }
 
 interface Props {
@@ -16,6 +18,10 @@ interface Props {
   label?: string;
   /** Adds a total row - meaningful for stacked forms, misleading for lines. */
   showTotal?: boolean;
+  /** Derived series (a trend, a net figure): listed below the rest, never summed. */
+  derivedKeys?: string[];
+  /** Extra line at the bottom, given the hovered row. */
+  footer?: (row: Record<string, unknown>) => React.ReactNode;
 }
 
 /**
@@ -25,17 +31,20 @@ interface Props {
  * row carries the identity. Rows are ordered largest first, since that is the
  * order the eye needs when a stack has several segments.
  */
-const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal }) => {
+const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal, derivedKeys = [], footer }) => {
   const { palette } = useTheme();
   const t = tokensFor(palette.mode);
 
   if (!active || !payload || payload.length === 0) return null;
 
-  const rows = [...payload]
-    .filter((entry) => entry.value !== undefined && entry.value !== null)
+  const present = payload.filter((entry) => entry.value !== undefined && entry.value !== null);
+  const isDerived = (entry: Entry) => derivedKeys.includes(String(entry.dataKey));
+  const rows = present
+    .filter((entry) => !isDerived(entry))
     .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+  const derived = present.filter(isDerived);
 
-  if (rows.length === 0) return null;
+  if (rows.length === 0 && derived.length === 0) return null;
 
   const total = rows.reduce((sum, entry) => sum + (entry.value ?? 0), 0);
 
@@ -91,6 +100,22 @@ const ChartTooltip: React.FC<Props> = ({ active, payload, label, showTotal }) =>
             {formatCurrency(total)}
           </Typography>
         </Box>
+      )}
+
+      {derived.map((entry) => (
+        <Box key={String(entry.dataKey)} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
+          <Box aria-hidden sx={{ width: 10, height: 2, backgroundColor: entry.color, flexShrink: 0 }} />
+          <Typography variant="body2" sx={{ flexGrow: 1 }}>{entry.name}</Typography>
+          <Typography variant="body2" sx={{ fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}>
+            {formatCurrency(entry.value ?? 0)}
+          </Typography>
+        </Box>
+      ))}
+
+      {footer && payload[0] && (
+        <Typography variant="caption" component="p" sx={{ mt: 1 }}>
+          {footer(payload[0].payload ?? {})}
+        </Typography>
       )}
     </Box>
   );

@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, ToggleButton, ToggleButtonGroup, TextField, MenuItem,
-  Select, OutlinedInput, FormControl, InputLabel, Chip, Stack,
+  Box, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack, Button,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
+import CheckIcon from '@mui/icons-material/Check';
 import PageHeader from '@/components/PageHeader';
 import NetWorthChart from '@/scenes/reports/NetWorthChart';
 import CategoryTrendChart from '@/scenes/reports/CategoryTrendChart';
-import { useGetCategoryListQuery } from '@/api';
+import CashflowChart from '@/scenes/reports/CashflowChart';
+import { useGetCategoriesQuery } from '@/api';
 
 /** Named ranges, in months back from the current month. */
 const PRESETS = [
@@ -48,11 +48,21 @@ const Reports: React.FC = () => {
   const [range, setRange] = useState(() => presetRange(12));
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const { data: categoryList } = useGetCategoryListQuery();
-  const categories: string[] = useMemo(
-    () => (categoryList ?? []).map((c: { category_name: string }) => c.category_name),
+  const { data: categoryList } = useGetCategoriesQuery();
+  // Income categories are not part of the spending chart, so offering them as
+  // a filter would select something that can never show up.
+  const categories = useMemo(
+    () => (categoryList ?? [])
+      .filter((c) => c.income_outcome !== 'Inkomsten')
+      .map((c) => c.category_name)
+      .sort((a, b) => a.localeCompare(b)),
     [categoryList],
   );
+
+  const toggleCategory = (name: string) =>
+    setSelectedCategories((current) =>
+      current.includes(name) ? current.filter((c) => c !== name) : [...current, name],
+    );
 
   const applyPreset = (value: string) => {
     setPreset(value);
@@ -72,7 +82,7 @@ const Reports: React.FC = () => {
       <PageHeader title="Reports" subtitle="How things developed over a period, rather than what one month did" />
 
       {/* Filters in one row above the charts; both charts follow them. */}
-      <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-end', flexWrap: 'wrap', mb: 6 }}>
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap', mb: 3 }}>
         <ToggleButtonGroup
           exclusive
           value={preset}
@@ -108,29 +118,6 @@ const Reports: React.FC = () => {
           sx={{ minWidth: 150 }}
         />
 
-        <FormControl sx={{ minWidth: 180 }}>
-          <InputLabel id="report-category-filter">Categories</InputLabel>
-          <Select
-            multiple
-            labelId="report-category-filter"
-            input={<OutlinedInput />}
-            displayEmpty
-            value={selectedCategories}
-            onChange={(e: SelectChangeEvent<string[]>) =>
-              setSelectedCategories(
-                typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value,
-              )
-            }
-            renderValue={(selected) =>
-              selected.length === 0 ? 'All' : `${selected.length} selected`
-            }
-          >
-            {categories.map((name) => (
-              <MenuItem key={name} value={name}>{name}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
         {endsThisMonth && (
           <Chip
             variant="outlined"
@@ -141,12 +128,45 @@ const Reports: React.FC = () => {
         )}
       </Box>
 
-      <Stack spacing={6} useFlexGap>
+      {/* Every category one click away, instead of behind a dropdown. None
+          selected means all; the spending chart and its table follow this. */}
+      <Box
+        role="group"
+        aria-label="Categories"
+        sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', mb: 4 }}
+      >
+        <Button
+          size="small"
+          variant={selectedCategories.length === 0 ? 'contained' : 'outlined'}
+          onClick={() => setSelectedCategories([])}
+        >
+          All categories
+        </Button>
+        {categories.map((name) => {
+          const on = selectedCategories.includes(name);
+          return (
+            <Chip
+              key={name}
+              size="small"
+              label={name}
+              icon={on ? <CheckIcon /> : undefined}
+              color={on ? 'primary' : 'default'}
+              variant={on ? 'filled' : 'outlined'}
+              onClick={() => toggleCategory(name)}
+              aria-pressed={on}
+            />
+          );
+        })}
+      </Box>
+
+      <Stack spacing={4} useFlexGap>
         <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
+        <CashflowChart startDate={range.startDate} endDate={range.endDate} />
         <CategoryTrendChart
           startDate={range.startDate}
           endDate={range.endDate}
           categories={selectedCategories.length > 0 ? selectedCategories : undefined}
+          onToggleCategory={toggleCategory}
         />
       </Stack>
     </>

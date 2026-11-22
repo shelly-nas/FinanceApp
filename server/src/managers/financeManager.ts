@@ -734,6 +734,42 @@ class FinanceManager {
   }
 
   /**
+   * Income and spending per month, for the cash flow chart.
+   *
+   * Signed per side, like the summaries: a refund in a spending category lowers
+   * that month's spending rather than counting as income, and a correction on a
+   * salary lowers income. Months without categorised transactions are absent
+   * rather than zero, so the chart shows a gap instead of a month of nothing.
+   */
+  public async getCashflowHistory(startDate: string, endDate: string): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', t.date_str), 'YYYY-MM') AS month,
+        COALESCE(SUM(CASE WHEN t.debit_credit = 'Credit' THEN t.amount ELSE -t.amount END)
+          FILTER (WHERE c.income_outcome = 'Inkomsten'), 0)::numeric AS income,
+        COALESCE(SUM(CASE WHEN t.debit_credit = 'Debit' THEN t.amount ELSE -t.amount END)
+          FILTER (WHERE c.income_outcome IS DISTINCT FROM 'Inkomsten'), 0)::numeric AS expenses
+      FROM public.${transaction_table} t
+      JOIN public.${category_table} c ON c.category_name = t.category
+      WHERE t.date_str >= $1
+        AND t.date_str <= $2
+        -- An internal transfer is neither income nor spending.
+        AND t.is_internal IS NOT TRUE
+      GROUP BY 1
+      ORDER BY 1;
+    `;
+
+    try {
+      const result = await client.query(query, [startDate, endDate]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * Net worth at the end of each month over a period.
    *
    * Built for a chart: a running total per account carried forward month by
@@ -780,7 +816,14 @@ class FinanceManager {
         SUM(balance)::numeric AS net_worth,
         SUM(balance) FILTER (WHERE account_type = 'Checking Account')::numeric AS checking,
         SUM(balance) FILTER (WHERE account_type = 'Savings Account')::numeric AS savings,
-        SUM(balance) FILTER (WHERE account_type = 'Investments')::numeric AS investments
+        SUM(balance) FILTER (WHERE account_type = 'Investments')::numeric AS investments,
+        -- Before the first imported movement, a balance is only the opening
+        -- figure carried backwards - a flat line that was never observed. The
+        -- chart leaves those months out rather than draw it.
+        (
+          EXISTS (SELECT 1 FROM public.${transaction_table} t WHERE t.date_str <= month_end)
+          OR EXISTS (SELECT 1 FROM public.${investment_table} i WHERE i.date_str <= month_end)
+        ) AS has_data
       FROM balances
       GROUP BY month_end
       ORDER BY month_end;
