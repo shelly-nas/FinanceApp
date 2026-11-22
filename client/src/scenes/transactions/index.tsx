@@ -187,7 +187,7 @@ const Transactions: React.FC = () => {
         actions={<ImportActions />}
       />
 
-      <Stack spacing={6} useFlexGap>
+      <Stack spacing={4} useFlexGap>
         {typeof navState.imported === 'number' && (
           <Alert severity={navState.skipped ? 'info' : 'success'}>
             {navState.imported} transactions imported
@@ -215,7 +215,7 @@ const Transactions: React.FC = () => {
             activeCount={activeFilterCount}
           />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 4, minHeight: 40, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2, minHeight: 32, flexWrap: 'wrap' }}>
             {selectedIds.length > 0 ? (
               // Bulk bar: only present once something is selected.
               <>
@@ -238,7 +238,7 @@ const Transactions: React.FC = () => {
               </>
             ) : (
               <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                {range} · Click any cell to edit. Enter saves, Escape cancels.
+                {range} · click a cell to edit · Enter saves · Esc cancels
               </Typography>
             )}
             {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
@@ -276,7 +276,7 @@ const Transactions: React.FC = () => {
                 rowsPerPage={pageSize}
                 rowsPerPageOptions={PAGE_SIZES}
                 onRowsPerPageChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
-                sx={{ mt: 2 }}
+                sx={{ mt: 1 }}
               />
             </>
           )}

@@ -31,13 +31,28 @@ const FilterBar: React.FC<Props> = ({
   const multiValue = (value: unknown) => (typeof value === 'string' ? value.split(',') : (value as string[]));
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'flex-end', mb: 6 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 2,
+        alignItems: 'flex-end',
+        mb: 3,
+        // Dense on a desktop, where a pointer needs no 40px target; touch
+        // screens keep the full height.
+        '@media (pointer: fine)': {
+          '& .MuiInputBase-input': { height: 32 },
+          '& .MuiSelect-select': { height: '32px !important', display: 'flex', alignItems: 'center' },
+          '& .MuiChip-root': { height: 32 },
+        },
+      }}
+    >
       <TextField
         label="Search"
         placeholder="Description, counterparty or account"
         value={filters.query ?? ''}
         onChange={(e) => onChange({ query: e.target.value })}
-        sx={{ minWidth: 280, flexGrow: 1, flexBasis: '100%' }}
+        sx={{ minWidth: 240, flexGrow: 1, flexBasis: 280 }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -54,7 +69,7 @@ const FilterBar: React.FC<Props> = ({
         }}
       />
 
-      <FormControl sx={{ minWidth: 170 }}>
+      <FormControl sx={{ minWidth: 150 }}>
         <InputLabel id="category-filter">Category</InputLabel>
         <Select
           multiple
@@ -71,7 +86,7 @@ const FilterBar: React.FC<Props> = ({
         </Select>
       </FormControl>
 
-      <FormControl sx={{ minWidth: 170 }}>
+      <FormControl sx={{ minWidth: 150 }}>
         <InputLabel id="account-filter">Account</InputLabel>
         <Select
           multiple
@@ -127,14 +142,14 @@ const FilterBar: React.FC<Props> = ({
         label="From"
         value={filters.startDate ?? ''}
         onChange={(e) => onChange({ startDate: e.target.value || undefined })}
-        sx={{ minWidth: 160 }}
+        sx={{ minWidth: 140 }}
       />
       <TextField
         type="date"
         label="To"
         value={filters.endDate ?? ''}
         onChange={(e) => onChange({ endDate: e.target.value || undefined })}
-        sx={{ minWidth: 160 }}
+        sx={{ minWidth: 140 }}
       />
 
       <TextField
@@ -142,14 +157,14 @@ const FilterBar: React.FC<Props> = ({
         label="Min €"
         value={filters.minAmount ?? ''}
         onChange={(e) => onChange({ minAmount: e.target.value === '' ? undefined : Number(e.target.value) })}
-        sx={{ width: 112 }}
+        sx={{ width: 96 }}
       />
       <TextField
         type="number"
         label="Max €"
         value={filters.maxAmount ?? ''}
         onChange={(e) => onChange({ maxAmount: e.target.value === '' ? undefined : Number(e.target.value) })}
-        sx={{ width: 112 }}
+        sx={{ width: 96 }}
       />
 
       <Tooltip title="Rows the classifier was not confident enough to label">

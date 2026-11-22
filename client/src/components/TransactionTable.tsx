@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, TableSortLabel, IconButton, Tooltip, Select, MenuItem, Checkbox,
-  Typography,
+  Typography, Box,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -183,6 +183,21 @@ const TransactionTable: React.FC<Props> = ({
       );
     }
 
+    // Long remittance text is cut off rather than wrapped, so every row stays
+    // one line; the full text is in the title. The limit sits on a block
+    // inside the cell, since a table cell itself ignores max-width.
+    if (column.key === 'notifications' && row.notifications) {
+      return (
+        <Box
+          component="span"
+          title={row.notifications}
+          sx={{ display: 'block', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
+          {row.notifications}
+        </Box>
+      );
+    }
+
     return row[column.key] as React.ReactNode;
   };
 
@@ -195,6 +210,18 @@ const TransactionTable: React.FC<Props> = ({
         width: 'auto',
         '& td:first-of-type, & th:first-of-type': { pl: 6 },
         '& td:last-of-type, & th:last-of-type': { pr: 6 },
+        // Dense rows on a desktop: more transactions per screen for someone
+        // scanning them. Touch screens keep the roomier default.
+        '@media (pointer: fine)': {
+          '& td, & th': { py: 1, px: 2 },
+          '& td.MuiTableCell-paddingCheckbox, & th.MuiTableCell-paddingCheckbox': { py: 0 },
+          // The tag picker is a full-height input and would set the height of
+          // every row; inside the table it shrinks to the row instead.
+          '& .MuiAutocomplete-root .MuiInputBase-root': { minHeight: 28, py: 0 },
+          '& .MuiAutocomplete-root .MuiInputBase-input': { height: 28 },
+          '& .MuiAutocomplete-root .MuiChip-root': { height: 22 },
+          '& .MuiIconButton-root': { p: 0.5 },
+        },
       }}
     >
       <Table size="small">
@@ -259,7 +286,7 @@ const TransactionTable: React.FC<Props> = ({
                   onClick={() => startEdit(row, column)}
                   sx={{
                     cursor: editable && column.editable ? 'pointer' : 'default',
-                    minWidth: column.key === 'notifications' ? 240 : undefined,
+                    minWidth: column.key === 'notifications' ? 200 : undefined,
                     fontVariantNumeric: column.key === 'amount' ? 'tabular-nums' : undefined,
                     // The cell under the pointer is the one a click edits.
                     '&:hover': editable && column.editable
@@ -278,7 +305,7 @@ const TransactionTable: React.FC<Props> = ({
                   {renderCell(row, column)}
                 </TableCell>
               ))}
-              <TableCell sx={{ minWidth: 180 }}>
+              <TableCell sx={{ minWidth: 160 }}>
                 {editable ? (
                   <TagPicker transactionId={row.id} />
                 ) : (
