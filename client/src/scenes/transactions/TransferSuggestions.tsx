@@ -69,7 +69,7 @@ const TransferSuggestions: React.FC<Props> = ({ transactionIds }) => {
         action={<Chip size="small" label={`${candidates.length} found`} />}
       />
 
-      <CardTable>
+      <CardTable dense>
         <TableHead>
           <TableRow>
             <TableCell>From</TableCell>
@@ -83,19 +83,21 @@ const TransferSuggestions: React.FC<Props> = ({ transactionIds }) => {
           {candidates.map((c) => (
             <TableRow key={`${c.from_transaction_id}-${c.to_transaction_id}`} hover>
               <TableCell>
-                <Typography sx={{ fontSize: 14, color: 'text.primary' }}>
+                {/* One line: the account, then date and description muted. */}
+                <Typography component="span" sx={{ fontSize: 14, color: 'text.primary' }}>
                   {accountLabel(c.from_account_name, c.from_account)}
                 </Typography>
-                <Typography variant="body2">
-                  {formatDate(c.from_date)} · {c.from_description ?? '—'}
+                <Typography component="span" variant="body2">
+                  {' · '}{formatDate(c.from_date)} · {c.from_description ?? '—'}
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ fontSize: 14, color: 'text.primary' }}>
+                {/* One line: the account, then date and description muted. */}
+                <Typography component="span" sx={{ fontSize: 14, color: 'text.primary' }}>
                   {accountLabel(c.to_account_name, c.to_account)}
                 </Typography>
-                <Typography variant="body2">
-                  {formatDate(c.to_date)} · {c.to_description ?? '—'}
+                <Typography component="span" variant="body2">
+                  {' · '}{formatDate(c.to_date)} · {c.to_description ?? '—'}
                 </Typography>
               </TableCell>
               <TableCell align="right">

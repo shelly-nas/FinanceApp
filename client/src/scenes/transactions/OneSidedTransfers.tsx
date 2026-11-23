@@ -51,10 +51,11 @@ const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
         action={<Chip size="small" label={`${transfers.length} found`} />}
       />
 
-      <CardTable>
+      <CardTable dense>
         <TableHead>
           <TableRow>
             <TableCell>Date</TableCell>
+            <TableCell>Description</TableCell>
             <TableCell>From</TableCell>
             <TableCell>To</TableCell>
             <TableCell align="right">Amount</TableCell>
@@ -64,10 +65,8 @@ const OneSidedTransfers: React.FC<Props> = ({ transactionIds }) => {
         <TableBody>
           {transfers.map((transfer: OneSidedTransfer) => (
             <TableRow key={transfer.id} hover>
-              <TableCell>
-                <Typography sx={{ fontSize: 14, color: 'text.primary' }}>{transfer.date_str?.slice(0, 10)}</Typography>
-                <Typography variant="body2">{transfer.name_description ?? '—'}</Typography>
-              </TableCell>
+              <TableCell sx={{ color: 'text.primary' }}>{transfer.date_str?.slice(0, 10)}</TableCell>
+              <TableCell>{transfer.name_description ?? '—'}</TableCell>
               <TableCell>
                 <Typography variant="body2">
                   {transfer.debit_credit === 'Debit'
