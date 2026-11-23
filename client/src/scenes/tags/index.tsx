@@ -123,7 +123,7 @@ const Tags: React.FC = () => {
         }
       />
 
-      <Stack spacing={6} useFlexGap>
+      <Stack spacing={4} useFlexGap>
         <DashboardBox>
           {(!tags || tags.length === 0) ? (
             <Typography variant="body2">

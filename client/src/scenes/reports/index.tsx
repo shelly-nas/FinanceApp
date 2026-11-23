@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, ToggleButton, ToggleButtonGroup, TextField, MenuItem,
-  Select, OutlinedInput, FormControl, InputLabel, Chip, Stack,
+  Box, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import PageHeader from '@/components/PageHeader';
+import StickyBar from '@/components/StickyBar';
 import NetWorthChart from '@/scenes/reports/NetWorthChart';
 import CategoryTrendChart from '@/scenes/reports/CategoryTrendChart';
-import { useGetCategoryListQuery } from '@/api';
+import CashflowChart from '@/scenes/reports/CashflowChart';
+import { useGetCategoriesQuery } from '@/api';
 
 /** Named ranges, in months back from the current month. */
 const PRESETS = [
@@ -48,11 +48,21 @@ const Reports: React.FC = () => {
   const [range, setRange] = useState(() => presetRange(12));
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const { data: categoryList } = useGetCategoryListQuery();
-  const categories: string[] = useMemo(
-    () => (categoryList ?? []).map((c: { category_name: string }) => c.category_name),
+  const { data: categoryList } = useGetCategoriesQuery();
+  // Income categories are not part of the spending chart, so offering them as
+  // a filter would select something that can never show up.
+  const categories = useMemo(
+    () => (categoryList ?? [])
+      .filter((c) => c.income_outcome !== 'Inkomsten')
+      .map((c) => c.category_name)
+      .sort((a, b) => a.localeCompare(b)),
     [categoryList],
   );
+
+  const toggleCategory = (name: string) =>
+    setSelectedCategories((current) =>
+      current.includes(name) ? current.filter((c) => c !== name) : [...current, name],
+    );
 
   const applyPreset = (value: string) => {
     setPreset(value);
@@ -71,82 +81,66 @@ const Reports: React.FC = () => {
     <>
       <PageHeader title="Reports" subtitle="How things developed over a period, rather than what one month did" />
 
-      {/* Filters in one row above the charts; both charts follow them. */}
-      <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-end', flexWrap: 'wrap', mb: 6 }}>
-        <ToggleButtonGroup
-          exclusive
-          value={preset}
-          onChange={(_e, value) => value && applyPreset(value)}
-          aria-label="Period"
-        >
-          {PRESETS.map((option) => (
-            <ToggleButton key={option.months} value={String(option.months)}>
-              {option.label}
-            </ToggleButton>
-          ))}
-          <ToggleButton value="ytd">This year</ToggleButton>
-        </ToggleButtonGroup>
-
-        <TextField
-          type="date"
-          label="From"
-          value={range.startDate}
-          onChange={(e) => {
-            setPreset('custom');
-            setRange((prev) => ({ ...prev, startDate: e.target.value }));
-          }}
-          sx={{ minWidth: 150 }}
-        />
-        <TextField
-          type="date"
-          label="To"
-          value={range.endDate}
-          onChange={(e) => {
-            setPreset('custom');
-            setRange((prev) => ({ ...prev, endDate: e.target.value }));
-          }}
-          sx={{ minWidth: 150 }}
-        />
-
-        <FormControl sx={{ minWidth: 180 }}>
-          <InputLabel id="report-category-filter">Categories</InputLabel>
-          <Select
-            multiple
-            labelId="report-category-filter"
-            input={<OutlinedInput />}
-            displayEmpty
-            value={selectedCategories}
-            onChange={(e: SelectChangeEvent<string[]>) =>
-              setSelectedCategories(
-                typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value,
-              )
-            }
-            renderValue={(selected) =>
-              selected.length === 0 ? 'All' : `${selected.length} selected`
-            }
+      {/* The period applies to every chart, so it stays in view while the
+          page scrolls. Category filters live in the card they apply to. */}
+      <StickyBar sx={{ mb: 4, py: 2 }}>
+        <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <ToggleButtonGroup
+            exclusive
+            value={preset}
+            onChange={(_e, value) => value && applyPreset(value)}
+            aria-label="Period"
           >
-            {categories.map((name) => (
-              <MenuItem key={name} value={name}>{name}</MenuItem>
+            {PRESETS.map((option) => (
+              <ToggleButton key={option.months} value={String(option.months)}>
+                {option.label}
+              </ToggleButton>
             ))}
-          </Select>
-        </FormControl>
+            <ToggleButton value="ytd">This year</ToggleButton>
+          </ToggleButtonGroup>
 
-        {endsThisMonth && (
-          <Chip
-            variant="outlined"
-            icon={<InfoIcon />}
-            label="This month is still running"
-            sx={{ ml: 'auto', height: 40, borderRadius: 2, px: 1 }}
+          <TextField
+            type="date"
+            label="From"
+            value={range.startDate}
+            onChange={(e) => {
+              setPreset('custom');
+              setRange((prev) => ({ ...prev, startDate: e.target.value }));
+            }}
+            sx={{ minWidth: 150 }}
           />
-        )}
-      </Box>
+          <TextField
+            type="date"
+            label="To"
+            value={range.endDate}
+            onChange={(e) => {
+              setPreset('custom');
+              setRange((prev) => ({ ...prev, endDate: e.target.value }));
+            }}
+            sx={{ minWidth: 150 }}
+          />
 
-      <Stack spacing={6} useFlexGap>
+          {endsThisMonth && (
+            <Chip
+              variant="outlined"
+              icon={<InfoIcon />}
+              label="This month is still running"
+              sx={{ ml: 'auto', height: 40, borderRadius: 2, px: 1 }}
+            />
+          )}
+        </Box>
+      </StickyBar>
+
+      <Stack spacing={4} useFlexGap>
         <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
+        <CashflowChart startDate={range.startDate} endDate={range.endDate} />
         <CategoryTrendChart
           startDate={range.startDate}
           endDate={range.endDate}
-          categories={selectedCategories.length > 0 ? selectedCategories : undefined}
+          allCategories={categories}
+          selected={selectedCategories}
+          onToggleCategory={toggleCategory}
+          onClearCategories={() => setSelectedCategories([])}
         />
       </Stack>
     </>

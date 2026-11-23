@@ -5,14 +5,16 @@ interface Entry {
   value?: string;
   color?: string;
   dataKey?: unknown;
-  payload?: { fill?: string };
+  /** 'line' for a Line series, a shape name otherwise. */
+  type?: string;
+  payload?: { fill?: string; strokeDasharray?: string };
 }
 
 /**
  * Legend for every chart on this screen. The swatch carries the series colour;
  * the name stays in text colour. The swatch reads the series fill, because
  * stacked fills are outlined in the surface colour and Recharts would
- * otherwise take that outline as the series colour.
+ * otherwise take that outline as the series colour. Lines get a stroke swatch.
  */
 const ChartLegend: React.FC<{ payload?: Entry[] }> = ({ payload }) => (
   <Box
@@ -21,10 +23,23 @@ const ChartLegend: React.FC<{ payload?: Entry[] }> = ({ payload }) => (
   >
     {(payload ?? []).map((entry) => (
       <Box component="li" key={String(entry.dataKey ?? entry.value)} sx={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none' }}>
-        <Box
-          aria-hidden
-          sx={{ width: 10, height: 10, borderRadius: '2px', flexShrink: 0, bgcolor: entry.payload?.fill ?? entry.color }}
-        />
+        {entry.type === 'line' ? (
+          // A line's fill is Recharts' default white, so it gets a stroke
+          // swatch in its own colour instead - dashed when the line is.
+          <Box
+            aria-hidden
+            sx={{
+              width: 14,
+              flexShrink: 0,
+              borderTop: `2px ${entry.payload?.strokeDasharray ? 'dashed' : 'solid'} ${entry.color}`,
+            }}
+          />
+        ) : (
+          <Box
+            aria-hidden
+            sx={{ width: 10, height: 10, borderRadius: '2px', flexShrink: 0, bgcolor: entry.payload?.fill ?? entry.color }}
+          />
+        )}
         <Typography variant="caption">{entry.value}</Typography>
       </Box>
     ))}

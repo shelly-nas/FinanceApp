@@ -21,7 +21,7 @@ const PageHeader: React.FC<Props> = ({ title, subtitle, actions }) => (
       alignItems: 'flex-end',
       flexWrap: 'wrap',
       gap: 4,
-      mb: 8,
+      mb: 5,
     }}
   >
     <Box sx={{ minWidth: 0 }}>

@@ -196,6 +196,14 @@ export interface NetWorthPoint {
   checking: string | null;
   savings: string | null;
   investments: string | null;
+  /** False before the first imported movement: the balance is only the opening figure. */
+  has_data: boolean;
+}
+
+export interface CashflowPoint {
+  month: string;
+  income: string;
+  expenses: string;
 }
 
 export interface Category {
@@ -394,7 +402,9 @@ export const api = createApi({
       query: (id) => ({
         url: `api/transactions/${id}/tags`,
       }),
-      providesTags: ["transactionTags"],
+      // Per transaction, so changing one row's tags refetches that row only
+      // rather than every tag picker on the page.
+      providesTags: (_result, _error, id) => [{ type: "transactionTags", id }],
     }),
     searchTransactions: build.query<SearchResult, SearchFilters>({
       query: (filters) => {
@@ -460,6 +470,15 @@ export const api = createApi({
         if (includeInternal) params.set('includeInternal', 'true');
         return { url: `api/reports/category-history`, params };
       },
+      providesTags: ["categoryHistory"],
+    }),
+    getCashflowHistory: build.query<CashflowPoint[], { startDate: string; endDate: string }>({
+      query: ({ startDate, endDate }) => ({
+        url: `api/reports/cashflow`,
+        params: { startDate, endDate },
+      }),
+      // Moves with the same edits as the category history: an import, a
+      // recategorisation, a confirmed transfer.
       providesTags: ["categoryHistory"],
     }),
     getCategories: build.query<Category[], void>({
@@ -589,7 +608,7 @@ export const api = createApi({
         method: 'PUT',
         body: { tagIds },
       }),
-      invalidatesTags: ["transactionTags", "tags", "tagSummary"],
+      invalidatesTags: (_result, _error, { id }) => [{ type: "transactionTags", id }, "tags", "tagSummary"],
     }),
   }),
 });
@@ -632,6 +651,7 @@ export const {
   useBulkSetTagMutation,
   useGetNetWorthHistoryQuery,
   useGetCategoryHistoryQuery,
+  useGetCashflowHistoryQuery,
   useGetCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,

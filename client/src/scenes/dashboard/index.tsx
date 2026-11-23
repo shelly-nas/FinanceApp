@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
           </>
         }
       />
-      <Stack spacing={6} useFlexGap>
+      <Stack spacing={4} useFlexGap>
         <KeyFigures />
         <SpendingBreakdown onCategorySelect={handleCategorySelect} />
         <TransactionDetails selectedCategory={selectedCategory} />

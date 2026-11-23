@@ -734,6 +734,42 @@ class FinanceManager {
   }
 
   /**
+   * Income and spending per month, for the cash flow chart.
+   *
+   * Signed per side, like the summaries: a refund in a spending category lowers
+   * that month's spending rather than counting as income, and a correction on a
+   * salary lowers income. Months without categorised transactions are absent
+   * rather than zero, so the chart shows a gap instead of a month of nothing.
+   */
+  public async getCashflowHistory(startDate: string, endDate: string): Promise<any[]> {
+    const client = await dbContext.connect();
+
+    const query = `
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', t.date_str), 'YYYY-MM') AS month,
+        COALESCE(SUM(CASE WHEN t.debit_credit = 'Credit' THEN t.amount ELSE -t.amount END)
+          FILTER (WHERE c.income_outcome = 'Inkomsten'), 0)::numeric AS income,
+        COALESCE(SUM(CASE WHEN t.debit_credit = 'Debit' THEN t.amount ELSE -t.amount END)
+          FILTER (WHERE c.income_outcome IS DISTINCT FROM 'Inkomsten'), 0)::numeric AS expenses
+      FROM public.${transaction_table} t
+      JOIN public.${category_table} c ON c.category_name = t.category
+      WHERE t.date_str >= $1
+        AND t.date_str <= $2
+        -- An internal transfer is neither income nor spending.
+        AND t.is_internal IS NOT TRUE
+      GROUP BY 1
+      ORDER BY 1;
+    `;
+
+    try {
+      const result = await client.query(query, [startDate, endDate]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * Net worth at the end of each month over a period.
    *
    * Built for a chart: a running total per account carried forward month by
@@ -780,7 +816,14 @@ class FinanceManager {
         SUM(balance)::numeric AS net_worth,
         SUM(balance) FILTER (WHERE account_type = 'Checking Account')::numeric AS checking,
         SUM(balance) FILTER (WHERE account_type = 'Savings Account')::numeric AS savings,
-        SUM(balance) FILTER (WHERE account_type = 'Investments')::numeric AS investments
+        SUM(balance) FILTER (WHERE account_type = 'Investments')::numeric AS investments,
+        -- Before the first imported movement, a balance is only the opening
+        -- figure carried backwards - a flat line that was never observed. The
+        -- chart leaves those months out rather than draw it.
+        (
+          EXISTS (SELECT 1 FROM public.${transaction_table} t WHERE t.date_str <= month_end)
+          OR EXISTS (SELECT 1 FROM public.${investment_table} i WHERE i.date_str <= month_end)
+        ) AS has_data
       FROM balances
       GROUP BY month_end
       ORDER BY month_end;
@@ -1257,11 +1300,16 @@ class FinanceManager {
    *
    * This is not a guess like an amount match is - the counterparty is literally
    * one of the user's own accounts - so it is applied rather than proposed. The
-   * rows stay visible under "Include transfers" and can be reverted per row.
+   * rows stay in the transaction list and the transfer review, and can be
+   * reverted per row.
    *
    * Returns the ids it marked, so an import can report them.
    */
   public async markCounterpartyTransfers(ids?: number[]): Promise<number[]> {
+    // No ids means every row; an empty list means an import that stored
+    // nothing new, which has nothing to mark.
+    if (ids && ids.length === 0) return [];
+
     const client = await dbContext.connect();
     const params: any[] = [];
     let scope = '';
@@ -1272,11 +1320,13 @@ class FinanceManager {
     }
 
     // is_internal IS NULL only: a row the user explicitly rejected (FALSE) or
-    // already confirmed (TRUE) is left exactly as they left it.
+    // already confirmed (TRUE) is left exactly as they left it. A transfer is
+    // always filed as one, replacing whatever the classifier guessed, so every
+    // transfer can be found under the same category.
     const query = `
       UPDATE public.${transaction_table} t
       SET is_internal = TRUE,
-          category = COALESCE(t.category, 'Overboekingen')
+          category = 'Overboekingen'
       FROM public.${account_table} a
       WHERE a.details = t.counterparty
         AND t.counterparty IS NOT NULL
@@ -1429,6 +1479,10 @@ class FinanceManager {
         WHERE d.debit_credit = 'Debit'
           AND d.is_internal IS DISTINCT FROM FALSE
           AND c.is_internal IS DISTINCT FROM FALSE
+          -- Both sides already recognised on their counterparty: each is listed
+          -- for review on its own, and proposing the pair would show the same
+          -- movement twice.
+          AND NOT (d.is_internal IS TRUE AND c.is_internal IS TRUE)
           AND NOT EXISTS (
             SELECT 1 FROM public.${transfer_table} t
             WHERE t.from_transaction_id IN (d.id, c.id)
@@ -1504,7 +1558,7 @@ class FinanceManager {
       await client.query(
         `UPDATE public.${transaction_table}
          SET is_internal = TRUE,
-             category = COALESCE(category, $2)
+             category = $2
          WHERE id = ANY($1::int[])`,
         [[fromId, toId], category],
       );

@@ -70,7 +70,7 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
         subtitle="Select a category to see its transactions below"
       />
 
-      <Stack spacing={4} useFlexGap sx={{ mb: 6 }}>
+      <Stack spacing={4} useFlexGap sx={{ mb: 4 }}>
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 2 }}>
             <Typography variant="overline">Income</Typography>
@@ -100,7 +100,7 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
         </Box>
       </Stack>
 
-      <Stack spacing={6} useFlexGap>
+      <Stack spacing={4} useFlexGap>
         <SortableSpendingTable
           title="Income"
           items={result.income}

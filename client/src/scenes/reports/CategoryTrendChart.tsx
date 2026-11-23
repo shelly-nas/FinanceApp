@@ -1,228 +1,199 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { Box, Typography, Chip, Button, useTheme } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
 import {
-  Box, Typography, ToggleButton, ToggleButtonGroup, Chip, useTheme,
-} from '@mui/material';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
 import ChartTooltip from '@/scenes/reports/ChartTooltip';
 import ChartLegend from '@/scenes/reports/ChartLegend';
+import StatRow from '@/scenes/reports/StatRow';
+import CategoryStatsTable from '@/scenes/reports/CategoryStatsTable';
+import { formatCurrency, formatCompact, formatMonthShort } from '@/scenes/reports/chartTheme';
 import {
-  formatCurrency, formatCompact, formatMonthShort, monthsBetween,
-} from '@/scenes/reports/chartTheme';
+  buildCategoryRows, summariseCategories, trendSlope, toneFor, OTHER, OTHER_COLOR,
+} from '@/scenes/reports/reportMath';
 import { useGetCategoryHistoryQuery } from '@/api';
 
 interface Props {
   startDate: string;
   endDate: string;
-  categories?: string[];
+  /** Every category that can be filtered on. */
+  allCategories: string[];
+  /** The selected categories; empty means all. */
+  selected: string[];
+  onToggleCategory: (category: string) => void;
+  onClearCategories: () => void;
 }
 
-/** Beyond this many series the chart stops being readable. */
+/**
+ * The category filter, inside the card it applies to: every category one
+ * click away instead of behind a dropdown.
+ */
+const CategoryFilter: React.FC<Pick<Props, 'allCategories' | 'selected' | 'onToggleCategory' | 'onClearCategories'>> = ({
+  allCategories, selected, onToggleCategory, onClearCategories,
+}) => (
+  <Box
+    role="group"
+    aria-label="Categories"
+    sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', mb: 4 }}
+  >
+    <Button
+      size="small"
+      variant={selected.length === 0 ? 'contained' : 'outlined'}
+      onClick={onClearCategories}
+    >
+      All categories
+    </Button>
+    {allCategories.map((name) => {
+      const on = selected.includes(name);
+      return (
+        <Chip
+          key={name}
+          size="small"
+          label={name}
+          icon={on ? <CheckIcon /> : undefined}
+          color={on ? 'primary' : 'default'}
+          variant={on ? 'filled' : 'outlined'}
+          onClick={() => onToggleCategory(name)}
+          aria-pressed={on}
+        />
+      );
+    })}
+  </Box>
+);
+
+/** Beyond this many series the stack stops being readable. */
 const MAX_SERIES = 8;
-const OTHER = 'Other';
-const OTHER_COLOR = '#8f929b';
 
 /**
- * Spending per category over time.
+ * Spending per category over time: stacked bars for what each month consisted
+ * of, a three-month moving average of the total over them for the direction,
+ * and a table below with the per-category figures and their own trend.
  *
- * Two forms for two questions, because one chart cannot answer both: stacked
- * bars show what a month consisted of and how the total moved, lines follow one
- * category across months without the neighbours shifting its baseline.
- *
- * Series are capped: past eight, the ninth is not given a new colour but folded
- * into "Other", so no category is ever drawn in a hue that means nothing.
- * Categories keep the colour they carry in the database, so a category looks the
- * same here as in the spending breakdown.
+ * Only months with data are drawn. A month that was never imported is not a
+ * month of zero spending, and a zero bar would say it was.
  */
-const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, categories }) => {
+const CategoryTrendChart: React.FC<Props> = ({
+  startDate, endDate, allCategories, selected, onToggleCategory, onClearCategories,
+}) => {
   const { palette } = useTheme();
-  const [form, setForm] = useState<'bar' | 'line'>('bar');
+  const { data: history } = useGetCategoryHistoryQuery({
+    startDate,
+    endDate,
+    categories: selected.length > 0 ? selected : undefined,
+  });
 
-  const { data: history } = useGetCategoryHistoryQuery({ startDate, endDate, categories });
+  const { rows, series, colors, labels } = useMemo(
+    () => buildCategoryRows(history ?? [], MAX_SERIES),
+    [history],
+  );
+  const stats = useMemo(() => summariseCategories(history ?? []), [history]);
 
-  const { rows, series, colors, labels } = useMemo<{
-    rows: Record<string, number | string>[];
-    series: string[];
-    colors: Record<string, string>;
-    labels: Record<string, string>;
-  }>(() => {
-    const points = history ?? [];
-    if (points.length === 0) {
-      return { rows: [], series: [], colors: {}, labels: {} };
-    }
+  const filter = (
+    <CategoryFilter
+      allCategories={allCategories}
+      selected={selected}
+      onToggleCategory={onToggleCategory}
+      onClearCategories={onClearCategories}
+    />
+  );
 
-    // Rank by total spend over the whole period, so the series that matter most
-    // are the ones that keep their own identity.
-    const totals = new Map<string, number>();
-    const colorByCategory: Record<string, string> = {};
-
-    for (const point of points) {
-      const value = Number(point.total);
-      totals.set(point.category, (totals.get(point.category) ?? 0) + value);
-      if (point.color) colorByCategory[point.category] = point.color;
-    }
-
-    const ranked = [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name);
-    const kept = ranked.slice(0, MAX_SERIES);
-    const folded = new Set(ranked.slice(MAX_SERIES));
-
-    // Recharts reads a dataKey as a path expression, so a category name
-    // containing a dot, comma or bracket - "Kleding, Shoppen, Elektronica" -
-    // resolves to nothing and the series silently renders empty. Each series
-    // gets an index-based key instead, with the real name kept for the legend
-    // and tooltip.
-    const seriesNames = folded.size > 0 ? [...kept, OTHER] : kept;
-    const keyByName = new Map(seriesNames.map((name, index) => [name, `s${index}`]));
-
-    const labelByKey: Record<string, string> = {};
-    const colorByKey: Record<string, string> = {};
-    for (const name of seriesNames) {
-      const key = keyByName.get(name)!;
-      labelByKey[key] = name;
-      colorByKey[key] = name === OTHER ? OTHER_COLOR : colorByCategory[name] ?? OTHER_COLOR;
-    }
-
-    // The months come from the requested range rather than the data, so a month
-    // in which nothing happened is a genuine zero instead of a gap.
-    const months = monthsBetween(startDate.slice(0, 7), endDate.slice(0, 7));
-    const byMonth = new Map<string, Record<string, number | string>>(
-      months.map((month) => [month, { month }]),
-    );
-
-    for (const point of points) {
-      const bucket = byMonth.get(point.month);
-      if (!bucket) continue;
-      const key = keyByName.get(folded.has(point.category) ? OTHER : point.category);
-      if (!key) continue;
-      bucket[key] = Number(bucket[key] ?? 0) + Number(point.total);
-    }
-
-    // Zero-fill so a line does not jump the gap and a bar segment is absent
-    // rather than undefined.
-    for (const bucket of byMonth.values()) {
-      for (const key of Object.keys(labelByKey)) {
-        if (bucket[key] === undefined) bucket[key] = 0;
-      }
-    }
-
-    return {
-      rows: months.map((month) => byMonth.get(month)!),
-      series: seriesNames.map((name) => keyByName.get(name)!),
-      colors: colorByKey,
-      labels: labelByKey,
-    };
-  }, [history, startDate, endDate]);
-
-  if (rows.length === 0 || series.length === 0) {
+  if (rows.length === 0) {
     return (
       <DashboardBox>
         <WidgetHeader title="Spending by category" />
-        <Typography variant="body2">
-          No categorised spending in this period.
-        </Typography>
+        {filter}
+        <Typography variant="body2">No data for this period.</Typography>
       </DashboardBox>
     );
   }
 
-  const periodTotal = rows.reduce(
-    (sum, row) => sum + series.reduce((s, name) => s + Number(row[name] ?? 0), 0),
-    0,
-  );
-
-  const axisProps = {
-    tick: { fill: palette.text.secondary, fontSize: 12 },
-    tickLine: false,
-  };
+  const monthTotals = rows.map((row) => series.reduce((sum, key) => sum + Number(row[key] ?? 0), 0));
+  const periodTotal = monthTotals.reduce((sum, value) => sum + value, 0);
+  const slope = trendSlope(monthTotals);
+  const axisTick = { fill: palette.text.secondary, fontSize: 12 };
 
   return (
     <DashboardBox>
       <WidgetHeader
         title="Spending by category"
-        subtitle={
-          <>
-            {formatCurrency(periodTotal)} across {rows.length} month{rows.length === 1 ? '' : 's'} ·{' '}
-            {form === 'bar'
-              ? 'what each month consisted of'
-              : 'each category followed across months'}
-          </>
-        }
+        subtitle="Per month, with the three-month moving average of the total"
         action={
-          <>
-            {Object.values(labels).includes(OTHER) && (
-              <Chip size="small" variant="outlined" label={`Top ${MAX_SERIES} shown, rest as Other`} />
-            )}
-            <ToggleButtonGroup
-              size="small"
-              exclusive
-              value={form}
-              onChange={(_e, next) => next && setForm(next)}
-              aria-label="Chart form"
-            >
-              <ToggleButton value="bar">
-                <BarChartIcon fontSize="small" aria-hidden /> Composition
-              </ToggleButton>
-              <ToggleButton value="line">
-                <ShowChartIcon fontSize="small" aria-hidden /> Trend
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </>
+          Object.values(labels).includes(OTHER) && (
+            <Chip size="small" variant="outlined" label={`Top ${MAX_SERIES}, rest as Other`} />
+          )
         }
       />
 
-      <Box sx={{ width: '100%', height: 340 }}>
+      {filter}
+
+      <StatRow
+        stats={[
+          { label: 'Total', value: formatCurrency(periodTotal), emphasis: true },
+          { label: 'Avg / month', value: formatCurrency(periodTotal / rows.length) },
+          { label: 'High', value: formatCurrency(Math.max(...monthTotals)) },
+          { label: 'Low', value: formatCurrency(Math.min(...monthTotals)) },
+          {
+            label: 'Trend / month',
+            value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}`,
+            // More spending is the bad direction.
+            tone: toneFor(slope, { higherIsBetter: false }),
+          },
+          { label: 'Months', value: String(rows.length) },
+        ]}
+      />
+
+      <Box sx={{ width: '100%', height: 320 }}>
         <ResponsiveContainer>
-          {form === 'bar' ? (
-            <BarChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.divider} />
-              <XAxis dataKey="month" tickFormatter={formatMonthShort} {...axisProps} axisLine={{ stroke: palette.divider }} />
-              <YAxis tickFormatter={formatCompact} {...axisProps} axisLine={false} width={60} />
-              <Tooltip content={<ChartTooltip showTotal />} cursor={{ fill: palette.action.hover }} />
-              <Legend content={<ChartLegend />} />
-              {series.map((name) => (
-                <Bar
-                  key={name}
-                  dataKey={name}
-                  name={labels[name]}
-                  stackId="spend"
-                  fill={colors[name] ?? OTHER_COLOR}
-                  // A 2px line in the surface colour keeps adjacent segments
-                  // from reading as one block.
-                  stroke={palette.background.paper}
-                  strokeWidth={2}
-                />
-              ))}
-            </BarChart>
-          ) : (
-            <LineChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.divider} />
-              <XAxis dataKey="month" tickFormatter={formatMonthShort} {...axisProps} axisLine={{ stroke: palette.divider }} />
-              <YAxis tickFormatter={formatCompact} {...axisProps} axisLine={false} width={60} />
-              <Tooltip content={<ChartTooltip />} cursor={{ stroke: palette.text.secondary, strokeWidth: 1 }} />
-              <Legend content={<ChartLegend />} />
-              {series.map((name) => (
-                <Line
-                  key={name}
-                  // Straight segments, not a spline: a monotone curve between a
-                  // peak and a zero overshoots below the axis, drawing a
-                  // negative cost that never happened.
-                  type="linear"
-                  dataKey={name}
-                  name={labels[name]}
-                  stroke={colors[name] ?? OTHER_COLOR}
-                  strokeWidth={2}
-                  dot={{ r: 3, strokeWidth: 0 }}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: palette.background.paper }}
-                />
-              ))}
-            </LineChart>
-          )}
+          <ComposedChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
+            <CartesianGrid strokeDasharray="2 4" vertical={false} stroke={palette.divider} />
+            <XAxis
+              dataKey="month"
+              tickFormatter={formatMonthShort}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={{ stroke: palette.divider }}
+            />
+            <YAxis tickFormatter={formatCompact} tick={axisTick} tickLine={false} axisLine={false} width={64} />
+            <Tooltip
+              content={<ChartTooltip showTotal derivedKeys={['trend']} />}
+              cursor={{ fill: palette.action.hover }}
+            />
+            <Legend content={<ChartLegend />} />
+            {series.map((key) => (
+              <Bar
+                key={key}
+                dataKey={key}
+                name={labels[key]}
+                stackId="spend"
+                fill={colors[key] ?? OTHER_COLOR}
+                // A 2px line in the surface colour keeps adjacent segments
+                // from reading as one block.
+                stroke={palette.background.paper}
+                strokeWidth={2}
+              />
+            ))}
+            <Line
+              type="linear"
+              dataKey="trend"
+              name="3-month average"
+              stroke={palette.text.primary}
+              strokeWidth={2}
+              strokeDasharray="6 4"
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: palette.background.paper }}
+              // The first two months have no full window; skip them rather
+              // than draw a line from nothing.
+              connectNulls={false}
+            />
+          </ComposedChart>
         </ResponsiveContainer>
+      </Box>
+
+      <Box sx={{ mt: 4 }}>
+        <CategoryStatsTable stats={stats} selected={selected} onToggle={onToggleCategory} />
       </Box>
     </DashboardBox>
   );

@@ -24,7 +24,19 @@ const StatTile: React.FC<Props> = ({ label, value, detail, action, children }) =
       <Typography variant="overline" component="h2">{label}</Typography>
       {action}
     </Box>
-    <Box sx={{ fontSize: 24, fontWeight: 600, lineHeight: 1.2, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', color: 'text.primary' }}>
+    {/* Regular weight: the size already makes it the headline, and bold on
+        every tile made the row heavy. Coloured amounts inside follow suit. */}
+    <Box
+      sx={{
+        fontSize: 24,
+        fontWeight: 400,
+        lineHeight: 1.2,
+        letterSpacing: '-0.02em',
+        fontVariantNumeric: 'tabular-nums',
+        color: 'text.primary',
+        '& .MuiTypography-root': { fontWeight: 'inherit' },
+      }}
+    >
       {value}
     </Box>
     {detail && <Typography variant="body2">{detail}</Typography>}

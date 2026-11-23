@@ -5,7 +5,7 @@ import Sidebar, { Brand } from '@/scenes/layout/Sidebar';
 import ImportDialogs from '@/scenes/layout/ImportDialogs';
 
 const SIDEBAR_WIDTH = 248;
-const TOPBAR_HEIGHT = 56;
+export const TOPBAR_HEIGHT = 56;
 
 /**
  * Sidebar beside the content from `md` up, pinned while the page scrolls.
@@ -77,9 +77,10 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         sx={{
           flex: 1,
           minWidth: 0,
-          px: { xs: 4, sm: 6, md: 8 },
-          pt: { xs: `${TOPBAR_HEIGHT + 24}px`, md: 8 },
-          pb: { xs: 6, md: 8 },
+          // Slim page margins: the cards carry their own padding.
+          px: { xs: 3, sm: 4, md: 6 },
+          pt: { xs: `${TOPBAR_HEIGHT + 16}px`, md: 6 },
+          pb: { xs: 4, md: 6 },
         }}
       >
         <Box sx={{ maxWidth: 1600, mx: 'auto' }}>{children}</Box>

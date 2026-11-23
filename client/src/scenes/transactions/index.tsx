@@ -7,13 +7,14 @@ import {
 import type { SelectChangeEvent } from '@mui/material';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import DashboardBox from '@/components/DashboardBox';
+import StickyBar from '@/components/StickyBar';
 import PageHeader from '@/components/PageHeader';
 import Toast, { ToastMessage } from '@/components/Toast';
 import ImportActions from '@/scenes/layout/ImportActions';
 import TransactionTable from '@/components/TransactionTable';
 import FilterBar from '@/scenes/transactions/FilterBar';
-import TransferSuggestions from '@/scenes/transactions/TransferSuggestions';
-import OneSidedTransfers from '@/scenes/transactions/OneSidedTransfers';
+import TransferReview from '@/scenes/transactions/TransferReview';
+import BulkTagControl from '@/scenes/transactions/BulkTagControl';
 import UnknownAccounts from '@/scenes/transactions/UnknownAccounts';
 import {
   SearchFilters,
@@ -26,6 +27,7 @@ import {
   useDeleteTransactionMutation,
   useBulkUpdateTransactionsMutation,
 } from '@/api';
+import { CARD_PADDING } from '@/components/DashboardBox';
 
 const PAGE_SIZES = [25, 50, 100, 250];
 
@@ -63,6 +65,10 @@ const Transactions: React.FC = () => {
     categories: navState.presetCategory ? [navState.presetCategory] : undefined,
     startDate: navState.presetStart,
     endDate: navState.presetEnd,
+    // Transfers between own accounts are listed, marked with an icon and filed
+    // under Overboekingen. A drill-down from the dashboard hides them, because
+    // the figure it came from leaves them out and the list should add up to it.
+    includeInternal: !navState.presetCategory,
     sortBy: 'date_str',
     sortDir: 'desc',
   }));
@@ -105,7 +111,7 @@ const Transactions: React.FC = () => {
     if (filters.startDate || filters.endDate) count++;
     if (filters.minAmount !== undefined || filters.maxAmount !== undefined) count++;
     if (filters.uncategorised) count++;
-    if (filters.includeInternal) count++;
+    if (!filters.includeInternal) count++;
     return count;
   }, [filters]);
 
@@ -116,7 +122,7 @@ const Transactions: React.FC = () => {
   };
 
   const resetFilters = () => {
-    setFilters({ sortBy: 'date_str', sortDir: 'desc' });
+    setFilters({ includeInternal: true, sortBy: 'date_str', sortDir: 'desc' });
     setPage(0);
     setSelectedIds([]);
   };
@@ -187,7 +193,7 @@ const Transactions: React.FC = () => {
         actions={<ImportActions />}
       />
 
-      <Stack spacing={6} useFlexGap>
+      <Stack spacing={4} useFlexGap>
         {typeof navState.imported === 'number' && (
           <Alert severity={navState.skipped ? 'info' : 'success'}>
             {navState.imported} transactions imported
@@ -201,48 +207,55 @@ const Transactions: React.FC = () => {
         )}
 
         <UnknownAccounts />
-        <OneSidedTransfers transactionIds={navState.transactionIds} />
-        <TransferSuggestions transactionIds={navState.transactionIds} />
+        <TransferReview transactionIds={navState.transactionIds} />
 
         <DashboardBox>
-          <FilterBar
-            filters={filters}
-            onChange={changeFilters}
-            onReset={resetFilters}
-            categories={categories}
-            accounts={accounts ?? []}
-            tags={tags ?? []}
-            activeCount={activeFilterCount}
-          />
+          {/* Filters and the bulk bar stay above the rows while the table
+              scrolls, so a filter can be changed from anywhere in the list. */}
+          <StickyBar surface="paper" sx={{ mx: -CARD_PADDING, px: CARD_PADDING, pt: 2, mt: -2 }}>
+            <FilterBar
+              filters={filters}
+              onChange={changeFilters}
+              onReset={resetFilters}
+              categories={categories}
+              accounts={accounts ?? []}
+              tags={tags ?? []}
+              activeCount={activeFilterCount}
+            />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 4, minHeight: 40, flexWrap: 'wrap' }}>
-            {selectedIds.length > 0 ? (
-              // Bulk bar: only present once something is selected.
-              <>
-                <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>
-                  {selectedIds.length} selected
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2, minHeight: 32, flexWrap: 'wrap' }}>
+              {selectedIds.length > 0 ? (
+                // Bulk bar: only present once something is selected.
+                <>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>
+                    {selectedIds.length} selected
+                  </Typography>
+                  <Select
+                    displayEmpty
+                    value={bulkCategory}
+                    onChange={handleBulkCategory}
+                    inputProps={{ 'aria-label': 'Set category for all selected' }}
+                    sx={{ minWidth: 260 }}
+                  >
+                    <MenuItem value="" disabled>Set category for all selected…</MenuItem>
+                    {categories.map((name) => (
+                      <MenuItem key={name} value={name}>{name}</MenuItem>
+                    ))}
+                  </Select>
+                  <BulkTagControl
+                    ids={selectedIds}
+                    onDone={(message, severity) => setToast({ message, severity })}
+                  />
+                  <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
+                </>
+              ) : (
+                <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                  {range} · click a cell to edit · Enter saves · Esc cancels
                 </Typography>
-                <Select
-                  displayEmpty
-                  value={bulkCategory}
-                  onChange={handleBulkCategory}
-                  inputProps={{ 'aria-label': 'Set category for all selected' }}
-                  sx={{ minWidth: 260 }}
-                >
-                  <MenuItem value="" disabled>Set category for all selected…</MenuItem>
-                  {categories.map((name) => (
-                    <MenuItem key={name} value={name}>{name}</MenuItem>
-                  ))}
-                </Select>
-                <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
-              </>
-            ) : (
-              <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                {range} · Click any cell to edit. Enter saves, Escape cancels.
-              </Typography>
-            )}
-            {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
-          </Box>
+              )}
+              {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
+            </Box>
+          </StickyBar>
 
           {rows.length === 0 ? (
             <Typography variant="body1" sx={{ py: 6 }}>
@@ -276,7 +289,7 @@ const Transactions: React.FC = () => {
                 rowsPerPage={pageSize}
                 rowsPerPageOptions={PAGE_SIZES}
                 onRowsPerPageChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
-                sx={{ mt: 2 }}
+                sx={{ mt: 1 }}
               />
             </>
           )}
