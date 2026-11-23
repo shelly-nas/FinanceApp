@@ -5,7 +5,7 @@ import Sidebar, { Brand } from '@/scenes/layout/Sidebar';
 import ImportDialogs from '@/scenes/layout/ImportDialogs';
 
 const SIDEBAR_WIDTH = 248;
-const TOPBAR_HEIGHT = 56;
+export const TOPBAR_HEIGHT = 56;
 
 /**
  * Sidebar beside the content from `md` up, pinned while the page scrolls.

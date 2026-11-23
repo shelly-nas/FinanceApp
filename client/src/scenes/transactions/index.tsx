@@ -7,6 +7,7 @@ import {
 import type { SelectChangeEvent } from '@mui/material';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import DashboardBox from '@/components/DashboardBox';
+import StickyBar from '@/components/StickyBar';
 import PageHeader from '@/components/PageHeader';
 import Toast, { ToastMessage } from '@/components/Toast';
 import ImportActions from '@/scenes/layout/ImportActions';
@@ -205,44 +206,48 @@ const Transactions: React.FC = () => {
         <TransferSuggestions transactionIds={navState.transactionIds} />
 
         <DashboardBox>
-          <FilterBar
-            filters={filters}
-            onChange={changeFilters}
-            onReset={resetFilters}
-            categories={categories}
-            accounts={accounts ?? []}
-            tags={tags ?? []}
-            activeCount={activeFilterCount}
-          />
+          {/* Filters and the bulk bar stay above the rows while the table
+              scrolls, so a filter can be changed from anywhere in the list. */}
+          <StickyBar surface="paper" sx={{ mx: -6, px: 6, pt: 2, mt: -2 }}>
+            <FilterBar
+              filters={filters}
+              onChange={changeFilters}
+              onReset={resetFilters}
+              categories={categories}
+              accounts={accounts ?? []}
+              tags={tags ?? []}
+              activeCount={activeFilterCount}
+            />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2, minHeight: 32, flexWrap: 'wrap' }}>
-            {selectedIds.length > 0 ? (
-              // Bulk bar: only present once something is selected.
-              <>
-                <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>
-                  {selectedIds.length} selected
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2, minHeight: 32, flexWrap: 'wrap' }}>
+              {selectedIds.length > 0 ? (
+                // Bulk bar: only present once something is selected.
+                <>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>
+                    {selectedIds.length} selected
+                  </Typography>
+                  <Select
+                    displayEmpty
+                    value={bulkCategory}
+                    onChange={handleBulkCategory}
+                    inputProps={{ 'aria-label': 'Set category for all selected' }}
+                    sx={{ minWidth: 260 }}
+                  >
+                    <MenuItem value="" disabled>Set category for all selected…</MenuItem>
+                    {categories.map((name) => (
+                      <MenuItem key={name} value={name}>{name}</MenuItem>
+                    ))}
+                  </Select>
+                  <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
+                </>
+              ) : (
+                <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                  {range} · click a cell to edit · Enter saves · Esc cancels
                 </Typography>
-                <Select
-                  displayEmpty
-                  value={bulkCategory}
-                  onChange={handleBulkCategory}
-                  inputProps={{ 'aria-label': 'Set category for all selected' }}
-                  sx={{ minWidth: 260 }}
-                >
-                  <MenuItem value="" disabled>Set category for all selected…</MenuItem>
-                  {categories.map((name) => (
-                    <MenuItem key={name} value={name}>{name}</MenuItem>
-                  ))}
-                </Select>
-                <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
-              </>
-            ) : (
-              <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                {range} · click a cell to edit · Enter saves · Esc cancels
-              </Typography>
-            )}
-            {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
-          </Box>
+              )}
+              {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
+            </Box>
+          </StickyBar>
 
           {rows.length === 0 ? (
             <Typography variant="body1" sx={{ py: 6 }}>

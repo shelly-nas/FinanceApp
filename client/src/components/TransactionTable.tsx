@@ -217,8 +217,9 @@ const TransactionTable: React.FC<Props> = ({
           '& td.MuiTableCell-paddingCheckbox, & th.MuiTableCell-paddingCheckbox': { py: 0 },
           // The tag picker is a full-height input and would set the height of
           // every row; inside the table it shrinks to the row instead.
-          '& .MuiAutocomplete-root .MuiInputBase-root': { minHeight: 28, py: 0 },
-          '& .MuiAutocomplete-root .MuiInputBase-input': { height: 28 },
+          // Chips and the input share one line instead of wrapping onto two.
+          '& .MuiAutocomplete-root .MuiInputBase-root': { minHeight: 24, py: 0, flexWrap: 'nowrap' },
+          '& .MuiAutocomplete-root .MuiAutocomplete-inputRoot .MuiAutocomplete-input': { height: 24, boxSizing: 'border-box', fontSize: 14 },
           '& .MuiAutocomplete-root .MuiChip-root': { height: 22 },
           '& .MuiIconButton-root': { p: 0.5 },
         },

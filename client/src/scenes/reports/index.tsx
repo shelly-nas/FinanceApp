@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack, Button,
+  Box, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack,
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
-import CheckIcon from '@mui/icons-material/Check';
 import PageHeader from '@/components/PageHeader';
+import StickyBar from '@/components/StickyBar';
 import NetWorthChart from '@/scenes/reports/NetWorthChart';
 import CategoryTrendChart from '@/scenes/reports/CategoryTrendChart';
 import CashflowChart from '@/scenes/reports/CashflowChart';
@@ -81,83 +81,55 @@ const Reports: React.FC = () => {
     <>
       <PageHeader title="Reports" subtitle="How things developed over a period, rather than what one month did" />
 
-      {/* Filters in one row above the charts; both charts follow them. */}
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap', mb: 3 }}>
-        <ToggleButtonGroup
-          exclusive
-          value={preset}
-          onChange={(_e, value) => value && applyPreset(value)}
-          aria-label="Period"
-        >
-          {PRESETS.map((option) => (
-            <ToggleButton key={option.months} value={String(option.months)}>
-              {option.label}
-            </ToggleButton>
-          ))}
-          <ToggleButton value="ytd">This year</ToggleButton>
-        </ToggleButtonGroup>
+      {/* The period applies to every chart, so it stays in view while the
+          page scrolls. Category filters live in the card they apply to. */}
+      <StickyBar sx={{ mb: 4, py: 2 }}>
+        <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <ToggleButtonGroup
+            exclusive
+            value={preset}
+            onChange={(_e, value) => value && applyPreset(value)}
+            aria-label="Period"
+          >
+            {PRESETS.map((option) => (
+              <ToggleButton key={option.months} value={String(option.months)}>
+                {option.label}
+              </ToggleButton>
+            ))}
+            <ToggleButton value="ytd">This year</ToggleButton>
+          </ToggleButtonGroup>
 
-        <TextField
-          type="date"
-          label="From"
-          value={range.startDate}
-          onChange={(e) => {
-            setPreset('custom');
-            setRange((prev) => ({ ...prev, startDate: e.target.value }));
-          }}
-          sx={{ minWidth: 150 }}
-        />
-        <TextField
-          type="date"
-          label="To"
-          value={range.endDate}
-          onChange={(e) => {
-            setPreset('custom');
-            setRange((prev) => ({ ...prev, endDate: e.target.value }));
-          }}
-          sx={{ minWidth: 150 }}
-        />
-
-        {endsThisMonth && (
-          <Chip
-            variant="outlined"
-            icon={<InfoIcon />}
-            label="This month is still running"
-            sx={{ ml: 'auto', height: 40, borderRadius: 2, px: 1 }}
+          <TextField
+            type="date"
+            label="From"
+            value={range.startDate}
+            onChange={(e) => {
+              setPreset('custom');
+              setRange((prev) => ({ ...prev, startDate: e.target.value }));
+            }}
+            sx={{ minWidth: 150 }}
           />
-        )}
-      </Box>
+          <TextField
+            type="date"
+            label="To"
+            value={range.endDate}
+            onChange={(e) => {
+              setPreset('custom');
+              setRange((prev) => ({ ...prev, endDate: e.target.value }));
+            }}
+            sx={{ minWidth: 150 }}
+          />
 
-      {/* Every category one click away, instead of behind a dropdown. None
-          selected means all; the spending chart and its table follow this. */}
-      <Box
-        role="group"
-        aria-label="Categories"
-        sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', mb: 4 }}
-      >
-        <Button
-          size="small"
-          variant={selectedCategories.length === 0 ? 'contained' : 'outlined'}
-          onClick={() => setSelectedCategories([])}
-        >
-          All categories
-        </Button>
-        {categories.map((name) => {
-          const on = selectedCategories.includes(name);
-          return (
+          {endsThisMonth && (
             <Chip
-              key={name}
-              size="small"
-              label={name}
-              icon={on ? <CheckIcon /> : undefined}
-              color={on ? 'primary' : 'default'}
-              variant={on ? 'filled' : 'outlined'}
-              onClick={() => toggleCategory(name)}
-              aria-pressed={on}
+              variant="outlined"
+              icon={<InfoIcon />}
+              label="This month is still running"
+              sx={{ ml: 'auto', height: 40, borderRadius: 2, px: 1 }}
             />
-          );
-        })}
-      </Box>
+          )}
+        </Box>
+      </StickyBar>
 
       <Stack spacing={4} useFlexGap>
         <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
@@ -165,8 +137,10 @@ const Reports: React.FC = () => {
         <CategoryTrendChart
           startDate={range.startDate}
           endDate={range.endDate}
-          categories={selectedCategories.length > 0 ? selectedCategories : undefined}
+          allCategories={categories}
+          selected={selectedCategories}
           onToggleCategory={toggleCategory}
+          onClearCategories={() => setSelectedCategories([])}
         />
       </Stack>
     </>
