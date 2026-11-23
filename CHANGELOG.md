@@ -5,8 +5,6 @@
 
 ### Features
 
-* analytische rapportages, compacter transactieoverzicht, overboekingen en import van meerdere bestanden ([37f362a](https://github.com/shelly-nas/FinanceApp/commit/37f362aea70a1ba65fb9c5a58a8116e2d7a08544))
-* **dashboard:** dashboard filteren op een set rekeningen ([fb24a1a](https://github.com/shelly-nas/FinanceApp/commit/fb24a1a3d4c6e3b845466fac628521ad0c0fe304))
 * **dashboard:** filter the dashboard on a set of accounts ([31a6dd1](https://github.com/shelly-nas/FinanceApp/commit/31a6dd1810b85c2785446d2f950b5d71824db3d1))
 * **import:** import several bank exports at once ([d0617fd](https://github.com/shelly-nas/FinanceApp/commit/d0617fd3dfc8b2a2e3d25ef9900e9ea9ffd9bbb5))
 * **reports:** colour gains green and losses red ([8981e6c](https://github.com/shelly-nas/FinanceApp/commit/8981e6c9d210133c3d8651b18fc9d5c917fc723e))
@@ -23,7 +21,6 @@
 ### Bug Fixes
 
 * **import:** do not mark every transfer when an import adds nothing new ([618e2b2](https://github.com/shelly-nas/FinanceApp/commit/618e2b2885f33ce0e2f1c78c8532361f49be276c))
-* **layout:** pagina's niet meer zijwaarts scrollbaar ([89aeffa](https://github.com/shelly-nas/FinanceApp/commit/89aeffa7cf236080a1e349f2790d17d28775236c))
 * **layout:** stop pages scrolling sideways past their content ([12cf48a](https://github.com/shelly-nas/FinanceApp/commit/12cf48a9409eaf77ee144ddf6b425f445f7bb296))
 * **tags:** stop the tag field flickering when a tag is added ([0e09639](https://github.com/shelly-nas/FinanceApp/commit/0e09639492715601c995e9c2af6ed4799e773aea))
 * **transfers:** file every transfer under Overboekingen ([c1bfaed](https://github.com/shelly-nas/FinanceApp/commit/c1bfaedb8e09e730bf1268b7b5216b3ac864bd34))
