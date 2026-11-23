@@ -7,7 +7,6 @@
 
 * **tags:** borderless tag field in the transaction table ([9cf2d3b](https://github.com/shelly-nas/FinanceApp/commit/9cf2d3ba39b7506b58ef2c73b7a474cc0886a288))
 * **transactions:** mark or unmark a transfer by hand ([2b360c1](https://github.com/shelly-nas/FinanceApp/commit/2b360c124c22cf0cfa4b0df969c48a0e0e7cd8ab))
-* **transactions:** overboeking handmatig markeren en alsnog herkennen ([4059021](https://github.com/shelly-nas/FinanceApp/commit/40590210f2acfb0ea12b8d2a7bf035ab63ddbcd3))
 
 
 ### Bug Fixes
