@@ -199,16 +199,19 @@ describe('imports and transfers', { skip: !hasDatabase && 'no database configure
       assert.equal((stored as any).is_internal, true);
     });
 
-    test('leaves a category the classifier already set', async () => {
-      const { createdIds } = await FinanceManager.addTransactions([
-        row({ name_description: 'Naar spaar', counterparty: SAVINGS, category: 'Boodschappen', amount: 500, date_str: '2026-08-05' }),
-        row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, category: null, debit_credit: 'Credit', amount: 500, date_str: '2026-08-06' }),
-      ]);
+    test('files a confirmed pair under the transfer category even when already categorised', async () => {
+      // The classifier often guesses something else for a transfer - savings,
+      // or a merchant category. Once it is known to be a transfer, that guess
+      // is wrong, and a transfer filed elsewhere is hard to find again.
+      // A distinct amount: an identical pair from an earlier test would be
+      // skipped as a re-import.
+      const pair = transferPair().map((r) => ({ ...r, category: 'Boodschappen', amount: 777 }));
+      const { createdIds } = await FinanceManager.addTransactions(pair);
       await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
 
-      const [stored] = await FinanceManager.getTransactions(undefined, undefined, [createdIds[0]]);
-      assert.equal((stored as any).category, 'Boodschappen');
-      assert.equal((stored as any).is_internal, true, 'still excluded from the summaries');
+      const stored = await FinanceManager.getTransactions(undefined, undefined, createdIds);
+      assert.equal(createdIds.length, 2);
+      assert.deepEqual(stored.map((r: any) => r.category), ['Overboekingen', 'Overboekingen']);
     });
 
     test('refuses to confirm a transaction that is already part of a transfer', async () => {
@@ -490,6 +493,17 @@ describe('one-sided transfers', { skip: !hasDatabase && 'no database configured'
 
     const [stored] = await FinanceManager.getTransactions(undefined, undefined, createdIds);
     assert.equal((stored as any).is_internal, true);
+    assert.equal((stored as any).category, 'Overboekingen');
+  });
+
+  test('files a one-sided transfer under the transfer category even when already categorised', async () => {
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar broker', counterparty: BROKER, category: 'Boodschappen', amount: 777 }),
+    ]);
+
+    await FinanceManager.markCounterpartyTransfers(createdIds);
+
+    const [stored] = await FinanceManager.getTransactions(undefined, undefined, createdIds);
     assert.equal((stored as any).category, 'Overboekingen');
   });
 

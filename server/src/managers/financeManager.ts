@@ -1272,11 +1272,13 @@ class FinanceManager {
     }
 
     // is_internal IS NULL only: a row the user explicitly rejected (FALSE) or
-    // already confirmed (TRUE) is left exactly as they left it.
+    // already confirmed (TRUE) is left exactly as they left it. A transfer is
+    // always filed as one, replacing whatever the classifier guessed, so every
+    // transfer can be found under the same category.
     const query = `
       UPDATE public.${transaction_table} t
       SET is_internal = TRUE,
-          category = COALESCE(t.category, 'Overboekingen')
+          category = 'Overboekingen'
       FROM public.${account_table} a
       WHERE a.details = t.counterparty
         AND t.counterparty IS NOT NULL
@@ -1504,7 +1506,7 @@ class FinanceManager {
       await client.query(
         `UPDATE public.${transaction_table}
          SET is_internal = TRUE,
-             category = COALESCE(category, $2)
+             category = $2
          WHERE id = ANY($1::int[])`,
         [[fromId, toId], category],
       );
