@@ -14,6 +14,7 @@ import ImportActions from '@/scenes/layout/ImportActions';
 import TransactionTable from '@/components/TransactionTable';
 import FilterBar from '@/scenes/transactions/FilterBar';
 import TransferReview from '@/scenes/transactions/TransferReview';
+import BulkTagControl from '@/scenes/transactions/BulkTagControl';
 import UnknownAccounts from '@/scenes/transactions/UnknownAccounts';
 import {
   SearchFilters,
@@ -240,6 +241,10 @@ const Transactions: React.FC = () => {
                       <MenuItem key={name} value={name}>{name}</MenuItem>
                     ))}
                   </Select>
+                  <BulkTagControl
+                    ids={selectedIds}
+                    onDone={(message, severity) => setToast({ message, severity })}
+                  />
                   <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
                 </>
               ) : (
