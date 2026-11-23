@@ -1,6 +1,6 @@
 # Ontwerp: navigatie en filters
 
-Status: **voorstel**, ter bespreking. Nog niets hiervan is gebouwd.
+Status: **akkoord**, wordt gebouwd op de branch `v2` en uitgebracht als 2.0.0.
 Wireframes: [`wireframes.html`](wireframes.html) (bron) en de afbeeldingen in [`img/`](img/).
 
 ## Waarom
@@ -201,8 +201,8 @@ Alles hieronder komt in **één release, 2.0.0**. Gebouwd wordt het wel in stapp
    - Events met de analyse erbij.
    - De dubbele kaart op Accounts verdwijnt.
 
-## Open punten
+## Besluiten
 
-- **Categorieën in het filter: inkomsten ook?** Ja in dit ontwerp. Wie alleen "Vast Inkomen" aanvinkt, ziet dan geen uitgaven: dat is consequent, maar kan verrassen. Alternatief: alleen uitgavencategorieën filterbaar maken.
-- **Events als filter.** Bewust weggelaten. Komt de vraag "hoeveel boodschappen tijdens de vakantie" terug, dan kan een event-filter later als vierde dimensie.
-- **Labels.** De app is Engelstalig. Dit ontwerp houdt dat aan: Overview, Trends, Manage.
+- **Inkomstencategorieën horen in het filter.** Wie alleen "Vast Inkomen" aanvinkt, ziet dan geen uitgaven; dat is consequent.
+- **Geen event-filter in 2.0.** Events staan alleen onder Manage. Een event-filter kan later als vierde dimensie, als de vraag "hoeveel boodschappen tijdens de vakantie" terugkomt.
+- **Labels blijven Engels**, zoals de rest van de app: Overview, Trends, Manage.
