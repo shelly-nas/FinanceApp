@@ -207,6 +207,8 @@ const TransactionTable: React.FC<Props> = ({
     <TableContainer
       sx={{
         overflowX: 'auto',
+        // Contains the visually-hidden header label; see index.css.
+        position: 'relative',
         mx: -CARD_PADDING,
         width: 'auto',
         '& td:first-of-type, & th:first-of-type': { pl: CARD_PADDING },
