@@ -26,9 +26,9 @@ Wat daaruit volgt:
 
 - **Twee zones.** *Insights* is analyseren: alleen lezen, filterbaar. *Manage* is gegevens bijhouden: invoeren, corrigeren, inrichten.
 - **Eén filter voor heel Insights.** Overview en Trends tonen dezelfde selectie. Wisselen tussen de twee houdt de selectie vast.
-- **Filters staan vast in beeld,** in de linkerbalk, met een samenvatting boven de inhoud.
+- **Filters staan vast in beeld,** in de linkerbalk. Boven de inhoud staat geen filterregel; de ondertitel zegt in woorden waar de cijfers over gaan.
 - **Eén begrip, één bediening.** Rekeningen en categorieën kies je overal op dezelfde manier.
-- **Elke stap is los te releasen.** De app staat nooit half verbouwd in productie.
+- **Eén release: 2.0.0.** Alles komt in één keer uit; tot die tijd blijft productie op 1.x (zie *Werkwijze en release*).
 
 ## Navigatie
 
@@ -66,7 +66,7 @@ Events zitten niet in het filter: die gaan volledig naar Manage (zie hieronder).
 - Wijzigingen werken meteen. Er is geen knop "Toepassen".
 - Ingeklapte secties laten zien wat er gekozen is ("3 of 8", "All").
 - **De staat staat in de URL** (`?period=12m&to=2026-10&accounts=…&categories=…`). Herladen, de terugknop en een gedeelde link houden de selectie vast. De rekeningen staan daarnaast in `localStorage`.
-- **Samenvattingsregel** boven de inhoud: elke actieve filter als chip, met ✕ om hem te wissen, plus "Clear filters".
+- **Ondertitel** van de pagina zegt in woorden wat de cijfers beslaan: "October 2026 · 3 of 8 accounts · Boodschappen". Een aparte filterregel boven de inhoud is er niet; het paneel is de plek om te kiezen en te wissen.
 
 ![Filterpaneel in detail](img/03-filterpaneel.png)
 
@@ -91,6 +91,10 @@ Events zitten niet in het filter: die gaan volledig naar Manage (zie hieronder).
 - Bij een periode van één maand valt er per maand niets te zien. Trends toont dan de 12 maanden tot en met die maand en zegt dat in de kop. Zo kom je bij het wisselen nooit op een lege pagina uit.
 
 ![Trends](img/02-trends.png)
+
+### Kerncijfers
+
+De vier kerncijfers van Overview (vermogen, inkomsten, uitgaven, netto) staan in **één compacte strook** in plaats van vier tegels: de vier cijfers naast elkaar, gescheiden door een dunne lijn, met een regel toelichting eronder. Ongeveer de helft van de hoogte, zodat de uitgavenverdeling hoger op de pagina begint. Op mobiel wordt het een blok van 2×2.
 
 ### Drill-down
 
@@ -144,17 +148,13 @@ Inhoudelijk ongewijzigd, als lijst in een kaart volgens het lijstpatroon. Accoun
 
 - De navigatie blijft in de bestaande lade.
 - Het filterpaneel wordt een knop **"Filters · 3"** naast de paginatitel. Die opent het paneel als sheet van onderen, met tikdoelen van minstens 44px en onderaan "Show 48 transactions".
-- De samenvattingschips staan bovenaan de pagina en scrollen horizontaal.
+- De knop zegt hoeveel filters er actief zijn; de ondertitel zegt welke periode.
 
 ![Mobiel](img/08-mobiel.png)
 
 ## Afwijking van de huisstijl
 
-De dataviz-richtlijn zegt: *filters in één rij boven de grafieken*. Met 8 rekeningen en 17 categorieën past dat niet meer in één rij; het werd een muur van chips. Daarom:
-- staat de **selectie** in het linkerpaneel;
-- staat **wat er geselecteerd is** wel in één rij boven de inhoud (de samenvattingsregel).
-
-Zo blijft het doel van de richtlijn overeind: je ziet altijd waar de cijfers over gaan.
+De dataviz-richtlijn zegt: *filters in één rij boven de grafieken*. Met 8 rekeningen en 17 categorieën past dat niet meer in één rij; het werd een muur van chips. De filters staan daarom in het linkerpaneel, dat op Insights-pagina's altijd zichtbaar is. Wat er geselecteerd is, staat in woorden in de ondertitel van de pagina, zodat je ziet waar de cijfers over gaan zonder dat er een extra regel boven de inhoud staat.
 
 ## Gevolgen voor de API
 
@@ -170,22 +170,29 @@ Zo blijft het doel van de richtlijn overeind: je ziet altijd waar de cijfers ove
 
 Alles optioneel en achterwaarts compatibel: zonder parameter blijft het gedrag zoals nu. Er is geen schemawijziging nodig.
 
-## Stappen
+## Werkwijze en release: alles in 2.0.0
 
-Elke stap is een eigen PR en is los te releasen.
+Alles hieronder komt in **één release, 2.0.0**. Gebouwd wordt het wel in stappen, zodat elke stap te reviewen en te testen is.
+
+- **Integratiebranch `v2`**, met een draft-PR `v2` → `main`. Acc draait alleen voor PR's naar `main`, dus elke push naar `v2` zet acc op de nieuwste stand: de 2.0 is daar steeds te bekijken.
+- **Elke stap is een PR naar `v2`.** CI draait op elke push, dus ook daar.
+- **`main` blijft releasebaar.** Een fix voor 1.x kan gewoon uit, en wordt daarna in `v2` gemerged.
+- **Release:** als stap 4 klaar is, gaat `v2` naar `main` met `Release-As: 2.0.0` in de commit. Release-please maakt dan een release-PR voor 2.0.0, en het mergen daarvan zet het in productie.
+
+### Stappen
 
 1. **Gedeelde filterstaat.**
    - Een `InsightsFilter`-context met de staat in de URL.
    - Rekeningen in `localStorage`, als vervanging van de huidige dashboardsleutel.
    - Op de server de parameters uit de tabel hierboven.
    - Dashboard en Reports lezen dezelfde selectie; hun eigen filters verdwijnen.
-   - Zichtbaar verandert er nog weinig. Dit is het fundament.
 2. **Navigatie en filterpaneel.**
-   - Sidebar met Insights en Manage, het filterpaneel en de samenvattingsregel.
+   - Sidebar met Insights en Manage, en het filterpaneel.
    - Mobiel: knop en sheet.
    - Dashboard en Reports heten voortaan Overview en Trends; oude URL's verwijzen door.
 3. **Insights afmaken.**
    - Het periodemodel (totalen tegenover per maand).
+   - De compacte kerncijfers.
    - Drill-down via het filter.
    - "Open in Transactions" met de meegenomen selectie.
 4. **Manage opschonen.**

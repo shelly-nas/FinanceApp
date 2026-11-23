@@ -71,8 +71,6 @@
   .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
   .btn.quiet { border-color: transparent; background: none; }
   .btn.danger { color: var(--error); border-color: #e9b4b0; }
-  .summary { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px; background: var(--surface); border: 1px dashed var(--border-strong); border-radius: 10px; }
-  .summary .lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
   .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 99px; border: 1px solid var(--border-strong); font-size: 12px; color: var(--body); background: var(--surface); white-space: nowrap; }
   .chip.on { background: var(--primary-soft); border-color: var(--primary-soft2); color: var(--primary); font-weight: 600; }
   .chip .x { color: var(--muted); font-weight: 700; }
@@ -84,6 +82,15 @@
   .card .cs { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .ov { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
   .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kstrip { display: grid; grid-template-columns: repeat(4, 1fr); padding: 12px 0; }
+  .kstrip .k { padding: 0 16px; border-left: 1px solid var(--border); min-width: 0; }
+  .kstrip .k:first-child { border-left: 0; }
+  .kstrip .v { font-size: 18px; color: var(--text); margin-top: 2px; font-variant-numeric: tabular-nums; line-height: 1.3; }
+  .kstrip .d { color: var(--muted); font-size: 12px; }
+  .kstrip.m { grid-template-columns: 1fr 1fr; padding: 0; }
+  .kstrip.m .k { padding: 10px 12px; border-left: 0; }
+  .kstrip.m .k:nth-child(2n) { border-left: 1px solid var(--border); }
+  .kstrip.m .k:nth-child(n+3) { border-top: 1px solid var(--border); }
   .kpi .v { font-size: 22px; color: var(--text); margin-top: 6px; font-variant-numeric: tabular-nums; }
   .kpi .d { color: var(--muted); font-size: 12px; margin-top: 2px; }
   .pos { color: var(--success) !important; } .neg { color: var(--error) !important; }
@@ -171,20 +178,11 @@
       <div class="ph-row">
         <div><div class="title">Overview</div><div class="subtitle">October 2026 · 3 of 8 accounts</div></div>
       </div>
-      <div class="summary">
-        <span class="lbl">Showing</span>
-        <span class="chip on">Oct 2026</span>
-        <span class="chip on">Gezamenlijke Betaalrekening <span class="x">✕</span></span>
-        <span class="chip on">Gezamenlijke Spaarrekening <span class="x">✕</span></span>
-        <span class="chip on">Jelle's Spaarrekening <span class="x">✕</span></span>
-        <span class="chip">All categories</span>
-        <span class="btn quiet" style="margin-left:auto;height:24px">Clear filters</span>
-      </div>
-      <div class="kpis">
-        <div class="card kpi"><div class="ov">Net worth</div><div class="v">€ 18.420,55</div><div class="d">3 accounts · as of 31 Oct</div></div>
-        <div class="card kpi"><div class="ov">Income</div><div class="v pos">+€ 4.950,00</div><div class="d">€ 4.950 fixed</div></div>
-        <div class="card kpi"><div class="ov">Expenses</div><div class="v neg">−€ 3.112,40</div><div class="d">incl. € 500 to Jelle's Betaal</div></div>
-        <div class="card kpi"><div class="ov">Net income</div><div class="v pos">+€ 1.837,60</div><div class="d">37.1% saved</div></div>
+      <div class="card kstrip">
+        <div class="k"><div class="ov">Net worth</div><div class="v">€ 18.420,55</div><div class="d">3 accounts · 31 Oct</div></div>
+        <div class="k"><div class="ov">Income</div><div class="v pos">+€ 4.950,00</div><div class="d">€ 4.950 fixed</div></div>
+        <div class="k"><div class="ov">Expenses</div><div class="v neg">−€ 3.112,40</div><div class="d">incl. € 500 to Jelle's Betaal</div></div>
+        <div class="k"><div class="ov">Net income</div><div class="v pos">+€ 1.837,60</div><div class="d">37.1% saved</div></div>
       </div>
       <div class="card">
         <div class="ch"><div><h3>Spending breakdown</h3><div class="cs">Click a category to filter everything on it</div></div></div>
@@ -204,17 +202,19 @@
           <tr><td>2026-10-27</td><td>Albert Heijn</td><td class="r neg">−€ 82,00</td><td>Boodschappen</td><td>Gezamenlijke Betaalrekening</td></tr>
         </table>
       </div>
-      <span class="pin" style="left:6px;top:102px">3</span>
-      <span class="pin" style="left:262px;top:450px">4</span>
-      <span class="pin" style="left:778px;top:560px">5</span>
+      <span class="pin" style="left:232px;top:56px">3</span>
+      <span class="pin" style="left:242px;top:370px">4</span>
+      <span class="pin" style="left:790px;top:480px">5</span>
+      <span class="pin" style="left:4px;top:110px">6</span>
     </main>
   </div>
   <ol class="legend">
     <li value="1">One filter for all of Insights. Kept when switching between Overview and Trends.</li>
     <li value="2">Grouped by type, like the "Per account" list. Remembered between visits.</li>
-    <li value="3">The active filters, always visible above the figures, removable one by one.</li>
+    <li value="3">The subtitle says in words what the figures cover. The selection itself lives in the panel only.</li>
     <li value="4">Drill-down sets the category filter, so Trends follows too.</li>
     <li value="5">Carries the selection to Manage → Transactions.</li>
+    <li value="6">Key figures as one compact strip instead of four tiles: half the height, same four numbers.</li>
   </ol>
 </section>
 
@@ -249,13 +249,6 @@
     </aside>
     <main class="main rel">
       <div class="ph-row"><div><div class="title">Trends</div><div class="subtitle">Nov 2025 – Oct 2026, per month · 3 of 8 accounts · Boodschappen</div></div></div>
-      <div class="summary">
-        <span class="lbl">Showing</span>
-        <span class="chip on">Nov 2025 – Oct 2026</span>
-        <span class="chip on">3 accounts <span class="x">✕</span></span>
-        <span class="chip on">Boodschappen <span class="x">✕</span></span>
-        <span class="btn quiet" style="margin-left:auto;height:24px">Clear filters</span>
-      </div>
       <div class="grid2">
         <div class="card"><div class="ch"><div><h3>Net worth</h3><div class="cs">Selected accounts, at each month end</div></div></div>
           <div style="display:flex;gap:24px;margin-bottom:8px"><div><div class="ov">Now</div><div style="font-size:18px;color:var(--text)">€ 18.420</div></div><div><div class="ov">Change</div><div class="pos" style="font-weight:600">+€ 3.310 (+21.9%)</div></div></div>
@@ -274,13 +267,13 @@
           <tr><td>Boodschappen</td><td class="r">€ 6.910,40</td><td class="r">€ 575,87</td><td class="r">€ 482,10</td><td class="r">€ 688,00</td><td class="r neg">+€ 9,40</td><td><svg width="90" height="18"><polyline fill="none" stroke="#8cc2b3" stroke-width="1.5" points="0,12 8,9 16,13 24,6 32,10 40,11 48,4 56,9 64,7 72,10 80,5 88,8"/></svg></td></tr>
         </table>
       </div>
-      <span class="pin" style="left:450px;top:102px">1</span>
-      <span class="pin" style="left:452px;top:46px">2</span>
+      <span class="pin" style="left:452px;top:56px">1</span>
+      <span class="pin" style="left:4px;top:56px">2</span>
     </main>
   </div>
   <ol class="legend">
     <li value="1">Same selection as Overview: the accounts and the Boodschappen filter came along.</li>
-    <li value="2">With a 1-month period, Trends shows the 12 months up to it and says so here.</li>
+    <li value="2">With a 1-month period, Trends shows the 12 months up to it and says so in the subtitle.</li>
   </ol>
 </section>
 
@@ -517,9 +510,12 @@
       <div class="topbar"><span style="font-size:20px">☰</span><div class="logo" style="width:26px;height:26px">€</div><b style="color:var(--text)">Finance</b></div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
         <div style="display:flex;justify-content:space-between;align-items:flex-end"><div><div class="title" style="font-size:22px">Overview</div><div class="subtitle">October 2026</div></div><span class="btn">Filters · 3</span></div>
-        <div style="display:flex;gap:6px;overflow:hidden"><span class="chip on">Oct 2026</span><span class="chip on">Gezamenlijke Betaal… ✕</span><span class="chip on">+2</span></div>
-        <div class="card kpi"><div class="ov">Net worth</div><div class="v">€ 18.420,55</div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="card kpi"><div class="ov">Income</div><div class="v pos" style="font-size:18px">+€ 4.950</div></div><div class="card kpi"><div class="ov">Expenses</div><div class="v neg" style="font-size:18px">−€ 3.112</div></div></div>
+        <div class="card kstrip m">
+          <div class="k"><div class="ov">Net worth</div><div class="v">€ 18.420</div></div>
+          <div class="k"><div class="ov">Net income</div><div class="v pos">+€ 1.838</div></div>
+          <div class="k"><div class="ov">Income</div><div class="v pos">+€ 4.950</div></div>
+          <div class="k"><div class="ov">Expenses</div><div class="v neg">−€ 3.112</div></div>
+        </div>
         <div class="card"><h3>Spending breakdown</h3><div class="bar" style="margin:10px 0"><i style="width:37%;background:#d55e8a"></i><i style="width:19%;background:#8cc2b3"></i><i style="width:16%;background:#c2b2d1"></i></div><table><tr><td>Woonlasten</td><td class="r">€ 1.150</td></tr><tr><td>Boodschappen</td><td class="r">€ 592</td></tr></table></div>
       </div>
     </div>
