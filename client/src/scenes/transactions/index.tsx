@@ -27,6 +27,7 @@ import {
   useDeleteTransactionMutation,
   useBulkUpdateTransactionsMutation,
 } from '@/api';
+import { CARD_PADDING } from '@/components/DashboardBox';
 
 const PAGE_SIZES = [25, 50, 100, 250];
 
@@ -211,7 +212,7 @@ const Transactions: React.FC = () => {
         <DashboardBox>
           {/* Filters and the bulk bar stay above the rows while the table
               scrolls, so a filter can be changed from anywhere in the list. */}
-          <StickyBar surface="paper" sx={{ mx: -6, px: 6, pt: 2, mt: -2 }}>
+          <StickyBar surface="paper" sx={{ mx: -CARD_PADDING, px: CARD_PADDING, pt: 2, mt: -2 }}>
             <FilterBar
               filters={filters}
               onChange={changeFilters}

@@ -72,7 +72,7 @@ const KeyFigures: React.FC = () => {
         // Four across on a wide screen, two on a tablet, one on a phone.
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
         alignItems: 'stretch',
-        gap: 6,
+        gap: 4,
       }}
     >
       <StatTile

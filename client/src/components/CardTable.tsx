@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Table } from '@mui/material';
+import { CARD_PADDING } from '@/components/DashboardBox';
 
 /**
  * A table inside a card. It runs to the card's edges, so row hovers and rules
@@ -12,13 +13,13 @@ const CardTable: React.FC<{
   /** Tight rows on a desktop, as in the transaction table. Touch keeps the default. */
   dense?: boolean;
 }> = ({ children, minWidth, dense }) => (
-  <Box sx={{ overflowX: 'auto', mx: -6 }}>
+  <Box sx={{ overflowX: 'auto', mx: -CARD_PADDING }}>
     <Table
       size="small"
       sx={{
         minWidth,
-        '& td:first-of-type, & th:first-of-type': { pl: 6 },
-        '& td:last-of-type, & th:last-of-type': { pr: 6 },
+        '& td:first-of-type, & th:first-of-type': { pl: CARD_PADDING },
+        '& td:last-of-type, & th:last-of-type': { pr: CARD_PADDING },
         ...(dense
           ? {
               '@media (pointer: fine)': {

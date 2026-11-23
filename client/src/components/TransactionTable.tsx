@@ -9,6 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { TransactionRow } from '@/api';
 import TagPicker from '@/components/TagPicker';
+import { CARD_PADDING } from '@/components/DashboardBox';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(value);
@@ -206,10 +207,10 @@ const TransactionTable: React.FC<Props> = ({
     <TableContainer
       sx={{
         overflowX: 'auto',
-        mx: -6,
+        mx: -CARD_PADDING,
         width: 'auto',
-        '& td:first-of-type, & th:first-of-type': { pl: 6 },
-        '& td:last-of-type, & th:last-of-type': { pr: 6 },
+        '& td:first-of-type, & th:first-of-type': { pl: CARD_PADDING },
+        '& td:last-of-type, & th:last-of-type': { pr: CARD_PADDING },
         // Dense rows on a desktop: more transactions per screen for someone
         // scanning them. Touch screens keep the roomier default.
         '@media (pointer: fine)': {

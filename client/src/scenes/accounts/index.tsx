@@ -168,7 +168,7 @@ const Accounts: React.FC = () => {
         }
       />
 
-      <Stack spacing={6} useFlexGap>
+      <Stack spacing={4} useFlexGap>
         {/* Accounts seen in imports but not yet named */}
         {unknown && unknown.length > 0 && (
           <DashboardBox>

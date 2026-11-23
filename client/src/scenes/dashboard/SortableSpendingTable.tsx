@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableSortLabel, TableBody } from '@mui/material';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import { CategorySums } from '@/scenes/dashboard/SpendingBreakdown';
+import { CARD_PADDING } from '@/components/DashboardBox';
 
 interface SortableSpendingTableProps {
   title: string;
@@ -39,11 +40,11 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
   );
 
   return (
-    <TableContainer sx={{ overflowX: 'auto', mx: -6, width: 'auto' }}>
+    <TableContainer sx={{ overflowX: 'auto', mx: -CARD_PADDING, width: 'auto' }}>
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ width: '28%', minWidth: 170, pl: 6 }}>{title}</TableCell>
+            <TableCell sx={{ width: '28%', minWidth: 170, pl: CARD_PADDING }}>{title}</TableCell>
             <TableCell sx={{ width: '42%', minWidth: 100 }}>
               <span className="visually-hidden">Share</span>
             </TableCell>
@@ -56,7 +57,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
                 Total
               </TableSortLabel>
             </TableCell>
-            <TableCell align="right" sx={{ minWidth: 96, pr: 6 }}>
+            <TableCell align="right" sx={{ minWidth: 96, pr: CARD_PADDING }}>
               <TableSortLabel
                 active={orderBy === 'percentage'}
                 direction={orderBy === 'percentage' ? order : 'desc'}
@@ -94,7 +95,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
                   '&:focus-visible': { outline: (theme) => `2px solid ${theme.palette.primary.main}`, outlineOffset: -2 },
                 }}
               >
-                <TableCell sx={{ ...cellSx, pl: 6 }}>{item.category}</TableCell>
+                <TableCell sx={{ ...cellSx, pl: CARD_PADDING }}>{item.category}</TableCell>
                 <TableCell>
                   <MultiColorProgress
                     segments={[{ value: share, color: item.color, name: item.category }]}
@@ -104,7 +105,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
                 <TableCell align="right" sx={{ ...cellSx, fontVariantNumeric: 'tabular-nums' }}>
                   {formatCurrency(item.total_amount)}
                 </TableCell>
-                <TableCell align="right" sx={{ ...cellSx, fontVariantNumeric: 'tabular-nums', pr: 6 }}>
+                <TableCell align="right" sx={{ ...cellSx, fontVariantNumeric: 'tabular-nums', pr: CARD_PADDING }}>
                   {formatPercentage(share)}
                 </TableCell>
               </TableRow>
