@@ -231,10 +231,10 @@ router.get('/transactions', async (req: Request, res: Response, next: NextFuncti
 
 
 /**
- * The optional `accounts` query parameter: a JSON array of account identifiers.
- * Undefined when absent, null when it is not a list of strings.
+ * An optional list query parameter (`accounts`, `categories`): a JSON array of
+ * strings. Undefined when absent, null when it is not a list of strings.
  */
-const parseAccountList = (value: unknown): string[] | undefined | null => {
+const parseStringList = (value: unknown): string[] | undefined | null => {
   if (value === undefined) return undefined;
   try {
     const parsed = JSON.parse(value as string);
@@ -246,13 +246,14 @@ const parseAccountList = (value: unknown): string[] | undefined | null => {
 
 router.get('/category-sums', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
-  const accounts = parseAccountList(req.query.accounts);
-  if (accounts === null) {
-    return res.status(400).json({ error: 'accounts must be a JSON array of account identifiers' });
+  const accounts = parseStringList(req.query.accounts);
+  const categories = parseStringList(req.query.categories);
+  if (accounts === null || categories === null) {
+    return res.status(400).json({ error: 'accounts and categories must be JSON arrays of strings' });
   }
 
   try {
-    const categorySums = await FinanceManager.getCategorySums(startDate as string, endDate as string, accounts);
+    const categorySums = await FinanceManager.getCategorySums(startDate as string, endDate as string, accounts, categories);
     res.status(200).json(categorySums);
   } catch (error) {
     next(error);
@@ -261,13 +262,14 @@ router.get('/category-sums', async (req: Request, res: Response, next: NextFunct
 
 router.get('/income-expenses-sum', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
-  const accounts = parseAccountList(req.query.accounts);
-  if (accounts === null) {
-    return res.status(400).json({ error: 'accounts must be a JSON array of account identifiers' });
+  const accounts = parseStringList(req.query.accounts);
+  const categories = parseStringList(req.query.categories);
+  if (accounts === null || categories === null) {
+    return res.status(400).json({ error: 'accounts and categories must be JSON arrays of strings' });
   }
 
   try {
-    const categorySums = await FinanceManager.getIncomeExpensesSum(startDate as string, endDate as string, accounts);
+    const categorySums = await FinanceManager.getIncomeExpensesSum(startDate as string, endDate as string, accounts, categories);
     res.status(200).json(categorySums);
   } catch (error) {
     next(error);
@@ -359,8 +361,14 @@ router.get('/reports/cashflow', async (req: Request, res: Response, next: NextFu
     return res.status(400).json({ error: 'startDate must not be after endDate' });
   }
 
+  const accounts = parseStringList(req.query.accounts);
+  const categories = parseStringList(req.query.categories);
+  if (accounts === null || categories === null) {
+    return res.status(400).json({ error: 'accounts and categories must be JSON arrays of strings' });
+  }
+
   try {
-    res.status(200).json(await FinanceManager.getCashflowHistory(startDate as string, endDate as string));
+    res.status(200).json(await FinanceManager.getCashflowHistory(startDate as string, endDate as string, { accounts, categories }));
   } catch (error) {
     next(error);
   }
@@ -378,8 +386,13 @@ router.get('/net-worth-history', async (req: Request, res: Response, next: NextF
     return res.status(400).json({ error: 'startDate must not be after endDate' });
   }
 
+  const accounts = parseStringList(req.query.accounts);
+  if (accounts === null) {
+    return res.status(400).json({ error: 'accounts must be a JSON array of account identifiers' });
+  }
+
   try {
-    const history = await FinanceManager.getNetWorthHistory(startDate as string, endDate as string);
+    const history = await FinanceManager.getNetWorthHistory(startDate as string, endDate as string, accounts);
     res.status(200).json(history);
   } catch (error) {
     next(error);

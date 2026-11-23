@@ -202,6 +202,64 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
       await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
     };
 
+    test('narrows the breakdown to the selected categories', async () => {
+      await FinanceManager.addTransactions([
+        row({ amount: 100 }),
+        row({ category: 'Vast Inkomen', debit_credit: 'Credit', amount: 1000, name_description: 'Salaris' }),
+      ]);
+
+      const sums = await FinanceManager.getCategorySums('2026-08-01', '2026-08-31', undefined, ['Boodschappen']);
+      assert.deepEqual(sums.map((r: any) => r.category), ['Boodschappen']);
+    });
+
+    test('narrows income and expenses to the selected categories', async () => {
+      await FinanceManager.addTransactions([
+        row({ amount: 100 }),
+        row({ category: 'Vast Inkomen', debit_credit: 'Credit', amount: 1000, name_description: 'Salaris' }),
+      ]);
+
+      const sums = await FinanceManager.getIncomeExpensesSum('2026-08-01', '2026-08-31', undefined, ['Boodschappen']);
+      const income = sums.reduce((t: number, r: any) => t + Number(r.income), 0);
+      const expenses = sums.reduce((t: number, r: any) => t + Number(r.expenses), 0);
+      assert.deepEqual([income, expenses], [0, 100]);
+    });
+
+    test('builds net worth from the selected accounts only', async () => {
+      await FinanceManager.addTransactions([row({ amount: 100 })]);
+
+      const [august] = await FinanceManager.getNetWorthHistory('2026-08-01', '2026-08-31', [CHECKING]);
+      assert.equal(Number(august.net_worth), 900, '1000 opening - 100, savings left out');
+    });
+
+    test('counts a transfer leaving the selection in the cash flow', async () => {
+      await moveToSavings();
+
+      const [august] = await FinanceManager.getCashflowHistory('2026-08-01', '2026-08-31', { accounts: [CHECKING] });
+      assert.equal(Number(august.expenses), 500);
+      assert.deepEqual(
+        await FinanceManager.getCashflowHistory('2026-08-01', '2026-08-31', { accounts: [CHECKING, SAVINGS] }),
+        [],
+        'within the selection it is money moved, not spent',
+      );
+    });
+
+    test('narrows the cash flow to the selected categories', async () => {
+      await FinanceManager.addTransactions([
+        row({ amount: 100 }),
+        row({ category: 'Vast Inkomen', debit_credit: 'Credit', amount: 1000, name_description: 'Salaris' }),
+      ]);
+
+      const [august] = await FinanceManager.getCashflowHistory('2026-08-01', '2026-08-31', { categories: ['Vast Inkomen'] });
+      assert.deepEqual([Number(august.income), Number(august.expenses)], [1000, 0]);
+    });
+
+    test('shows a transfer leaving the selection in the category history', async () => {
+      await moveToSavings();
+
+      const history = await FinanceManager.getCategoryHistory('2026-08-01', '2026-08-31', { accounts: [CHECKING] });
+      assert.deepEqual(history.map((r: any) => [r.category, Number(r.total)]), [['Overboekingen', 500]]);
+    });
+
     test('counts only the selected accounts', async () => {
       await FinanceManager.addTransactions([
         row({ amount: 100 }),
