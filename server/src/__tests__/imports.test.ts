@@ -506,6 +506,27 @@ describe('one-sided transfers', { skip: !hasDatabase && 'no database configured'
     assert.equal((stored as any).category, 'Overboekingen');
   });
 
+  test('marks earlier transactions once their counterparty is added as an account', async () => {
+    const LATER = 'NL00TEST0000000009';
+    const { createdIds } = await FinanceManager.addTransactions([
+      row({ name_description: 'Naar nieuwe rekening', counterparty: LATER, category: null, amount: 120 }),
+    ]);
+    const client = await dbContext.connect();
+    try {
+      await client.query('DELETE FROM accounts WHERE details = $1', [LATER]);
+    } finally {
+      client.release();
+    }
+
+    await FinanceManager.createAccount({
+      account_type: 'Savings Account', account_name: 'Later toegevoegd', details: LATER, balance_when_created: 0,
+    });
+
+    const [stored] = await FinanceManager.getTransactions(undefined, undefined, createdIds);
+    assert.equal((stored as any).is_internal, true);
+    assert.equal((stored as any).category, 'Overboekingen');
+  });
+
   test('marks nothing for an import in which every row was already stored', async () => {
     // An empty list of new rows means "nothing new", not "everything": a
     // re-import of a known file must not reclassify the whole history.

@@ -1198,6 +1198,7 @@ class FinanceManager {
       RETURNING *;
     `;
 
+    let created;
     try {
       const result = await client.query(query, [
         account.account_type,
@@ -1205,10 +1206,14 @@ class FinanceManager {
         account.details,
         account.balance_when_created ?? 0,
       ]);
-      return result.rows[0];
+      created = result.rows[0];
     } finally {
       client.release();
     }
+    // Transactions imported before this account existed name it as their
+    // counterparty without having been recognised as transfers; they are now.
+    await this.markCounterpartyTransfers();
+    return created;
   }
 
   public async updateAccount(id: string, updates: { [key: string]: any }): Promise<any> {
@@ -1225,6 +1230,7 @@ class FinanceManager {
 
     const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
     const values = entries.map(([, value]) => value);
+    let updated;
 
     try {
       await client.query('BEGIN');
@@ -1255,6 +1261,7 @@ class FinanceManager {
       // revert to the opening figure.
       const oldDetails = before.rows[0].details;
       const newDetails = result.rows[0].details;
+      updated = result.rows[0];
 
       if (oldDetails !== newDetails) {
         await client.query(
@@ -1268,13 +1275,15 @@ class FinanceManager {
       }
 
       await client.query('COMMIT');
-      return result.rows[0];
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
       client.release();
     }
+    // A new identifier may be the counterparty of earlier transactions.
+    await this.markCounterpartyTransfers();
+    return updated;
   }
 
   /**
