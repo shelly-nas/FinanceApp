@@ -10,9 +10,11 @@ import { useNavigate } from 'react-router-dom';
 
 interface TransactionDetailsProps {
   selectedCategory: string | null;
+  /** The accounts to cover; undefined for all. */
+  accounts?: string[];
 }
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory }) => {
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory, accounts }) => {
   const { firstDay, lastDay } = useDateRange();
   const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
       startDate: formatDate(firstDay),
       endDate: formatDate(lastDay),
       categories: selectedCategory ? [selectedCategory] : undefined,
+      accounts,
       limit: 500,
     },
     { skip: !selectedCategory },
@@ -38,6 +41,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
         presetCategory: selectedCategory,
         presetStart: formatDate(firstDay),
         presetEnd: formatDate(lastDay),
+        presetAccounts: accounts,
       },
     });
   };

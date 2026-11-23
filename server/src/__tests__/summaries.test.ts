@@ -44,7 +44,8 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
           ('Boodschappen', '#8cc2b3', 'Vast', 'Uitgaven'),
           ('Vast Inkomen', '#8fc069', 'Vast', 'Inkomsten'),
           ('Sparen, Beleggen', '#88a2a6', 'Variabel', 'Uitgaven'),
-          ('Variabel Inkomen', '#80bfb4', 'Variabel', 'Inkomsten')
+          ('Variabel Inkomen', '#80bfb4', 'Variabel', 'Inkomsten'),
+          ('Overboekingen', '#c2b2d1', 'Variabel', 'Uitgaven')
         ON CONFLICT (category_name) DO NOTHING;
       `);
       await client.query(
@@ -188,6 +189,59 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
       const [stored] = await FinanceManager.getTransactions('2026-08-01', '2026-08-31');
       const serialised = JSON.parse(JSON.stringify(stored));
       assert.equal(serialised.date_str, '2026-08-31');
+    });
+  });
+
+  describe('account selection', () => {
+    // A transfer from checking to savings, confirmed as a pair.
+    const moveToSavings = async () => {
+      const { createdIds } = await FinanceManager.addTransactions([
+        row({ name_description: 'Naar spaar', counterparty: SAVINGS, amount: 500 }),
+        row({ name_description: 'Van betaal', account: SAVINGS, counterparty: CHECKING, debit_credit: 'Credit', amount: 500 }),
+      ]);
+      await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
+    };
+
+    test('counts only the selected accounts', async () => {
+      await FinanceManager.addTransactions([
+        row({ amount: 100 }),
+        row({ account: SAVINGS, amount: 40, name_description: 'Spaar kosten' }),
+      ]);
+
+      const sums = await FinanceManager.getCategorySums('2026-08-01', '2026-08-31', [CHECKING]);
+      const groceries = sums.find((r: any) => r.category === 'Boodschappen');
+      assert.equal(Number(groceries.total_amount), -100);
+    });
+
+    test('counts a transfer to an account outside the selection as money out', async () => {
+      await moveToSavings();
+
+      const sums = await FinanceManager.getIncomeExpensesSum('2026-08-01', '2026-08-31', [CHECKING]);
+      const expenses = sums.reduce((total: number, r: any) => total + Number(r.expenses), 0);
+      assert.equal(expenses, 500, 'the money left the selected account');
+    });
+
+    test('leaves out a transfer between two selected accounts', async () => {
+      await moveToSavings();
+
+      const sums = await FinanceManager.getIncomeExpensesSum('2026-08-01', '2026-08-31', [CHECKING, SAVINGS]);
+      const moved = sums.reduce((total: number, r: any) => total + Number(r.expenses) + Number(r.income), 0);
+      assert.equal(moved, 0);
+    });
+
+    test('leaves out every transfer without a selection, as before', async () => {
+      await moveToSavings();
+
+      assert.deepEqual(await FinanceManager.getCategorySums('2026-08-01', '2026-08-31'), []);
+    });
+
+    test('finds the outside transfer in the drill-down for the selection', async () => {
+      await moveToSavings();
+
+      const { rows } = await FinanceManager.searchTransactions({
+        startDate: '2026-08-01', endDate: '2026-08-31', accounts: [CHECKING],
+      });
+      assert.deepEqual(rows.map((r: any) => r.name_description), ['Naar spaar']);
     });
   });
 

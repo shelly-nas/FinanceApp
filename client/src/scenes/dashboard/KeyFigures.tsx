@@ -35,7 +35,7 @@ const splitByType = (items: IncomeExpenseItem[], key: 'income' | 'expenses') =>
  * a side column; as tiles they read first and give the tables below the full
  * width.
  */
-const KeyFigures: React.FC = () => {
+const KeyFigures: React.FC<{ accounts?: string[] }> = ({ accounts: selection }) => {
   const { firstDay, lastDay } = useDateRange();
   const [visible, setVisible] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
@@ -45,9 +45,11 @@ const KeyFigures: React.FC = () => {
   const { data: periodData } = useGetIncomeExpensesSumQuery({
     startDate: formatDate(firstDay),
     endDate: formatDate(lastDay),
+    accounts: selection,
   });
 
-  const accounts = accountData ?? [];
+  // Net worth and the per-account list cover the selected accounts only.
+  const accounts = (accountData ?? []).filter((a) => !selection || selection.includes(a.details));
   const items = (periodData ?? []) as IncomeExpenseItem[];
 
   const netWorth = accounts.reduce((total, a) => total + parseFloat(a.current_balance), 0);

@@ -10,6 +10,30 @@ const tag_table = "tags";
 const transaction_tag_table = "transaction_tags";
 const transfer_table = "transfers";
 
+/**
+ * Which transfers between the user's own accounts to leave out of a total.
+ *
+ * Without an account selection, all of them: money moved is not money spent or
+ * earned. With one, only those that stay inside the selection. A transfer to
+ * an account outside it did leave the selection, so for that set of accounts
+ * it is money out (or in), and it counts.
+ *
+ * The other side is the paired row's account for a confirmed pair, else the
+ * counterparty. `accountsParam` is the placeholder of the selection, e.g. '$1'.
+ */
+const internalScope = (alias: string, accountsParam?: string): string =>
+  accountsParam === undefined
+    ? `${alias}.is_internal IS NOT TRUE`
+    : `(${alias}.is_internal IS NOT TRUE OR NOT (COALESCE((
+          SELECT o.account
+          FROM public.${transfer_table} tr
+          JOIN public.${transaction_table} o
+            ON o.id = CASE WHEN tr.from_transaction_id = ${alias}.id
+                           THEN tr.to_transaction_id ELSE tr.from_transaction_id END
+          WHERE ${alias}.id IN (tr.from_transaction_id, tr.to_transaction_id)
+          LIMIT 1
+        ), ${alias}.counterparty, '') = ANY(${accountsParam}::text[])))`;
+
 export interface ImportResult {
   createdIds: number[];
   imported: number;
@@ -195,6 +219,7 @@ class FinanceManager {
     const client = await dbContext.connect();
     const params: any[] = [];
     const where: string[] = ['1=1'];
+    let accountsParam: string | undefined;
 
     const add = (value: any) => {
       params.push(value);
@@ -222,7 +247,8 @@ class FinanceManager {
     }
 
     if (filters.accounts && filters.accounts.length > 0) {
-      where.push(`t.account = ANY(${add(filters.accounts)}::text[])`);
+      accountsParam = add(filters.accounts);
+      where.push(`t.account = ANY(${accountsParam}::text[])`);
     }
 
     if (filters.tagIds && filters.tagIds.length > 0) {
@@ -242,7 +268,9 @@ class FinanceManager {
     // Confirmed transfers are money moved rather than spent. They stay out of
     // the default view for the same reason they stay out of the summaries, but
     // remain findable when explicitly asked for.
-    if (!filters.includeInternal) where.push('t.is_internal IS NOT TRUE');
+    // With an account selection, a transfer leaving it is listed: it is what
+    // the dashboard counts for that selection.
+    if (!filters.includeInternal) where.push(internalScope('t', accountsParam));
 
     const whereClause = where.join(' AND ');
 
@@ -412,9 +440,12 @@ class FinanceManager {
     }
   }
 
-  public async getCategorySums(startDate?: string, endDate?: string): Promise<any[]> {
+  public async getCategorySums(startDate?: string, endDate?: string, accounts?: string[]): Promise<any[]> {
     const client = await dbContext.connect();
     const params: any[] = [];
+    // The account selection, when there is one, is always $1.
+    const selection = accounts && accounts.length > 0 ? '$1' : undefined;
+    if (selection) params.push(accounts);
 
     let query = `
       SELECT 
@@ -434,11 +465,13 @@ class FinanceManager {
       WHERE 
         1=1
         -- Confirmed transfers between the user's own accounts are money moved,
-        -- not money spent or earned, so they must not reach a breakdown.
-        AND ja.is_internal IS NOT TRUE
+        -- not money spent or earned, so they must not reach a breakdown -
+        -- unless they leave the selected accounts; see internalScope.
+        AND ${internalScope('ja', selection)}
+        ${selection ? `AND ja.account = ANY(${selection}::text[])` : ''}
     `;
 
-    let paramIndex = 1;
+    let paramIndex = params.length + 1;
 
     if (startDate) {
       query += ` AND ja.date_str >= $${paramIndex}`;
@@ -466,9 +499,12 @@ class FinanceManager {
     }
   }
 
-  public async getIncomeExpensesSum(startDate?: string, endDate?: string): Promise<any[]> {
+  public async getIncomeExpensesSum(startDate?: string, endDate?: string, accounts?: string[]): Promise<any[]> {
     const client = await dbContext.connect();
     const params: any[] = [];
+    // The account selection, when there is one, is always $1.
+    const selection = accounts && accounts.length > 0 ? '$1' : undefined;
+    if (selection) params.push(accounts);
 
     let query = `
       WITH categorized_transactions AS (
@@ -498,11 +534,13 @@ class FinanceManager {
           c.category_type IN ('Vast', 'Variabel')
           -- See getCategorySums: an internal transfer is neither income nor
           -- expense, and counting both its sides inflates each by the amount
-          -- moved and distorts the savings rate.
-          AND ja.is_internal IS NOT TRUE
+          -- moved and distorts the savings rate. A transfer that leaves the
+          -- selected accounts does count; see internalScope.
+          AND ${internalScope('ja', selection)}
+          ${selection ? `AND ja.account = ANY(${selection}::text[])` : ''}
     `;
 
-    let paramIndex = 1;
+    let paramIndex = params.length + 1;
 
     if (startDate) {
       query += ` AND ja.date_str >= $${paramIndex}`;
