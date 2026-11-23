@@ -63,6 +63,10 @@ const Transactions: React.FC = () => {
     categories: navState.presetCategory ? [navState.presetCategory] : undefined,
     startDate: navState.presetStart,
     endDate: navState.presetEnd,
+    // Transfers between own accounts are listed, marked with an icon and filed
+    // under Overboekingen. A drill-down from the dashboard hides them, because
+    // the figure it came from leaves them out and the list should add up to it.
+    includeInternal: !navState.presetCategory,
     sortBy: 'date_str',
     sortDir: 'desc',
   }));
@@ -105,7 +109,7 @@ const Transactions: React.FC = () => {
     if (filters.startDate || filters.endDate) count++;
     if (filters.minAmount !== undefined || filters.maxAmount !== undefined) count++;
     if (filters.uncategorised) count++;
-    if (filters.includeInternal) count++;
+    if (!filters.includeInternal) count++;
     return count;
   }, [filters]);
 
@@ -116,7 +120,7 @@ const Transactions: React.FC = () => {
   };
 
   const resetFilters = () => {
-    setFilters({ sortBy: 'date_str', sortDir: 'desc' });
+    setFilters({ includeInternal: true, sortBy: 'date_str', sortDir: 'desc' });
     setPage(0);
     setSelectedIds([]);
   };

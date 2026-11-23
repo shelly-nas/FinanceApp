@@ -164,13 +164,13 @@ const FilterBar: React.FC<Props> = ({
         />
       </Tooltip>
 
-      <Tooltip title="Transfers between your own accounts are hidden by default">
+      <Tooltip title="Transfers between your own accounts, filed under Overboekingen. They never count as income or spending.">
         <Chip
-          label="Include transfers"
-          icon={filters.includeInternal ? <CheckIcon /> : undefined}
-          color={filters.includeInternal ? 'primary' : 'default'}
-          variant={filters.includeInternal ? 'filled' : 'outlined'}
-          aria-pressed={Boolean(filters.includeInternal)}
+          label="Hide transfers"
+          icon={!filters.includeInternal ? <CheckIcon /> : undefined}
+          color={!filters.includeInternal ? 'primary' : 'default'}
+          variant={!filters.includeInternal ? 'filled' : 'outlined'}
+          aria-pressed={!filters.includeInternal}
           onClick={() => onChange({ includeInternal: !filters.includeInternal })}
           sx={{ height: 40, borderRadius: 2, px: 1 }}
         />
