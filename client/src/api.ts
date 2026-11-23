@@ -563,6 +563,16 @@ export const api = createApi({
       }),
       providesTags: ["oneSidedTransfers"],
     }),
+    setInternal: build.mutation<{ updated: number }, { ids: number[]; internal: boolean }>({
+      query: (body) => ({
+        url: `api/transactions/internal`,
+        method: 'PUT',
+        body,
+      }),
+      // In or out of the transfers moves every income and spending figure.
+      invalidatesTags: ["oneSidedTransfers", "transactions", "searchTransactions", "categorySums",
+                        "incomeExpensesSum", "transferCandidates", "categoryHistory"],
+    }),
     unmarkInternal: build.mutation<void, number>({
       query: (id) => ({
         url: `api/transfers/unmark/${id}`,
@@ -639,6 +649,7 @@ export const {
   useGetTransfersQuery,
   useGetOneSidedTransfersQuery,
   useUnmarkInternalMutation,
+  useSetInternalMutation,
   useConfirmTransferMutation,
   useRejectTransferMutation,
   useUnlinkTransferMutation,

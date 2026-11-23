@@ -1440,6 +1440,54 @@ class FinanceManager {
   }
 
   /** Undo the automatic marking for one transaction. */
+  /**
+   * Mark a transaction as a transfer between own accounts by hand, or take the
+   * mark off. Marking files it under Overboekingen, as every transfer is.
+   *
+   * Unmarking sets FALSE, so a later import does not mark it again, and clears
+   * Overboekingen so the row asks for a real category. When the row is one
+   * side of a confirmed pair, the pair is dissolved and the other side is
+   * released the same way: half a transfer is not a transfer.
+   */
+  public async setInternal(id: number, internal: boolean): Promise<number[]> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      let ids = [id];
+      if (internal) {
+        await client.query(
+          `UPDATE public.${transaction_table} SET is_internal = TRUE, category = 'Overboekingen' WHERE id = $1`,
+          [id],
+        );
+      } else {
+        const pair = await client.query(
+          `DELETE FROM public.${transfer_table}
+           WHERE from_transaction_id = $1 OR to_transaction_id = $1
+           RETURNING from_transaction_id, to_transaction_id`,
+          [id],
+        );
+        if (pair.rows[0]) ids = [pair.rows[0].from_transaction_id, pair.rows[0].to_transaction_id];
+        await client.query(
+          `UPDATE public.${transaction_table}
+           SET is_internal = FALSE,
+               category = NULLIF(category, 'Overboekingen')
+           WHERE id = ANY($1::int[])`,
+          [ids],
+        );
+      }
+
+      await client.query('COMMIT');
+      return ids;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   public async unmarkInternal(id: string): Promise<any> {
     const client = await dbContext.connect();
 

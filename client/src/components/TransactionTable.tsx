@@ -58,6 +58,8 @@ interface Props {
   onSort?: (key: string) => void;
   onEdit?: (row: TransactionRow, column: keyof TransactionRow, value: string) => void;
   onDelete?: (row: TransactionRow) => void;
+  /** Marks or unmarks a row as a transfer between own accounts. */
+  onToggleInternal?: (row: TransactionRow) => void;
   selectedIds?: number[];
   onToggleSelect?: (id: number) => void;
   onToggleSelectAll?: () => void;
@@ -80,6 +82,7 @@ const TransactionTable: React.FC<Props> = ({
   onSort,
   onEdit,
   onDelete,
+  onToggleInternal,
   selectedIds = [],
   onToggleSelect,
   onToggleSelectAll,
@@ -241,6 +244,11 @@ const TransactionTable: React.FC<Props> = ({
                 />
               </TableCell>
             )}
+            <TableCell padding="checkbox" sx={{ textAlign: 'center' }}>
+              <Tooltip title="Transfer between your own accounts">
+                <SwapHorizIcon aria-label="Transfer" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+              </Tooltip>
+            </TableCell>
             {COLUMNS.map((column) => (
               <TableCell
                 key={String(column.key)}
@@ -283,6 +291,34 @@ const TransactionTable: React.FC<Props> = ({
                   />
                 </TableCell>
               )}
+              <TableCell padding="checkbox" sx={{ textAlign: 'center' }}>
+                {onToggleInternal ? (
+                  // A toggle: lit when the row is a transfer, faint when not.
+                  <Tooltip
+                    title={row.is_internal
+                      ? 'Transfer between your own accounts - not income or spending. Click if it is not.'
+                      : 'Mark as a transfer between your own accounts'}
+                  >
+                    <IconButton
+                      size="small"
+                      aria-label={row.is_internal ? 'Not a transfer' : 'Mark as transfer'}
+                      aria-pressed={Boolean(row.is_internal)}
+                      onClick={() => onToggleInternal(row)}
+                      sx={{
+                        color: row.is_internal ? 'primary.main' : 'text.disabled',
+                        opacity: row.is_internal ? 1 : 0.5,
+                        '&:hover': { opacity: 1 },
+                      }}
+                    >
+                      <SwapHorizIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                ) : row.is_internal ? (
+                  <Tooltip title="Transfer between your own accounts - not income or spending">
+                    <SwapHorizIcon aria-label="Transfer between own accounts" sx={{ fontSize: 16, color: 'text.secondary', verticalAlign: 'middle' }} />
+                  </Tooltip>
+                ) : null}
+              </TableCell>
               {COLUMNS.map((column) => (
                 <TableCell
                   key={String(column.key)}
@@ -298,14 +334,6 @@ const TransactionTable: React.FC<Props> = ({
                       : undefined,
                   }}
                 >
-                  {column.key === 'date_str' && row.is_internal ? (
-                    <Tooltip title="Transfer between your own accounts - excluded from income and expenses">
-                      <SwapHorizIcon
-                        aria-label="Transfer between own accounts"
-                        sx={{ fontSize: 16, mr: 1, verticalAlign: 'text-bottom', color: 'text.secondary' }}
-                      />
-                    </Tooltip>
-                  ) : null}
                   {renderCell(row, column)}
                 </TableCell>
               ))}
