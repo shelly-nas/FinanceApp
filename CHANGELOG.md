@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0](https://github.com/shelly-nas/FinanceApp/compare/v1.3.0...v1.4.0) (2026-11-23)
+
+
+### Features
+
+* **tags:** borderless tag field in the transaction table ([9cf2d3b](https://github.com/shelly-nas/FinanceApp/commit/9cf2d3ba39b7506b58ef2c73b7a474cc0886a288))
+* **transactions:** mark or unmark a transfer by hand ([2b360c1](https://github.com/shelly-nas/FinanceApp/commit/2b360c124c22cf0cfa4b0df969c48a0e0e7cd8ab))
+
+
+### Bug Fixes
+
+* **transfers:** recognise transfers once their counterparty is an account ([b2acd71](https://github.com/shelly-nas/FinanceApp/commit/b2acd71a70a21374aa65f707b101a0b303f6e732))
+
 ## [1.3.0](https://github.com/shelly-nas/FinanceApp/compare/v1.2.1...v1.3.0) (2026-11-23)
 
 
