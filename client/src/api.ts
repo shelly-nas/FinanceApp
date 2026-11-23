@@ -402,7 +402,9 @@ export const api = createApi({
       query: (id) => ({
         url: `api/transactions/${id}/tags`,
       }),
-      providesTags: ["transactionTags"],
+      // Per transaction, so changing one row's tags refetches that row only
+      // rather than every tag picker on the page.
+      providesTags: (_result, _error, id) => [{ type: "transactionTags", id }],
     }),
     searchTransactions: build.query<SearchResult, SearchFilters>({
       query: (filters) => {
@@ -606,7 +608,7 @@ export const api = createApi({
         method: 'PUT',
         body: { tagIds },
       }),
-      invalidatesTags: ["transactionTags", "tags", "tagSummary"],
+      invalidatesTags: (_result, _error, { id }) => [{ type: "transactionTags", id }, "tags", "tagSummary"],
     }),
   }),
 });
