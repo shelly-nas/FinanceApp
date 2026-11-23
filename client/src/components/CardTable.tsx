@@ -13,7 +13,9 @@ const CardTable: React.FC<{
   /** Tight rows on a desktop, as in the transaction table. Touch keeps the default. */
   dense?: boolean;
 }> = ({ children, minWidth, dense }) => (
-  <Box sx={{ overflowX: 'auto', mx: -CARD_PADDING }}>
+  // position: relative keeps absolutely positioned content (a visually-hidden
+  // header label) inside the scroll area instead of widening the page.
+  <Box sx={{ overflowX: 'auto', position: 'relative', mx: -CARD_PADDING }}>
     <Table
       size="small"
       sx={{

@@ -40,7 +40,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
   );
 
   return (
-    <TableContainer sx={{ overflowX: 'auto', mx: -CARD_PADDING, width: 'auto' }}>
+    <TableContainer sx={{ overflowX: 'auto', position: 'relative', mx: -CARD_PADDING, width: 'auto' }}>
       <Table size="small">
         <TableHead>
           <TableRow>
