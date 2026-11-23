@@ -6,6 +6,8 @@ import {
 import type { SelectChangeEvent } from '@mui/material';
 import { useUploadTransactionsMutation, useImportBackupMutation } from '@/api';
 import { useNavigate } from 'react-router-dom';
+import { combineImports, isCsv, uploadErrorMessage } from '@/utils/importBatch';
+import type { ImportSummary } from '@/api';
 
 // Sentinel in the same dropdown as the banks: the file to pick is chosen the
 // same way whether it is a bank export or a backup, so it belongs in one list.
@@ -30,6 +32,8 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onCl
   const [loading, setLoading] = useState(false);
   const [bank, setBank] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // "2 of 3" while several files are imported one after another.
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   // Held between picking a backup file and confirming what to do with it.
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
@@ -39,59 +43,77 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onCl
   const isBackup = bank === BACKUP;
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    // Reset the input, so picking the same file again after an error still
+    const files = Array.from(event.target.files ?? []);
+    // Reset the input, so picking the same files again after an error still
     // fires a change event.
     event.target.value = '';
-    if (!file) return;
+    if (files.length === 0) return;
 
     if (isBackup) {
         // A restore replaces everything, so it is confirmed before it runs
         // rather than after - by then there is nothing to go back to.
-        setPendingFile(file);
+        setPendingFile(files[0]);
         return;
     }
 
-    if (file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')) {
-        setLoading(true);
-        setError(null);
+    const notCsv = files.filter((file) => !isCsv(file));
+    if (notCsv.length > 0) {
+        setError(`Not a CSV file: ${notCsv.map((f) => f.name).join(', ')}. Pick the exports your bank produced.`);
+        return;
+    }
 
+    setLoading(true);
+    setError(null);
+
+    // One file at a time, in order: each import has to be stored before the
+    // next one runs, so rows that overlapping exports share are recognised as
+    // already stored instead of imported twice.
+    const succeeded: ImportSummary[] = [];
+    const failed: string[] = [];
+    for (const [index, file] of files.entries()) {
+        setProgress({ current: index + 1, total: files.length });
         const formData = new FormData();
         formData.append('file', file);
-
         try {
             const response = await postUploadTransactions({ formData, bankType: bank });
-
-            if ('data' in response && response.data?.message === "Entries imported successfully") {
-                setLoading(false);
-                onUploadSuccess();
-                // Rows already stored are skipped, so overlapping export periods
-                // are harmless - but say so, otherwise a partial import looks
-                // like the file was wrong.
-                navigate('/transactions', {
-                    state: {
-                        transactionIds: JSON.stringify(response.data.createdIds),
-                        imported: response.data.imported,
-                        skipped: response.data.skipped,
-                        markedInternal: response.data.markedInternal,
-                    },
-                });
+            if ('data' in response && response.data?.message === 'Entries imported successfully') {
+                succeeded.push(response.data);
             } else {
-                setLoading(false);
-                const failure = 'error' in response ? response.error : undefined;
-                const message =
-                    failure && 'data' in failure && typeof failure.data === 'string'
-                        ? failure.data
-                        : 'Error uploading file';
-                setError(message);
+                failed.push(`${file.name}: ${uploadErrorMessage('error' in response ? response.error : undefined)}`);
             }
-        } catch (error) {
-            setLoading(false);
-            setError('Unexpected error occurred while uploading the file.');
+        } catch {
+            failed.push(`${file.name}: unexpected error while uploading`);
         }
-    } else {
-        setError('That is not a CSV file. Pick the export your bank produced.');
     }
+    setProgress(null);
+    setLoading(false);
+
+    if (failed.length > 0) {
+        // Stay in the dialog so the failures can be read - onUploadSuccess
+        // would navigate away and close it. What did import is stored, and
+        // every upload already refreshed the data on screen.
+        const done = combineImports(succeeded);
+        setError(
+            (succeeded.length > 0
+                ? `${succeeded.length} of ${files.length} files imported (${done.imported} transactions). `
+                : '') + `Failed: ${failed.join('; ')}`,
+        );
+        return;
+    }
+
+    // Rows already stored are skipped, so overlapping export periods are
+    // harmless - but say so, otherwise a partial import looks like the file
+    // was wrong.
+    const total = combineImports(succeeded);
+    onUploadSuccess();
+    navigate('/transactions', {
+        state: {
+            transactionIds: JSON.stringify(total.createdIds),
+            imported: total.imported,
+            skipped: total.skipped,
+            markedInternal: total.markedInternal,
+        },
+    });
   };
 
   /** Run the restore the user has just confirmed. */
@@ -151,8 +173,8 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onCl
         <DialogTitle>Import data</DialogTitle>
         <DialogContent>
           <Typography variant="body2">
-            Pick the bank the export came from, then choose the file. Rows already
-            stored are recognised and skipped.
+            Pick the bank the exports came from, then choose one or more files.
+            Rows already stored are recognised and skipped.
           </Typography>
 
           <FormControl fullWidth>
@@ -193,6 +215,7 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onCl
             style={{ display: 'none' }}
             id="upload-file"
             type="file"
+            multiple={!isBackup}
             onChange={handleFileUpload}
             disabled={!bank || loading}
           />
@@ -203,7 +226,11 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onCl
               disabled={!bank || loading}
               startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
             >
-              {loading ? 'Importing…' : isBackup ? 'Choose backup…' : 'Choose file…'}
+              {loading
+                ? progress && progress.total > 1
+                  ? `Importing ${progress.current} of ${progress.total}…`
+                  : 'Importing…'
+                : isBackup ? 'Choose backup…' : 'Choose files…'}
             </Button>
           </label>
         </DialogActions>
