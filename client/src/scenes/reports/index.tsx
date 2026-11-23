@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   Box, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack,
 } from '@mui/material';
@@ -8,78 +8,50 @@ import StickyBar from '@/components/StickyBar';
 import NetWorthChart from '@/scenes/reports/NetWorthChart';
 import CategoryTrendChart from '@/scenes/reports/CategoryTrendChart';
 import CashflowChart from '@/scenes/reports/CashflowChart';
+import PeriodStepper from '@/scenes/insights/PeriodStepper';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
+import { Preset } from '@/scenes/insights/filter';
+import { toMonthKey } from '@/utils/monthRange';
 import { useGetCategoriesQuery } from '@/api';
 
-/** Named ranges, in months back from the current month. */
-const PRESETS = [
-  { label: '6 months', months: 6 },
-  { label: '12 months', months: 12 },
-  { label: '24 months', months: 24 },
-] as const;
-
-const toIso = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-
-/** A range ending with the last day of the current month, `months` long. */
-const presetRange = (months: number) => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return { startDate: toIso(start), endDate: toIso(end) };
-};
-
-const yearToDate = () => {
-  const now = new Date();
-  return {
-    startDate: toIso(new Date(now.getFullYear(), 0, 1)),
-    endDate: toIso(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
-  };
-};
+const PRESET_LABELS: { value: Preset; label: string }[] = [
+  { value: 'month', label: 'Month' },
+  { value: '3m', label: '3 months' },
+  { value: '6m', label: '6 months' },
+  { value: '12m', label: '12 months' },
+  { value: 'year', label: 'Year' },
+];
 
 /**
  * How things developed, rather than what one month did.
  *
- * The time axis is a range instead of the dashboard's single month, which is the
- * whole reason this is a separate screen: the dashboard answers "what happened in
- * August", this one answers "what has been happening".
+ * Reads the same filter as the dashboard - period, accounts, categories - so
+ * switching between the two keeps the selection. A single month has nothing
+ * to show per month, so the charts then cover the twelve months up to it.
  */
 const Reports: React.FC = () => {
-  const [preset, setPreset] = useState<string>('12');
-  const [range, setRange] = useState(() => presetRange(12));
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const { filter, update, setPreset, toggleCategory, trend } = useInsightsFilter();
 
   const { data: categoryList } = useGetCategoriesQuery();
-  // Income categories are not part of the spending chart, so offering them as
-  // a filter would select something that can never show up.
   const categories = useMemo(
-    () => (categoryList ?? [])
-      .filter((c) => c.income_outcome !== 'Inkomsten')
-      .map((c) => c.category_name)
-      .sort((a, b) => a.localeCompare(b)),
+    () => (categoryList ?? []).map((c) => c.category_name).sort((a, b) => a.localeCompare(b)),
     [categoryList],
   );
 
-  const toggleCategory = (name: string) =>
-    setSelectedCategories((current) =>
-      current.includes(name) ? current.filter((c) => c !== name) : [...current, name],
-    );
-
-  const applyPreset = (value: string) => {
-    setPreset(value);
-    if (value === 'ytd') {
-      setRange(yearToDate());
-    } else if (value !== 'custom') {
-      setRange(presetRange(Number(value)));
-    }
-  };
-
   // The current month is still running, so its figures are partial. Saying so
   // beats a reader concluding that spending collapsed this month.
-  const endsThisMonth = range.endDate.slice(0, 7) === toIso(new Date()).slice(0, 7);
+  const endsThisMonth = trend.to === toMonthKey(new Date());
 
   return (
     <>
-      <PageHeader title="Reports" subtitle="How things developed over a period, rather than what one month did" />
+      <PageHeader
+        title="Reports"
+        subtitle={
+          trend.widened
+            ? `${trend.label}, per month - the 12 months up to the selected month`
+            : `${trend.label}, per month`
+        }
+      />
 
       {/* The period applies to every chart, so it stays in view while the
           page scrolls. Category filters live in the card they apply to. */}
@@ -87,36 +59,29 @@ const Reports: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <ToggleButtonGroup
             exclusive
-            value={preset}
-            onChange={(_e, value) => value && applyPreset(value)}
+            value={filter.preset}
+            onChange={(_e, value) => value && setPreset(value)}
             aria-label="Period"
           >
-            {PRESETS.map((option) => (
-              <ToggleButton key={option.months} value={String(option.months)}>
-                {option.label}
-              </ToggleButton>
+            {PRESET_LABELS.map((option) => (
+              <ToggleButton key={option.value} value={option.value}>{option.label}</ToggleButton>
             ))}
-            <ToggleButton value="ytd">This year</ToggleButton>
           </ToggleButtonGroup>
 
+          <PeriodStepper trend />
+
           <TextField
-            type="date"
+            type="month"
             label="From"
-            value={range.startDate}
-            onChange={(e) => {
-              setPreset('custom');
-              setRange((prev) => ({ ...prev, startDate: e.target.value }));
-            }}
+            value={trend.from}
+            onChange={(e) => e.target.value && update({ preset: 'custom', from: e.target.value, to: trend.to })}
             sx={{ minWidth: 150 }}
           />
           <TextField
-            type="date"
+            type="month"
             label="To"
-            value={range.endDate}
-            onChange={(e) => {
-              setPreset('custom');
-              setRange((prev) => ({ ...prev, endDate: e.target.value }));
-            }}
+            value={trend.to}
+            onChange={(e) => e.target.value && update({ preset: 'custom', from: trend.from, to: e.target.value })}
             sx={{ minWidth: 150 }}
           />
 
@@ -132,15 +97,15 @@ const Reports: React.FC = () => {
       </StickyBar>
 
       <Stack spacing={4} useFlexGap>
-        <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
-        <CashflowChart startDate={range.startDate} endDate={range.endDate} />
+        <NetWorthChart startDate={trend.startDate} endDate={trend.endDate} />
+        <CashflowChart startDate={trend.startDate} endDate={trend.endDate} />
         <CategoryTrendChart
-          startDate={range.startDate}
-          endDate={range.endDate}
+          startDate={trend.startDate}
+          endDate={trend.endDate}
           allCategories={categories}
-          selected={selectedCategories}
+          selected={filter.categories}
           onToggleCategory={toggleCategory}
-          onClearCategories={() => setSelectedCategories([])}
+          onClearCategories={() => update({ categories: [] })}
         />
       </Stack>
     </>

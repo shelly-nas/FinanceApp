@@ -249,19 +249,29 @@ export const api = createApi({
       },
       providesTags: ["transactions"],
     }),
-    getCategorySums: build.query<any, { startDate: string; endDate: string; accounts?: string[] }>({
-      query: ({ startDate, endDate, accounts }) => ({
+    getCategorySums: build.query<any, { startDate: string; endDate: string; accounts?: string[]; categories?: string[] }>({
+      query: ({ startDate, endDate, accounts, categories }) => ({
         url: `api/category-sums`,
         // No list means every account; see the dashboard's account filter.
-        params: { startDate, endDate, ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}) },
+        params: {
+          startDate,
+          endDate,
+          ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}),
+          ...(categories?.length ? { categories: JSON.stringify(categories) } : {}),
+        },
       }),
       providesTags: ["categorySums"],
     }),
-    getIncomeExpensesSum: build.query<any, { startDate: string; endDate: string; accounts?: string[] }>({
-      query: ({ startDate, endDate, accounts }) => ({
+    getIncomeExpensesSum: build.query<any, { startDate: string; endDate: string; accounts?: string[]; categories?: string[] }>({
+      query: ({ startDate, endDate, accounts, categories }) => ({
         url: `api/income-expenses-sum`,
         // No list means every account; see the dashboard's account filter.
-        params: { startDate, endDate, ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}) },
+        params: {
+          startDate,
+          endDate,
+          ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}),
+          ...(categories?.length ? { categories: JSON.stringify(categories) } : {}),
+        },
       }),
       providesTags: ["incomeExpensesSum"],
     }),
@@ -320,10 +330,10 @@ export const api = createApi({
       }),
       providesTags: ["accountOverview"],
     }),
-    getNetWorthHistory: build.query<NetWorthPoint[], { startDate: string; endDate: string }>({
-      query: ({ startDate, endDate }) => ({
+    getNetWorthHistory: build.query<NetWorthPoint[], { startDate: string; endDate: string; accounts?: string[] }>({
+      query: ({ startDate, endDate, accounts }) => ({
         url: `api/net-worth-history`,
-        params: { startDate, endDate },
+        params: { startDate, endDate, ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}) },
       }),
       providesTags: ["netWorthHistory"],
     }),
@@ -474,10 +484,20 @@ export const api = createApi({
       },
       providesTags: ["categoryHistory"],
     }),
-    getCashflowHistory: build.query<CashflowPoint[], { startDate: string; endDate: string }>({
-      query: ({ startDate, endDate }) => ({
+    getCashflowHistory: build.query<CashflowPoint[], {
+      startDate: string;
+      endDate: string;
+      accounts?: string[];
+      categories?: string[];
+    }>({
+      query: ({ startDate, endDate, accounts, categories }) => ({
         url: `api/reports/cashflow`,
-        params: { startDate, endDate },
+        params: {
+          startDate,
+          endDate,
+          ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}),
+          ...(categories?.length ? { categories: JSON.stringify(categories) } : {}),
+        },
       }),
       // Moves with the same edits as the category history: an import, a
       // recategorisation, a confirmed transfer.

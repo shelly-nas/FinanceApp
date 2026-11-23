@@ -14,6 +14,7 @@ import {
 } from '@/scenes/reports/chartTheme';
 import { toneFor, trendSlope } from '@/scenes/reports/reportMath';
 import { NetWorthPoint, useGetNetWorthHistoryQuery } from '@/api';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 
 interface Props {
   startDate: string;
@@ -40,7 +41,8 @@ const KEY_BY_TYPE: Record<string, keyof NetWorthPoint> = {
 const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
   const { palette } = useTheme();
   const [byType, setByType] = useState(false);
-  const { data: history } = useGetNetWorthHistoryQuery({ startDate, endDate });
+  const { accounts } = useInsightsFilter();
+  const { data: history } = useGetNetWorthHistoryQuery({ startDate, endDate, accounts });
 
   const points = useMemo(
     () =>

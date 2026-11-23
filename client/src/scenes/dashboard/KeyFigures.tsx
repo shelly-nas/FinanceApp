@@ -5,7 +5,8 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityIcon from '@mui/icons-material/VisibilityOutlined';
 import StatTile from '@/components/StatTile';
 import { useGetAccountOverviewQuery, useGetIncomeExpensesSumQuery } from '@/api';
-import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
+import { formatDate } from '@/utils/monthRange';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 import '@/styles.css';
 
 const formatCurrency = (value: number) =>
@@ -35,17 +36,19 @@ const splitByType = (items: IncomeExpenseItem[], key: 'income' | 'expenses') =>
  * a side column; as tiles they read first and give the tables below the full
  * width.
  */
-const KeyFigures: React.FC<{ accounts?: string[] }> = ({ accounts: selection }) => {
-  const { firstDay, lastDay } = useDateRange();
+const KeyFigures: React.FC = () => {
+  const { period, accounts: selection, categories } = useInsightsFilter();
+  const { lastDay } = period;
   const [visible, setVisible] = useState(false);
   const [showAccounts, setShowAccounts] = useState(false);
 
-  const asOf = formatDate(lastDay);
+  const asOf = period.endDate;
   const { data: accountData } = useGetAccountOverviewQuery({ asOf });
   const { data: periodData } = useGetIncomeExpensesSumQuery({
-    startDate: formatDate(firstDay),
-    endDate: formatDate(lastDay),
+    startDate: period.startDate,
+    endDate: period.endDate,
     accounts: selection,
+    categories,
   });
 
   // Net worth and the per-account list cover the selected accounts only.
@@ -133,13 +136,13 @@ const KeyFigures: React.FC<{ accounts?: string[] }> = ({ accounts: selection }) 
       <StatTile
         label="Income"
         value={<Typography component="span" variant="credit" sx={{ fontSize: 'inherit' }}>+{formatCurrency(income)}</Typography>}
-        detail={splitByType(items, 'income') || 'Nothing came in this month'}
+        detail={splitByType(items, 'income') || 'Nothing came in this period'}
       />
 
       <StatTile
         label="Expenses"
         value={<Typography component="span" variant="debit" sx={{ fontSize: 'inherit' }}>−{formatCurrency(expenses)}</Typography>}
-        detail={splitByType(items, 'expenses') || 'Nothing went out this month'}
+        detail={splitByType(items, 'expenses') || 'Nothing went out this period'}
       />
 
       <StatTile
@@ -149,7 +152,7 @@ const KeyFigures: React.FC<{ accounts?: string[] }> = ({ accounts: selection }) 
             {net > 0 ? '+' : ''}{formatCurrency(net)}
           </Typography>
         }
-        detail={income > 0 ? `${savingsRate.toFixed(1)}% of income saved` : 'No income this month'}
+        detail={income > 0 ? `${savingsRate.toFixed(1)}% of income saved` : 'No income this period'}
       />
     </Box>
   );

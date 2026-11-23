@@ -6,7 +6,7 @@ import Dashboard from '@/scenes/dashboard';
 import { createTheme } from '@mui/material/styles';
 import { themeSettings } from '@/theme';
 import { ColorModeProvider, useColorMode } from '@/theme/ColorModeContext';
-import { DateRangeProvider } from '@/scenes/dateRange/DateRangeContext';
+import { InsightsFilterProvider } from '@/scenes/insights/InsightsFilterContext';
 import Transactions from '@/scenes/transactions';
 import Tags from '@/scenes/tags';
 import Accounts from '@/scenes/accounts';
@@ -20,7 +20,7 @@ const ThemedApp: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <DateRangeProvider>
+      <InsightsFilterProvider>
         <AppShell>
           <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -34,7 +34,7 @@ const ThemedApp: React.FC = () => {
             {/* <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} /> */}
           </Routes>
         </AppShell>
-      </DateRangeProvider>
+      </InsightsFilterProvider>
     </ThemeProvider>
   );
 };

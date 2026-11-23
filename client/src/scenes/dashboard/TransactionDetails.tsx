@@ -4,26 +4,24 @@ import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import TransactionTable from '@/components/TransactionTable';
-import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 import { useSearchTransactionsQuery } from '@/api';
 import { useNavigate } from 'react-router-dom';
 
 interface TransactionDetailsProps {
   selectedCategory: string | null;
-  /** The accounts to cover; undefined for all. */
-  accounts?: string[];
 }
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory, accounts }) => {
-  const { firstDay, lastDay } = useDateRange();
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategory }) => {
+  const { period, accounts } = useInsightsFilter();
   const navigate = useNavigate();
 
   // Filtered server-side rather than fetching the month and narrowing it here,
   // so the same query backs this panel and the transactions screen.
   const { data: result } = useSearchTransactionsQuery(
     {
-      startDate: formatDate(firstDay),
-      endDate: formatDate(lastDay),
+      startDate: period.startDate,
+      endDate: period.endDate,
       categories: selectedCategory ? [selectedCategory] : undefined,
       accounts,
       limit: 500,
@@ -39,8 +37,8 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
     navigate('/transactions', {
       state: {
         presetCategory: selectedCategory,
-        presetStart: formatDate(firstDay),
-        presetEnd: formatDate(lastDay),
+        presetStart: period.startDate,
+        presetEnd: period.endDate,
         presetAccounts: accounts,
       },
     });
@@ -52,7 +50,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ selectedCategor
         title={selectedCategory ? `Transactions in ${selectedCategory}` : 'Transactions'}
         subtitle={
           selectedCategory
-            ? `${transactions.length} this month`
+            ? `${transactions.length} in ${period.label}`
             : undefined
         }
         action={

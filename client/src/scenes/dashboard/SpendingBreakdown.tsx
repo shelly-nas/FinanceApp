@@ -4,7 +4,7 @@ import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
 import MultiColorProgress from '@/components/MultiColorProgress';
 import SortableSpendingTable from './SortableSpendingTable';
-import { formatDate, useDateRange } from '@/scenes/dateRange/DateRangeContext';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 import { useGetCategorySumsQuery } from '@/api';
 
 export interface CategorySums {
@@ -15,8 +15,6 @@ export interface CategorySums {
 
 interface SpendingBreakdownProps {
   onCategorySelect: (category: string) => void;
-  /** The accounts to cover; undefined for all. */
-  accounts?: string[];
 }
 
 function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: CategorySums[] } {
@@ -36,13 +34,14 @@ function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: 
   return { income, expenses };
 }
 
-const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect, accounts }) => {
-  const { firstDay, lastDay } = useDateRange();
+const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect }) => {
+  const { period, accounts, categories } = useInsightsFilter();
 
   const { data: results } = useGetCategorySumsQuery({
-    startDate: formatDate(firstDay),
-    endDate: formatDate(lastDay),
+    startDate: period.startDate,
+    endDate: period.endDate,
     accounts,
+    categories,
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

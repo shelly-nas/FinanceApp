@@ -15,6 +15,7 @@ import {
   buildCategoryRows, summariseCategories, trendSlope, toneFor, OTHER, OTHER_COLOR,
 } from '@/scenes/reports/reportMath';
 import { useGetCategoryHistoryQuery } from '@/api';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 
 interface Props {
   startDate: string;
@@ -79,10 +80,12 @@ const CategoryTrendChart: React.FC<Props> = ({
   startDate, endDate, allCategories, selected, onToggleCategory, onClearCategories,
 }) => {
   const { palette } = useTheme();
+  const { accounts } = useInsightsFilter();
   const { data: history } = useGetCategoryHistoryQuery({
     startDate,
     endDate,
     categories: selected.length > 0 ? selected : undefined,
+    accounts,
   });
 
   const { rows, series, colors, labels } = useMemo(
