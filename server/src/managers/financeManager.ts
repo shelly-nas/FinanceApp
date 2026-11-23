@@ -1198,6 +1198,7 @@ class FinanceManager {
       RETURNING *;
     `;
 
+    let created;
     try {
       const result = await client.query(query, [
         account.account_type,
@@ -1205,10 +1206,14 @@ class FinanceManager {
         account.details,
         account.balance_when_created ?? 0,
       ]);
-      return result.rows[0];
+      created = result.rows[0];
     } finally {
       client.release();
     }
+    // Transactions imported before this account existed name it as their
+    // counterparty without having been recognised as transfers; they are now.
+    await this.markCounterpartyTransfers();
+    return created;
   }
 
   public async updateAccount(id: string, updates: { [key: string]: any }): Promise<any> {
@@ -1225,6 +1230,7 @@ class FinanceManager {
 
     const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
     const values = entries.map(([, value]) => value);
+    let updated;
 
     try {
       await client.query('BEGIN');
@@ -1255,6 +1261,7 @@ class FinanceManager {
       // revert to the opening figure.
       const oldDetails = before.rows[0].details;
       const newDetails = result.rows[0].details;
+      updated = result.rows[0];
 
       if (oldDetails !== newDetails) {
         await client.query(
@@ -1268,13 +1275,15 @@ class FinanceManager {
       }
 
       await client.query('COMMIT');
-      return result.rows[0];
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
       client.release();
     }
+    // A new identifier may be the counterparty of earlier transactions.
+    await this.markCounterpartyTransfers();
+    return updated;
   }
 
   /**
@@ -1431,6 +1440,54 @@ class FinanceManager {
   }
 
   /** Undo the automatic marking for one transaction. */
+  /**
+   * Mark a transaction as a transfer between own accounts by hand, or take the
+   * mark off. Marking files it under Overboekingen, as every transfer is.
+   *
+   * Unmarking sets FALSE, so a later import does not mark it again, and clears
+   * Overboekingen so the row asks for a real category. When the row is one
+   * side of a confirmed pair, the pair is dissolved and the other side is
+   * released the same way: half a transfer is not a transfer.
+   */
+  public async setInternal(id: number, internal: boolean): Promise<number[]> {
+    const client = await dbContext.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      let ids = [id];
+      if (internal) {
+        await client.query(
+          `UPDATE public.${transaction_table} SET is_internal = TRUE, category = 'Overboekingen' WHERE id = $1`,
+          [id],
+        );
+      } else {
+        const pair = await client.query(
+          `DELETE FROM public.${transfer_table}
+           WHERE from_transaction_id = $1 OR to_transaction_id = $1
+           RETURNING from_transaction_id, to_transaction_id`,
+          [id],
+        );
+        if (pair.rows[0]) ids = [pair.rows[0].from_transaction_id, pair.rows[0].to_transaction_id];
+        await client.query(
+          `UPDATE public.${transaction_table}
+           SET is_internal = FALSE,
+               category = NULLIF(category, 'Overboekingen')
+           WHERE id = ANY($1::int[])`,
+          [ids],
+        );
+      }
+
+      await client.query('COMMIT');
+      return ids;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   public async unmarkInternal(id: string): Promise<any> {
     const client = await dbContext.connect();
 

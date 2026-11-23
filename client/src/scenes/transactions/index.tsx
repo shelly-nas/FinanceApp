@@ -26,6 +26,7 @@ import {
   useUpdateTransactionMutation,
   useDeleteTransactionMutation,
   useBulkUpdateTransactionsMutation,
+  useSetInternalMutation,
 } from '@/api';
 import { CARD_PADDING } from '@/components/DashboardBox';
 
@@ -95,6 +96,7 @@ const Transactions: React.FC = () => {
   const [updateTransaction] = useUpdateTransactionMutation();
   const [deleteTransaction] = useDeleteTransactionMutation();
   const [bulkUpdate] = useBulkUpdateTransactionsMutation();
+  const [setInternal] = useSetInternalMutation();
 
   const categories: string[] = useMemo(
     () => (categoryList ?? []).map((c: { category_name: string }) => c.category_name),
@@ -161,6 +163,31 @@ const Transactions: React.FC = () => {
       setToast({ message: 'Could not delete that transaction.', severity: 'error' });
     } finally {
       setDeleteTarget(null);
+    }
+  };
+
+  const handleToggleInternal = async (row: TransactionRow) => {
+    const internal = !row.is_internal;
+    try {
+      await setInternal({ ids: [row.id], internal }).unwrap();
+      setToast({
+        message: internal
+          ? 'Marked as a transfer, filed under Overboekingen'
+          : 'No longer a transfer - it counts as income or spending again',
+        severity: 'success',
+      });
+    } catch {
+      setToast({ message: 'Could not change that, please try again.', severity: 'error' });
+    }
+  };
+
+  const handleBulkInternal = async () => {
+    try {
+      const { updated } = await setInternal({ ids: selectedIds, internal: true }).unwrap();
+      setToast({ message: `${updated} transaction(s) marked as transfer`, severity: 'success' });
+      setSelectedIds([]);
+    } catch {
+      setToast({ message: 'Could not mark those as transfers.', severity: 'error' });
     }
   };
 
@@ -245,6 +272,9 @@ const Transactions: React.FC = () => {
                       <MenuItem key={name} value={name}>{name}</MenuItem>
                     ))}
                   </Select>
+                  <Button variant="outlined" size="small" onClick={handleBulkInternal}>
+                    Mark as transfer
+                  </Button>
                   <BulkTagControl
                     ids={selectedIds}
                     onDone={(message, severity) => setToast({ message, severity })}
@@ -279,6 +309,7 @@ const Transactions: React.FC = () => {
                 onSort={handleSort}
                 onEdit={handleEdit}
                 onDelete={setDeleteTarget}
+                onToggleInternal={handleToggleInternal}
                 selectedIds={selectedIds}
                 onToggleSelect={toggleSelect}
                 onToggleSelectAll={toggleSelectAll}

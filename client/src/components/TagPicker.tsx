@@ -125,7 +125,23 @@ const TagPicker: React.FC<TagPickerProps> = ({ transactionId, size = 'small' }) 
       }
       renderInput={(params) => (
         // The placeholder only on an empty field: beside chips it is noise.
-        <TextField {...params} variant="standard" placeholder={value.length === 0 ? 'Add tag' : undefined} />
+        // No underline: the field reads as part of the row, and shows its
+        // edges only on hover and focus.
+        <TextField
+          {...params}
+          variant="standard"
+          placeholder={value.length === 0 ? 'Add tag' : undefined}
+          InputProps={{ ...params.InputProps, disableUnderline: true }}
+          sx={{
+            '& .MuiInputBase-root': {
+              borderRadius: 1.5,
+              px: 1,
+              transition: 'background-color 150ms ease, box-shadow 150ms ease',
+              '&:hover': { bgcolor: 'action.hover' },
+              '&.Mui-focused': { bgcolor: 'background.paper', boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.primary.main}` },
+            },
+          }}
+        />
       )}
       sx={{ minWidth: 180 }}
     />

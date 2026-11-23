@@ -787,6 +787,29 @@ router.get('/transfers/one-sided', async (req: Request, res: Response, next: Nex
   }
 });
 
+// Mark transactions as transfers between own accounts by hand, or take the
+// mark off. Body: { ids: number[], internal: boolean }.
+router.put('/transactions/internal', async (req: Request, res: Response, next: NextFunction) => {
+  const { ids, internal } = req.body ?? {};
+
+  if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => Number.isInteger(id))) {
+    return res.status(400).json({ error: 'ids must be a non-empty array of transaction ids' });
+  }
+  if (typeof internal !== 'boolean') {
+    return res.status(400).json({ error: 'internal must be true or false' });
+  }
+
+  try {
+    const changed = new Set<number>();
+    for (const id of ids) {
+      for (const affected of await FinanceManager.setInternal(id, internal)) changed.add(affected);
+    }
+    res.status(200).json({ updated: changed.size });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Revert the automatic marking: the row counts as ordinary spending again.
 router.post('/transfers/unmark/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
