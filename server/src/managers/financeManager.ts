@@ -1300,7 +1300,8 @@ class FinanceManager {
    *
    * This is not a guess like an amount match is - the counterparty is literally
    * one of the user's own accounts - so it is applied rather than proposed. The
-   * rows stay visible under "Include transfers" and can be reverted per row.
+   * rows stay in the transaction list and the transfer review, and can be
+   * reverted per row.
    *
    * Returns the ids it marked, so an import can report them.
    */
@@ -1478,6 +1479,10 @@ class FinanceManager {
         WHERE d.debit_credit = 'Debit'
           AND d.is_internal IS DISTINCT FROM FALSE
           AND c.is_internal IS DISTINCT FROM FALSE
+          -- Both sides already recognised on their counterparty: each is listed
+          -- for review on its own, and proposing the pair would show the same
+          -- movement twice.
+          AND NOT (d.is_internal IS TRUE AND c.is_internal IS TRUE)
           AND NOT EXISTS (
             SELECT 1 FROM public.${transfer_table} t
             WHERE t.from_transaction_id IN (d.id, c.id)

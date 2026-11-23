@@ -13,8 +13,7 @@ import Toast, { ToastMessage } from '@/components/Toast';
 import ImportActions from '@/scenes/layout/ImportActions';
 import TransactionTable from '@/components/TransactionTable';
 import FilterBar from '@/scenes/transactions/FilterBar';
-import TransferSuggestions from '@/scenes/transactions/TransferSuggestions';
-import OneSidedTransfers from '@/scenes/transactions/OneSidedTransfers';
+import TransferReview from '@/scenes/transactions/TransferReview';
 import UnknownAccounts from '@/scenes/transactions/UnknownAccounts';
 import {
   SearchFilters,
@@ -206,8 +205,7 @@ const Transactions: React.FC = () => {
         )}
 
         <UnknownAccounts />
-        <OneSidedTransfers transactionIds={navState.transactionIds} />
-        <TransferSuggestions transactionIds={navState.transactionIds} />
+        <TransferReview transactionIds={navState.transactionIds} />
 
         <DashboardBox>
           {/* Filters and the bulk bar stay above the rows while the table

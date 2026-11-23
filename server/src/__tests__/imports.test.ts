@@ -181,6 +181,16 @@ describe('imports and transfers', { skip: !hasDatabase && 'no database configure
       assert.equal((await FinanceManager.getTransferCandidates()).length, 0);
     });
 
+    test('does not propose a pair whose sides are both already recognised', async () => {
+      // Both counterparties are own accounts, so each side is marked a transfer
+      // on its own and listed for review there. Proposing the pair as well
+      // would show the same movement twice.
+      const { createdIds } = await FinanceManager.addTransactions(transferPair());
+      await FinanceManager.markCounterpartyTransfers(createdIds);
+
+      assert.equal((await FinanceManager.getTransferCandidates()).length, 0);
+    });
+
     test('stops proposing a pair once confirmed', async () => {
       const { createdIds } = await FinanceManager.addTransactions(transferPair());
       await FinanceManager.confirmTransfer(createdIds[0], createdIds[1], 'iban');
