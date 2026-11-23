@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.3.0](https://github.com/shelly-nas/FinanceApp/compare/v1.2.1...v1.3.0) (2026-11-23)
+
+
+### Features
+
+* analytische rapportages, compacter transactieoverzicht, overboekingen en import van meerdere bestanden ([37f362a](https://github.com/shelly-nas/FinanceApp/commit/37f362aea70a1ba65fb9c5a58a8116e2d7a08544))
+* **dashboard:** dashboard filteren op een set rekeningen ([fb24a1a](https://github.com/shelly-nas/FinanceApp/commit/fb24a1a3d4c6e3b845466fac628521ad0c0fe304))
+* **dashboard:** filter the dashboard on a set of accounts ([31a6dd1](https://github.com/shelly-nas/FinanceApp/commit/31a6dd1810b85c2785446d2f950b5d71824db3d1))
+* **import:** import several bank exports at once ([d0617fd](https://github.com/shelly-nas/FinanceApp/commit/d0617fd3dfc8b2a2e3d25ef9900e9ea9ffd9bbb5))
+* **reports:** colour gains green and losses red ([8981e6c](https://github.com/shelly-nas/FinanceApp/commit/8981e6c9d210133c3d8651b18fc9d5c917fc723e))
+* **reports:** line chart for net worth, cash flow chart and category trends ([145cd76](https://github.com/shelly-nas/FinanceApp/commit/145cd76097d1d932c0144a77a880da341bd8d132))
+* **transactions:** add or remove a tag on every selected transaction ([44e25dd](https://github.com/shelly-nas/FinanceApp/commit/44e25dd689a98b98592b235dd3f3aa67502466fe))
+* **transactions:** compact transfer tables on the transactions tab ([719b8a0](https://github.com/shelly-nas/FinanceApp/commit/719b8a0b152cb3065d432b12606e0f73d731c0dd))
+* **transactions:** denser filter bar and transaction table ([cc03a22](https://github.com/shelly-nas/FinanceApp/commit/cc03a223cbab0e77876615d8f3bf2978d722ad0a))
+* **transactions:** list transfers between own accounts by default ([396a9e2](https://github.com/shelly-nas/FinanceApp/commit/396a9e21fc3b4d8953c6ee487738c9d6cf744c51))
+* **transactions:** review all transfers between own accounts in one card ([74f9e9e](https://github.com/shelly-nas/FinanceApp/commit/74f9e9ec30a78b0fadb99808e5de3e5b29b07865))
+* **ui:** keep filters in view while scrolling ([55c1297](https://github.com/shelly-nas/FinanceApp/commit/55c1297ccaf8690dfd14ba4a5e791e0fe2f2c576))
+* **ui:** slimmer margins and lighter dashboard figures ([ca4870e](https://github.com/shelly-nas/FinanceApp/commit/ca4870ed53b38943c9be1ceb328ecefa98be8d48))
+
+
+### Bug Fixes
+
+* **import:** do not mark every transfer when an import adds nothing new ([618e2b2](https://github.com/shelly-nas/FinanceApp/commit/618e2b2885f33ce0e2f1c78c8532361f49be276c))
+* **layout:** pagina's niet meer zijwaarts scrollbaar ([89aeffa](https://github.com/shelly-nas/FinanceApp/commit/89aeffa7cf236080a1e349f2790d17d28775236c))
+* **layout:** stop pages scrolling sideways past their content ([12cf48a](https://github.com/shelly-nas/FinanceApp/commit/12cf48a9409eaf77ee144ddf6b425f445f7bb296))
+* **tags:** stop the tag field flickering when a tag is added ([0e09639](https://github.com/shelly-nas/FinanceApp/commit/0e09639492715601c995e9c2af6ed4799e773aea))
+* **transfers:** file every transfer under Overboekingen ([c1bfaed](https://github.com/shelly-nas/FinanceApp/commit/c1bfaedb8e09e730bf1268b7b5216b3ac864bd34))
+
+
+### Build & Deployment
+
+* enforce a coverage minimum in CI ([#23](https://github.com/shelly-nas/FinanceApp/issues/23)) ([b802c21](https://github.com/shelly-nas/FinanceApp/commit/b802c21a765f6b92c2cac85402d752a60e27632b))
+
 ## [1.2.1](https://github.com/shelly-nas/FinanceApp/compare/v1.2.0...v1.2.1) (2026-10-11)
 
 
