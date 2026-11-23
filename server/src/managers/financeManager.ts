@@ -1305,6 +1305,10 @@ class FinanceManager {
    * Returns the ids it marked, so an import can report them.
    */
   public async markCounterpartyTransfers(ids?: number[]): Promise<number[]> {
+    // No ids means every row; an empty list means an import that stored
+    // nothing new, which has nothing to mark.
+    if (ids && ids.length === 0) return [];
+
     const client = await dbContext.connect();
     const params: any[] = [];
     let scope = '';

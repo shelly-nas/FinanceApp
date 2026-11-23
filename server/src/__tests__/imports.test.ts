@@ -496,6 +496,16 @@ describe('one-sided transfers', { skip: !hasDatabase && 'no database configured'
     assert.equal((stored as any).category, 'Overboekingen');
   });
 
+  test('marks nothing for an import in which every row was already stored', async () => {
+    // An empty list of new rows means "nothing new", not "everything": a
+    // re-import of a known file must not reclassify the whole history.
+    await FinanceManager.addTransactions([
+      row({ name_description: 'Naar broker eerder', counterparty: BROKER, category: null, amount: 250 }),
+    ]);
+
+    assert.deepEqual(await FinanceManager.markCounterpartyTransfers([]), []);
+  });
+
   test('files a one-sided transfer under the transfer category even when already categorised', async () => {
     const { createdIds } = await FinanceManager.addTransactions([
       row({ name_description: 'Naar broker', counterparty: BROKER, category: 'Boodschappen', amount: 777 }),
