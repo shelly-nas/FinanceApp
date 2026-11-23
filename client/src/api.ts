@@ -249,17 +249,19 @@ export const api = createApi({
       },
       providesTags: ["transactions"],
     }),
-    getCategorySums: build.query<any, { startDate: string; endDate: string }>({
-      query: ({ startDate, endDate }) => ({
+    getCategorySums: build.query<any, { startDate: string; endDate: string; accounts?: string[] }>({
+      query: ({ startDate, endDate, accounts }) => ({
         url: `api/category-sums`,
-        params: { startDate, endDate },
+        // No list means every account; see the dashboard's account filter.
+        params: { startDate, endDate, ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}) },
       }),
       providesTags: ["categorySums"],
     }),
-    getIncomeExpensesSum: build.query<any, { startDate: string; endDate: string }>({
-      query: ({ startDate, endDate }) => ({
+    getIncomeExpensesSum: build.query<any, { startDate: string; endDate: string; accounts?: string[] }>({
+      query: ({ startDate, endDate, accounts }) => ({
         url: `api/income-expenses-sum`,
-        params: { startDate, endDate },
+        // No list means every account; see the dashboard's account filter.
+        params: { startDate, endDate, ...(accounts?.length ? { accounts: JSON.stringify(accounts) } : {}) },
       }),
       providesTags: ["incomeExpensesSum"],
     }),

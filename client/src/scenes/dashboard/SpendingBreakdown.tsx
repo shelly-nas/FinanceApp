@@ -15,6 +15,8 @@ export interface CategorySums {
 
 interface SpendingBreakdownProps {
   onCategorySelect: (category: string) => void;
+  /** The accounts to cover; undefined for all. */
+  accounts?: string[];
 }
 
 function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: CategorySums[] } {
@@ -34,12 +36,13 @@ function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: 
   return { income, expenses };
 }
 
-const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect }) => {
+const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect, accounts }) => {
   const { firstDay, lastDay } = useDateRange();
 
   const { data: results } = useGetCategorySumsQuery({
     startDate: formatDate(firstDay),
     endDate: formatDate(lastDay),
+    accounts,
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

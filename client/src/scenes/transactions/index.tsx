@@ -54,6 +54,8 @@ const Transactions: React.FC = () => {
     presetCategory?: string;
     presetStart?: string;
     presetEnd?: string;
+    /** The dashboard's account selection, carried along with a drill-down. */
+    presetAccounts?: string[];
   } = location.state ?? {};
 
   const [filters, setFilters] = useState<SearchFilters>(() => ({
@@ -63,6 +65,7 @@ const Transactions: React.FC = () => {
     // A drill-down from the dashboard carries its category and month across, so
     // the user continues where they were rather than re-entering the filters.
     categories: navState.presetCategory ? [navState.presetCategory] : undefined,
+    accounts: navState.presetAccounts,
     startDate: navState.presetStart,
     endDate: navState.presetEnd,
     // Transfers between own accounts are listed, marked with an icon and filed

@@ -230,11 +230,29 @@ router.get('/transactions', async (req: Request, res: Response, next: NextFuncti
 });
 
 
+/**
+ * The optional `accounts` query parameter: a JSON array of account identifiers.
+ * Undefined when absent, null when it is not a list of strings.
+ */
+const parseAccountList = (value: unknown): string[] | undefined | null => {
+  if (value === undefined) return undefined;
+  try {
+    const parsed = JSON.parse(value as string);
+    return Array.isArray(parsed) && parsed.every((v) => typeof v === 'string') ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
 router.get('/category-sums', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
+  const accounts = parseAccountList(req.query.accounts);
+  if (accounts === null) {
+    return res.status(400).json({ error: 'accounts must be a JSON array of account identifiers' });
+  }
 
   try {
-    const categorySums = await FinanceManager.getCategorySums(startDate as string, endDate as string);
+    const categorySums = await FinanceManager.getCategorySums(startDate as string, endDate as string, accounts);
     res.status(200).json(categorySums);
   } catch (error) {
     next(error);
@@ -243,9 +261,13 @@ router.get('/category-sums', async (req: Request, res: Response, next: NextFunct
 
 router.get('/income-expenses-sum', async (req: Request, res: Response, next: NextFunction) => {
   const { startDate, endDate } = req.query;
+  const accounts = parseAccountList(req.query.accounts);
+  if (accounts === null) {
+    return res.status(400).json({ error: 'accounts must be a JSON array of account identifiers' });
+  }
 
   try {
-    const categorySums = await FinanceManager.getIncomeExpensesSum(startDate as string, endDate as string);
+    const categorySums = await FinanceManager.getIncomeExpensesSum(startDate as string, endDate as string, accounts);
     res.status(200).json(categorySums);
   } catch (error) {
     next(error);
