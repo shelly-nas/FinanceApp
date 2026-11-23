@@ -12,7 +12,7 @@ import StatRow from '@/scenes/reports/StatRow';
 import CategoryStatsTable from '@/scenes/reports/CategoryStatsTable';
 import { formatCurrency, formatCompact, formatMonthShort } from '@/scenes/reports/chartTheme';
 import {
-  buildCategoryRows, summariseCategories, trendSlope, OTHER, OTHER_COLOR,
+  buildCategoryRows, summariseCategories, trendSlope, toneFor, OTHER, OTHER_COLOR,
 } from '@/scenes/reports/reportMath';
 import { useGetCategoryHistoryQuery } from '@/api';
 
@@ -135,7 +135,12 @@ const CategoryTrendChart: React.FC<Props> = ({
           { label: 'Avg / month', value: formatCurrency(periodTotal / rows.length) },
           { label: 'High', value: formatCurrency(Math.max(...monthTotals)) },
           { label: 'Low', value: formatCurrency(Math.min(...monthTotals)) },
-          { label: 'Trend / month', value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}` },
+          {
+            label: 'Trend / month',
+            value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}`,
+            // More spending is the bad direction.
+            tone: toneFor(slope, { higherIsBetter: false }),
+          },
           { label: 'Months', value: String(rows.length) },
         ]}
       />
@@ -187,7 +192,7 @@ const CategoryTrendChart: React.FC<Props> = ({
         </ResponsiveContainer>
       </Box>
 
-      <Box sx={{ mt: 6 }}>
+      <Box sx={{ mt: 4 }}>
         <CategoryStatsTable stats={stats} selected={selected} onToggle={onToggleCategory} />
       </Box>
     </DashboardBox>

@@ -3,7 +3,8 @@ import { Box, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 import { LineChart, Line, YAxis } from 'recharts';
 import CardTable from '@/components/CardTable';
 import { formatCurrency } from '@/scenes/reports/chartTheme';
-import { CategoryStats, OTHER_COLOR } from '@/scenes/reports/reportMath';
+import { CategoryStats, OTHER_COLOR, toneFor } from '@/scenes/reports/reportMath';
+import { toneColor } from '@/scenes/reports/StatRow';
 
 interface Props {
   stats: CategoryStats[];
@@ -62,7 +63,14 @@ const CategoryStatsTable: React.FC<Props> = ({ stats, selected, onToggle }) => (
               <TableCell align="right" sx={numeric}>{formatCurrency(row.average)}</TableCell>
               <TableCell align="right" sx={numeric}>{formatCurrency(row.min)}</TableCell>
               <TableCell align="right" sx={numeric}>{formatCurrency(row.max)}</TableCell>
-              <TableCell align="right" sx={numeric}>
+              <TableCell
+                align="right"
+                sx={{
+                  ...numeric,
+                  // Rising spending in red, falling in green.
+                  color: toneColor(toneFor(row.slope, { higherIsBetter: false })),
+                }}
+              >
                 {row.slope === null ? '–' : `${row.slope >= 0 ? '+' : ''}${formatCurrency(row.slope)}`}
               </TableCell>
               <TableCell sx={{ py: 0 }}>

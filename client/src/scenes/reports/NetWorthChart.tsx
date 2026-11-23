@@ -12,7 +12,7 @@ import {
   ACCOUNT_TYPE_COLORS, ACCOUNT_TYPE_ORDER, ACCOUNT_TYPE_LABELS,
   formatCurrency, formatCompact, formatMonthShort,
 } from '@/scenes/reports/chartTheme';
-import { trendSlope } from '@/scenes/reports/reportMath';
+import { toneFor, trendSlope } from '@/scenes/reports/reportMath';
 import { NetWorthPoint, useGetNetWorthHistoryQuery } from '@/api';
 
 interface Props {
@@ -100,13 +100,14 @@ const NetWorthChart: React.FC<Props> = ({ startDate, endDate }) => {
           { label: 'Now', value: formatCurrency(latest), emphasis: true },
           {
             label: 'Change',
+            tone: toneFor(change),
             value: `${change >= 0 ? '+' : ''}${formatCurrency(change)}${
               changePct === null ? '' : ` (${changePct >= 0 ? '+' : ''}${changePct.toFixed(1)}%)`
             }`,
           },
           { label: 'High', value: formatCurrency(Math.max(...totals)) },
           { label: 'Low', value: formatCurrency(Math.min(...totals)) },
-          { label: 'Trend / month', value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}` },
+          { label: 'Trend / month', value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}`, tone: toneFor(slope) },
           { label: 'Months', value: String(points.length) },
         ]}
       />

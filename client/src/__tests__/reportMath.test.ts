@@ -1,6 +1,6 @@
 import { test, describe, assert } from 'vitest';
 import {
-  movingAverage, trendSlope, summariseCategories, buildCashflow, buildCategoryRows,
+  movingAverage, trendSlope, summariseCategories, buildCashflow, buildCategoryRows, toneFor,
 } from '@/scenes/reports/reportMath';
 
 const point = (month: string, category: string, total: number, color = '#000000') => ({
@@ -97,5 +97,22 @@ describe('buildCashflow', () => {
   test('has no savings rate in a month without income', () => {
     const [month] = buildCashflow([{ month: '2026-08', income: '0', expenses: '300' }]);
     assert.equal(month.savingsRate, null);
+  });
+});
+
+describe('toneFor', () => {
+  test('colours a rise positive where more is better, like net worth', () => {
+    assert.equal(toneFor(120), 'positive');
+    assert.equal(toneFor(-5), 'negative');
+  });
+
+  test('turns it around where more is worse, like spending', () => {
+    assert.equal(toneFor(120, { higherIsBetter: false }), 'negative');
+    assert.equal(toneFor(-5, { higherIsBetter: false }), 'positive');
+  });
+
+  test('leaves zero and missing values neutral', () => {
+    assert.equal(toneFor(0), undefined);
+    assert.equal(toneFor(null), undefined);
   });
 });

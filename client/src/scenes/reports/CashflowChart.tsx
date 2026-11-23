@@ -11,7 +11,7 @@ import StatRow from '@/scenes/reports/StatRow';
 import {
   CASHFLOW_COLORS, formatCurrency, formatCompact, formatMonthShort,
 } from '@/scenes/reports/chartTheme';
-import { buildCashflow } from '@/scenes/reports/reportMath';
+import { buildCashflow, toneFor } from '@/scenes/reports/reportMath';
 import { useGetCashflowHistoryQuery } from '@/api';
 
 interface Props {
@@ -53,11 +53,11 @@ const CashflowChart: React.FC<Props> = ({ startDate, endDate }) => {
 
       <StatRow
         stats={[
-          { label: 'Saved', value: formatCurrency(net), emphasis: true },
-          { label: 'Savings rate', value: formatPct(income > 0 ? (net / income) * 100 : null) },
+          { label: 'Saved', value: formatCurrency(net), emphasis: true, tone: toneFor(net) },
+          { label: 'Savings rate', value: formatPct(income > 0 ? (net / income) * 100 : null), tone: toneFor(income > 0 ? net : null) },
           { label: 'Income', value: formatCurrency(income) },
           { label: 'Spending', value: formatCurrency(expenses) },
-          { label: 'Avg saved / month', value: formatCurrency(net / rows.length) },
+          { label: 'Avg saved / month', value: formatCurrency(net / rows.length), tone: toneFor(net) },
         ]}
       />
 

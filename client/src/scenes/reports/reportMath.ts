@@ -160,3 +160,18 @@ export const buildCashflow = (points: CashflowPoint[]): CashflowRow[] =>
       savingsRate: income > 0 ? (net / income) * 100 : null,
     };
   });
+
+export type Tone = 'positive' | 'negative';
+
+/**
+ * Green or red for a change. Where more is better (net worth, savings) a rise
+ * is positive; for spending it is the other way round, so a growing expense is
+ * not shown in the colour of good news. Zero and missing values stay neutral.
+ */
+export const toneFor = (
+  value: number | null,
+  { higherIsBetter = true }: { higherIsBetter?: boolean } = {},
+): Tone | undefined => {
+  if (value === null || value === 0 || Number.isNaN(value)) return undefined;
+  return (value > 0) === higherIsBetter ? 'positive' : 'negative';
+};

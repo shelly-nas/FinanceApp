@@ -1,11 +1,18 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import type { Tone } from '@/scenes/reports/reportMath';
+
+/** Theme colour for a tone: green for good, red for bad, nothing for neutral. */
+export const toneColor = (tone?: Tone) =>
+  tone === 'positive' ? 'success.main' : tone === 'negative' ? 'error.main' : undefined;
 
 export interface Stat {
   label: string;
   value: string;
   /** The headline figure, shown larger. */
   emphasis?: boolean;
+  /** Green for a good change, red for a bad one; see toneFor. */
+  tone?: Tone;
 }
 
 /**
@@ -22,9 +29,10 @@ const StatRow: React.FC<{ stats: Stat[] }> = ({ stats }) => (
           sx={{
             m: 0,
             fontSize: stat.emphasis ? 24 : 14,
-            fontWeight: 600,
+            // The headline in regular weight, like the dashboard tiles.
+            fontWeight: stat.emphasis ? 400 : 600,
             lineHeight: stat.emphasis ? 1.2 : 1.5,
-            color: 'text.primary',
+            color: toneColor(stat.tone) ?? 'text.primary',
             fontVariantNumeric: 'tabular-nums',
             whiteSpace: 'nowrap',
           }}
