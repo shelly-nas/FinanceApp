@@ -1,6 +1,6 @@
 # Ontwerp: navigatie en filters
 
-Status: **akkoord**, wordt gebouwd op de branch `v2` en uitgebracht als 2.0.0.
+Status: **akkoord**, wordt gebouwd in vier PR's naar `main` en uitgebracht als 2.0.0.
 Wireframes: [`wireframes.html`](wireframes.html) (bron) en de afbeeldingen in [`img/`](img/).
 
 ## Waarom
@@ -28,7 +28,7 @@ Wat daaruit volgt:
 - **Eén filter voor heel Insights.** Overview en Trends tonen dezelfde selectie. Wisselen tussen de twee houdt de selectie vast.
 - **Filters staan vast in beeld,** in de linkerbalk. Boven de inhoud staat geen filterregel; de ondertitel zegt in woorden waar de cijfers over gaan.
 - **Eén begrip, één bediening.** Rekeningen en categorieën kies je overal op dezelfde manier.
-- **Eén release: 2.0.0.** Alles komt in één keer uit; tot die tijd blijft productie op 1.x (zie *Werkwijze en release*).
+- **Eén major release: 2.0.0.** Alles komt in één keer uit en vervangt 1.x (zie *Werkwijze en release*).
 
 ## Navigatie
 
@@ -172,12 +172,12 @@ Alles optioneel en achterwaarts compatibel: zonder parameter blijft het gedrag z
 
 ## Werkwijze en release: alles in 2.0.0
 
-Alles hieronder komt in **één release, 2.0.0**. Gebouwd wordt het wel in stappen, zodat elke stap te reviewen en te testen is.
+Alles hieronder komt in **één major release, 2.0.0**, die 1.x vervangt. Gebouwd wordt het in stappen, zodat elke stap te reviewen en te testen is.
 
-- **Integratiebranch `v2`**, met een draft-PR `v2` → `main`. Acc draait alleen voor PR's naar `main`, dus elke push naar `v2` zet acc op de nieuwste stand: de 2.0 is daar steeds te bekijken.
-- **Elke stap is een PR naar `v2`.** CI draait op elke push, dus ook daar.
-- **`main` blijft releasebaar.** Een fix voor 1.x kan gewoon uit, en wordt daarna in `v2` gemerged.
-- **Release:** als stap 4 klaar is, gaat `v2` naar `main` met `Release-As: 2.0.0` in de commit. Release-please maakt dan een release-PR voor 2.0.0, en het mergen daarvan zet het in productie.
+- **Elke stap is een PR naar `main`**, zoals gewoonlijk, en staat daarmee ook op acc.
+- **De release-PR blijft openstaan** tot alle vier de stappen in `main` zitten. Release-please verzamelt intussen de wijzigingen.
+- **Release:** na stap 4 een commit met `Release-As: 2.0.0`. Release-please maakt de release-PR dan 2.0.0, en het mergen daarvan zet het in productie.
+- Een dringende fix in de tussentijd gaat dan in dezelfde 2.0.0 mee, of de release-PR wordt eerder gemerged.
 
 ### Stappen
 
