@@ -37,7 +37,7 @@ Wat daaruit volgt:
 | Dashboard | **Overview** | Insights |
 | Reports | **Trends** | Insights |
 | Transactions | **Transactions**, met tabs *To do* en *All* | Manage |
-| Accounts | **Accounts** (ongewijzigd, zonder de dubbele kaart) | Manage |
+| Accounts | **Accounts** (ongewijzigd) | Manage |
 | Categories | **Categories** | Manage |
 | Events | **Events**, met de analyse per event erbij | Manage |
 | Import in paginakoppen, export en restore in de sidebar | **Import & export** | Manage |
@@ -142,7 +142,7 @@ Elke manier waarop data binnenkomt of eruit gaat:
 
 ### Accounts en Categories
 
-Inhoudelijk ongewijzigd, als lijst in een kaart volgens het lijstpatroon. Accounts verliest de kaart "seen in your transactions, not yet added": die staat in *To do*.
+Inhoudelijk ongewijzigd, als lijst in een kaart volgens het lijstpatroon. Accounts houdt de kaart "seen in your transactions, not yet added", want daar voeg je ze toe. *To do* meldt dezelfde rekeningen en verwijst met "Set up accounts" naar Accounts.
 
 ## Mobiel
 
