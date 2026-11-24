@@ -9,7 +9,7 @@ import {
 } from '@/scenes/insights/filter';
 
 /** The pages that show the filter and keep it in their URL. */
-const INSIGHTS_PATHS = ['/', '/reports'];
+const INSIGHTS_PATHS = ['/', '/trends'];
 
 const readStoredAccounts = () => {
   try {
@@ -38,6 +38,8 @@ interface Value {
   setPreset: (preset: Preset) => void;
   toggleAccount: (details: string) => void;
   toggleCategory: (name: string) => void;
+  /** Back to the current month, every account and every category. */
+  reset: () => void;
   /** The period Overview shows. */
   period: ReturnType<typeof periodDates> & { from: string; to: string; label: string };
   /** The months Trends shows: the period, or the 12 months up to a single month. */
@@ -134,6 +136,7 @@ export const InsightsFilterProvider: React.FC<{ children: ReactNode }> = ({ chil
       ),
       toggleAccount: (details) => apply({ ...filter, accounts: toggle(accounts, details) }),
       toggleCategory: (name) => apply({ ...filter, categories: toggle(filter.categories, name) }),
+      reset: () => apply(defaultFilter()),
       period: { ...periodDates(months), ...months, label: describePeriod(months) },
       trend: { ...periodDates(trend), ...trend, label: describePeriod(trend) },
       accounts: accounts.length > 0 ? accounts : undefined,

@@ -3,17 +3,17 @@ import { Stack } from "@mui/material";
 import KeyFigures from "@/scenes/dashboard/KeyFigures";
 import SpendingBreakdown from "@/scenes/dashboard/SpendingBreakdown";
 import TransactionDetails from "@/scenes/dashboard/TransactionDetails";
-import AccountFilter from "@/scenes/dashboard/AccountFilter";
-import PeriodStepper from "@/scenes/insights/PeriodStepper";
-import { useInsightsFilter } from "@/scenes/insights/InsightsFilterContext";
+import MobileFilters from "@/scenes/insights/MobileFilters";
+import { useSelectionLabel } from "@/scenes/insights/useSelectionLabel";
 import PageHeader from "@/components/PageHeader";
-import ImportActions from "@/scenes/layout/ImportActions";
-import { useGetAccountOverviewQuery } from "@/api";
 
+/**
+ * Overview: what the selected period, accounts and categories add up to.
+ * The selection is set in the filter panel; the subtitle says what it is.
+ */
 const Dashboard: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { period, filter, update } = useInsightsFilter();
-  const { data: allAccounts } = useGetAccountOverviewQuery();
+  const subtitle = useSelectionLabel('period');
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(prevCategory => prevCategory === category ? null : category);
@@ -21,22 +21,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        subtitle={`Balances, income and spending for ${period.label}`}
-        actions={
-          <>
-            <PeriodStepper />
-            <ImportActions withInvestments />
-          </>
-        }
-      />
+      <PageHeader title="Overview" subtitle={subtitle} actions={<MobileFilters />} />
       <Stack spacing={4} useFlexGap>
-        <AccountFilter
-          accounts={allAccounts ?? []}
-          selected={filter.accounts}
-          onChange={(accounts) => update({ accounts })}
-        />
         <KeyFigures />
         <SpendingBreakdown onCategorySelect={handleCategorySelect} />
         <TransactionDetails selectedCategory={selectedCategory} />

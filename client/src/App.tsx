@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AppShell from '@/scenes/layout/AppShell';
 import Dashboard from '@/scenes/dashboard';
 import { createTheme } from '@mui/material/styles';
@@ -12,6 +12,13 @@ import Tags from '@/scenes/tags';
 import Accounts from '@/scenes/accounts';
 import Categories from '@/scenes/categories';
 import Reports from '@/scenes/reports';
+import ImportExport from '@/scenes/importExport';
+
+/** Reports became Trends in 2.0; old links and bookmarks keep working. */
+const ToTrends: React.FC = () => {
+  const { search } = useLocation();
+  return <Navigate to={`/trends${search}`} replace />;
+};
 
 const ThemedApp: React.FC = () => {
   const { resolvedMode } = useColorMode();
@@ -30,7 +37,9 @@ const ThemedApp: React.FC = () => {
             <Route path="/events" element={<Tags />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/categories" element={<Categories />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/trends" element={<Reports />} />
+            <Route path="/reports" element={<ToTrends />} />
+            <Route path="/import-export" element={<ImportExport />} />
             {/* <Route path="/Review Accounts" element={<div>Review Accounts Page</div>} /> */}
           </Routes>
         </AppShell>

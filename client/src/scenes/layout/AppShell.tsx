@@ -4,7 +4,7 @@ import MenuIcon from '@mui/icons-material/MenuRounded';
 import Sidebar, { Brand } from '@/scenes/layout/Sidebar';
 import ImportDialogs from '@/scenes/layout/ImportDialogs';
 
-const SIDEBAR_WIDTH = 248;
+const SIDEBAR_WIDTH = 264;
 export const TOPBAR_HEIGHT = 56;
 
 /**
@@ -31,10 +31,12 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             position: 'sticky',
             top: 0,
             height: '100vh',
-            overflowY: 'auto',
+            // The sidebar lays out its own scrolling: the navigation stays,
+            // the filter below it scrolls.
+            overflow: 'hidden',
           }}
         >
-          <Sidebar />
+          <Sidebar showFilters />
         </Box>
       ) : (
         <>

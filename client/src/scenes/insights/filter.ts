@@ -168,3 +168,28 @@ export const parseStoredAccounts = (raw: string | null): string[] => {
     return [];
   }
 };
+
+// --- Describing the selection ----------------------------------------------------
+
+/**
+ * The selection in words, for a page subtitle: "October 2026 · 3 of 8
+ * accounts · Boodschappen". All accounts and all categories go unsaid.
+ */
+export const describeSelection = (
+  periodLabel: string,
+  accounts: { selected: number; total: number },
+  categories: string[],
+): string => {
+  const parts = [periodLabel];
+  if (accounts.selected > 0 && accounts.selected < accounts.total) {
+    parts.push(`${accounts.selected} of ${accounts.total} accounts`);
+  }
+  if (categories.length > 0) {
+    parts.push(categories.length <= 2 ? categories.join(', ') : `${categories.length} categories`);
+  }
+  return parts.join(' · ');
+};
+
+/** How many things the filter narrows on, for the "Filters · 3" button. */
+export const activeFilterCount = (filter: Pick<InsightsFilter, 'accounts' | 'categories'>) =>
+  filter.accounts.length + filter.categories.length;

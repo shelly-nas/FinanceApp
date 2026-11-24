@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, Typography, Chip, Button, useTheme } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
+import { Box, Typography, Chip, useTheme } from '@mui/material';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
@@ -20,50 +19,11 @@ import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 interface Props {
   startDate: string;
   endDate: string;
-  /** Every category that can be filtered on. */
-  allCategories: string[];
-  /** The selected categories; empty means all. */
+  /** The categories selected in the Insights filter; empty means all. */
   selected: string[];
+  /** Toggles a category in the filter - the table rows call this. */
   onToggleCategory: (category: string) => void;
-  onClearCategories: () => void;
 }
-
-/**
- * The category filter, inside the card it applies to: every category one
- * click away instead of behind a dropdown.
- */
-const CategoryFilter: React.FC<Pick<Props, 'allCategories' | 'selected' | 'onToggleCategory' | 'onClearCategories'>> = ({
-  allCategories, selected, onToggleCategory, onClearCategories,
-}) => (
-  <Box
-    role="group"
-    aria-label="Categories"
-    sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', mb: 4 }}
-  >
-    <Button
-      size="small"
-      variant={selected.length === 0 ? 'contained' : 'outlined'}
-      onClick={onClearCategories}
-    >
-      All categories
-    </Button>
-    {allCategories.map((name) => {
-      const on = selected.includes(name);
-      return (
-        <Chip
-          key={name}
-          size="small"
-          label={name}
-          icon={on ? <CheckIcon /> : undefined}
-          color={on ? 'primary' : 'default'}
-          variant={on ? 'filled' : 'outlined'}
-          onClick={() => onToggleCategory(name)}
-          aria-pressed={on}
-        />
-      );
-    })}
-  </Box>
-);
 
 /** Beyond this many series the stack stops being readable. */
 const MAX_SERIES = 8;
@@ -76,9 +36,7 @@ const MAX_SERIES = 8;
  * Only months with data are drawn. A month that was never imported is not a
  * month of zero spending, and a zero bar would say it was.
  */
-const CategoryTrendChart: React.FC<Props> = ({
-  startDate, endDate, allCategories, selected, onToggleCategory, onClearCategories,
-}) => {
+const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, selected, onToggleCategory }) => {
   const { palette } = useTheme();
   const { accounts } = useInsightsFilter();
   const { data: history } = useGetCategoryHistoryQuery({
@@ -94,20 +52,11 @@ const CategoryTrendChart: React.FC<Props> = ({
   );
   const stats = useMemo(() => summariseCategories(history ?? []), [history]);
 
-  const filter = (
-    <CategoryFilter
-      allCategories={allCategories}
-      selected={selected}
-      onToggleCategory={onToggleCategory}
-      onClearCategories={onClearCategories}
-    />
-  );
 
   if (rows.length === 0) {
     return (
       <DashboardBox>
         <WidgetHeader title="Spending by category" />
-        {filter}
         <Typography variant="body2">No data for this period.</Typography>
       </DashboardBox>
     );
@@ -129,8 +78,6 @@ const CategoryTrendChart: React.FC<Props> = ({
           )
         }
       />
-
-      {filter}
 
       <StatRow
         stats={[

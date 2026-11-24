@@ -2,6 +2,7 @@ import { test, describe, assert } from 'vitest';
 import {
   defaultFilter, periodMonths, monthCount, periodDates, trendMonths, stepPeriod, describePeriod,
   readFilter, writeFilter, hasFilterParams, filterKey, parseStoredAccounts, InsightsFilter,
+  describeSelection, activeFilterCount,
 } from '@/scenes/insights/filter';
 
 const NOW = new Date(2026, 10, 23); // 23 November 2026
@@ -121,5 +122,24 @@ describe('parseStoredAccounts', () => {
     assert.deepEqual(parseStoredAccounts('nope'), []);
     assert.deepEqual(parseStoredAccounts('[1]'), []);
     assert.deepEqual(parseStoredAccounts(null), []);
+  });
+});
+
+describe('describeSelection', () => {
+  test('leaves out what is not narrowed', () => {
+    assert.equal(describeSelection('October 2026', { selected: 0, total: 8 }, []), 'October 2026');
+    assert.equal(describeSelection('October 2026', { selected: 8, total: 8 }, []), 'October 2026');
+  });
+
+  test('names a few categories and counts more', () => {
+    assert.equal(
+      describeSelection('October 2026', { selected: 3, total: 8 }, ['Boodschappen']),
+      'October 2026 · 3 of 8 accounts · Boodschappen',
+    );
+    assert.equal(describeSelection('Oct 2026', { selected: 0, total: 8 }, ['a', 'b', 'c']), 'Oct 2026 · 3 categories');
+  });
+
+  test('counts what the filter narrows on', () => {
+    assert.equal(activeFilterCount({ accounts: ['a', 'b'], categories: ['c'] }), 3);
   });
 });
