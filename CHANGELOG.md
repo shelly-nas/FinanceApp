@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/shelly-nas/FinanceApp/compare/v2.0.0...v2.0.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **insights:** open on the previous month again ([04bd4ca](https://github.com/shelly-nas/FinanceApp/commit/04bd4ca8b60ae2814f997f8fc576f9e8893cb61a))
+* **insights:** Overview opent weer op de vorige maand ([55b34ff](https://github.com/shelly-nas/FinanceApp/commit/55b34ff7f25ab87fb9ca9ec0a37dda2489461145))
+
 ## [2.0.0](https://github.com/shelly-nas/FinanceApp/compare/v1.4.0...v2.0.0) (2026-11-24)
 
 
