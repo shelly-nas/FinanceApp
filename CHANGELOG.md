@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.0.0](https://github.com/shelly-nas/FinanceApp/compare/v1.4.0...v2.0.0) (2026-11-24)
+
+
+### Features
+
+* **insights:** filter every summary on accounts and categories ([1b2ddd2](https://github.com/shelly-nas/FinanceApp/commit/1b2ddd2bcbcf97c64fadf22c84553da10ee9c11c))
+* **insights:** one shared filter for the dashboard and reports ([5d7c6f4](https://github.com/shelly-nas/FinanceApp/commit/5d7c6f452a9f1ed3cee91c60480c287b877237ea))
+* **manage:** To do and All on Transactions, Import & export, open and closed events ([d71a32c](https://github.com/shelly-nas/FinanceApp/commit/d71a32c7001dbabd19cd90961ad27320ba83f714))
+* **navigation:** Insights and Manage, with the filter in the sidebar ([10880a3](https://github.com/shelly-nas/FinanceApp/commit/10880a35ddc5334e64e2bffed4b7cd8893685b1e))
+* **overview:** compact key figures and drill-down through the filter ([1fe8c22](https://github.com/shelly-nas/FinanceApp/commit/1fe8c2258c449dab47bade85b2e9ac6226ed3dd3))
+
+
+### Documentation
+
+* build 2.0 in one pull request ([a741c85](https://github.com/shelly-nas/FinanceApp/commit/a741c85d48720e5bab7b601161c4171bce0e63a7))
+* design for the navigation and one shared filter ([72f19e2](https://github.com/shelly-nas/FinanceApp/commit/72f19e2c9c1f73ea79d1cf08c31a4360327a9b7d))
+* drop the filter summary row, compact key figures, release as 2.0.0 ([e5e70a4](https://github.com/shelly-nas/FinanceApp/commit/e5e70a441ba38c08e3bb01caafce1d401c81c0c4))
+* keep adding new accounts on the Accounts page ([e2c35ac](https://github.com/shelly-nas/FinanceApp/commit/e2c35ac0d17940d440f2b3161efdf790fe2af251))
+* record the decisions on the navigation and filter design ([debc63b](https://github.com/shelly-nas/FinanceApp/commit/debc63b3000e8a95e9abd5b749bf93f026b689e2))
+* release 2.0 from main instead of a separate branch ([3786649](https://github.com/shelly-nas/FinanceApp/commit/378664924e36b7cb097f42ceb50a9c2a13b707a7))
+
+
+### Chores
+
+* release 2.0.0 ([c830966](https://github.com/shelly-nas/FinanceApp/commit/c830966fd60e60e6bb8f663fe9e7a8b9f57cd347))
+
 ## [1.4.0](https://github.com/shelly-nas/FinanceApp/compare/v1.3.0...v1.4.0) (2026-11-23)
 
 
