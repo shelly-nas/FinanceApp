@@ -253,6 +253,20 @@ describe('summary queries', { skip: !hasDatabase && 'no database configured' }, 
       assert.deepEqual([Number(august.income), Number(august.expenses)], [1000, 0]);
     });
 
+    test('gives income per category on the income side, credits positive', async () => {
+      await FinanceManager.addTransactions([
+        row({ amount: 100 }),
+        row({ category: 'Vast Inkomen', debit_credit: 'Credit', amount: 3000, name_description: 'Salaris' }),
+        row({ category: 'Vast Inkomen', debit_credit: 'Debit', amount: 200, name_description: 'Correctie' }),
+      ]);
+
+      const income = await FinanceManager.getCategoryHistory('2026-08-01', '2026-08-31', { side: 'income' });
+      assert.deepEqual(income.map((r: any) => [r.category, Number(r.total)]), [['Vast Inkomen', 2800]]);
+
+      const spending = await FinanceManager.getCategoryHistory('2026-08-01', '2026-08-31');
+      assert.deepEqual(spending.map((r: any) => r.category), ['Boodschappen'], 'spending stays the default');
+    });
+
     test('shows a transfer leaving the selection in the category history', async () => {
       await moveToSavings();
 

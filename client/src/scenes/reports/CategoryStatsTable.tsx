@@ -8,6 +8,8 @@ import { toneColor } from '@/scenes/reports/StatRow';
 
 interface Props {
   stats: CategoryStats[];
+  /** True for income, where a rising trend is good; false for spending. */
+  higherIsBetter?: boolean;
   selected: string[];
   onToggle?: (category: string) => void;
 }
@@ -28,7 +30,7 @@ const Sparkline: React.FC<{ values: number[]; color: string }> = ({ values, colo
  * spotted without reading every sparkline. A row click toggles the category in
  * the page filter.
  */
-const CategoryStatsTable: React.FC<Props> = ({ stats, selected, onToggle }) => (
+const CategoryStatsTable: React.FC<Props> = ({ stats, selected, onToggle, higherIsBetter = false }) => (
     <CardTable minWidth={720}>
       <TableHead>
         <TableRow>
@@ -68,7 +70,7 @@ const CategoryStatsTable: React.FC<Props> = ({ stats, selected, onToggle }) => (
                 sx={{
                   ...numeric,
                   // Rising spending in red, falling in green.
-                  color: toneColor(toneFor(row.slope, { higherIsBetter: false })),
+                  color: toneColor(toneFor(row.slope, { higherIsBetter })),
                 }}
               >
                 {row.slope === null ? '–' : `${row.slope >= 0 ? '+' : ''}${formatCurrency(row.slope)}`}

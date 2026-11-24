@@ -175,3 +175,20 @@ export const toneFor = (
   if (value === null || value === 0 || Number.isNaN(value)) return undefined;
   return (value > 0) === higherIsBetter ? 'positive' : 'negative';
 };
+
+export type Side = 'expenses' | 'income';
+
+/**
+ * Which side the category chart starts on: income when every selected
+ * category is an income category, spending otherwise. Nothing selected means
+ * every category, and spending is what most questions are about.
+ */
+export const defaultSide = (
+  selected: string[],
+  categories: { category_name: string; income_outcome: string | null }[],
+): Side => {
+  if (selected.length === 0) return 'expenses';
+  const isIncome = (name: string) =>
+    categories.find((c) => c.category_name === name)?.income_outcome === 'Inkomsten';
+  return selected.every(isIncome) ? 'income' : 'expenses';
+};

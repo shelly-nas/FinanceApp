@@ -1,6 +1,6 @@
 import { test, describe, assert } from 'vitest';
 import {
-  movingAverage, trendSlope, summariseCategories, buildCashflow, buildCategoryRows, toneFor,
+  movingAverage, trendSlope, summariseCategories, buildCashflow, buildCategoryRows, toneFor, defaultSide,
 } from '@/scenes/reports/reportMath';
 
 const point = (month: string, category: string, total: number, color = '#000000') => ({
@@ -114,5 +114,21 @@ describe('toneFor', () => {
   test('leaves zero and missing values neutral', () => {
     assert.equal(toneFor(0), undefined);
     assert.equal(toneFor(null), undefined);
+  });
+});
+
+describe('defaultSide', () => {
+  const categories = [
+    { category_name: 'Vast Inkomen', income_outcome: 'Inkomsten' },
+    { category_name: 'Boodschappen', income_outcome: 'Uitgaven' },
+  ];
+
+  test('starts on spending without a selection or with any spending category', () => {
+    assert.equal(defaultSide([], categories), 'expenses');
+    assert.equal(defaultSide(['Vast Inkomen', 'Boodschappen'], categories), 'expenses');
+  });
+
+  test('starts on income when only income categories are selected', () => {
+    assert.equal(defaultSide(['Vast Inkomen'], categories), 'income');
   });
 });
