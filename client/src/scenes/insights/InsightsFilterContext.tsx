@@ -38,7 +38,7 @@ interface Value {
   setPreset: (preset: Preset) => void;
   toggleAccount: (details: string) => void;
   toggleCategory: (name: string) => void;
-  /** Back to the current month, every account and every category. */
+  /** Back to the previous month, every account and every category. */
   reset: () => void;
   /** The period Overview shows. */
   period: ReturnType<typeof periodDates> & { from: string; to: string; label: string };
@@ -59,7 +59,7 @@ const InsightsFilterContext = createContext<Value | undefined>(undefined);
  * coming back to Overview through the menu restores it.
  *
  * The selected accounts are also remembered between visits; the period starts
- * at the current month again and the categories at all.
+ * at the previous month again and the categories at all.
  */
 export const InsightsFilterProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();

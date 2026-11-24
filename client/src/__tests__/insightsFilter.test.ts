@@ -9,8 +9,13 @@ const NOW = new Date(2026, 10, 23); // 23 November 2026
 const f = (over: Partial<InsightsFilter>): InsightsFilter => ({ ...defaultFilter(NOW), ...over });
 
 describe('defaultFilter', () => {
-  test('starts at the current month, every account and category', () => {
-    assert.deepEqual(defaultFilter(NOW), { preset: 'month', to: '2026-11', accounts: [], categories: [] });
+  test('starts at the previous month, every account and category', () => {
+    // The month just closed is the one a fresh bank export covers.
+    assert.deepEqual(defaultFilter(NOW), { preset: 'month', to: '2026-10', accounts: [], categories: [] });
+  });
+
+  test('crosses into the previous year in January', () => {
+    assert.equal(defaultFilter(new Date(2027, 0, 15)).to, '2026-12');
   });
 });
 

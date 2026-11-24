@@ -25,9 +25,13 @@ export interface InsightsFilter {
 
 const PRESET_MONTHS: Partial<Record<Preset, number>> = { month: 1, '3m': 3, '6m': 6, '12m': 12 };
 
+/**
+ * Where Insights opens: the previous month, the one a fresh bank export
+ * covers and the last one with complete figures.
+ */
 export const defaultFilter = (now: Date = new Date(), accounts: string[] = []): InsightsFilter => ({
   preset: 'month',
-  to: toMonthKey(now),
+  to: toMonthKey(shiftMonth(now, -1)),
   accounts,
   categories: [],
 });

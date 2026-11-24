@@ -52,7 +52,7 @@ De sidebar toont eerst de twee navigatiegroepen en daaronder, alleen op Insights
 
 | Dimensie | Bediening | Standaard | Onthouden tussen bezoeken |
 |---|---|---|---|
-| **Periode** | Month, 3M, 6M, 12M, Year, of "…" voor een eigen periode. Met ‹ › stap je per periodelengte. | Deze maand | Nee, elk bezoek begint bij deze maand |
+| **Periode** | Month, 3M, 6M, 12M, Year, of "…" voor een eigen periode. Met ‹ › stap je per periodelengte. | Vorige maand | Nee, elk bezoek begint bij de vorige maand |
 | **Rekeningen** | Vinkjes, gegroepeerd per soort (Checking, Savings, Investments) | Alle | **Ja** |
 | **Categorieën** | Vinkjes, gegroepeerd in inkomsten en uitgaven (vast/variabel), met zoekveld | Alle | Nee |
 
