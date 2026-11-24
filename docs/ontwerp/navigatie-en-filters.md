@@ -1,6 +1,6 @@
 # Ontwerp: navigatie en filters
 
-Status: **akkoord**, wordt gebouwd in vier PR's naar `main` en uitgebracht als 2.0.0.
+Status: **akkoord**, gebouwd in één PR naar `main` en uitgebracht als 2.0.0.
 Wireframes: [`wireframes.html`](wireframes.html) (bron) en de afbeeldingen in [`img/`](img/).
 
 ## Waarom
@@ -172,12 +172,10 @@ Alles optioneel en achterwaarts compatibel: zonder parameter blijft het gedrag z
 
 ## Werkwijze en release: alles in 2.0.0
 
-Alles hieronder komt in **één major release, 2.0.0**, die 1.x vervangt. Gebouwd wordt het in stappen, zodat elke stap te reviewen en te testen is.
+Alles hieronder komt in **één major release, 2.0.0**, die 1.x vervangt: een big bang.
 
-- **Elke stap is een PR naar `main`**, zoals gewoonlijk, en staat daarmee ook op acc.
-- **De release-PR blijft openstaan** tot alle vier de stappen in `main` zitten. Release-please verzamelt intussen de wijzigingen.
-- **Release:** na stap 4 een commit met `Release-As: 2.0.0`. Release-please maakt de release-PR dan 2.0.0, en het mergen daarvan zet het in productie.
-- Een dringende fix in de tussentijd gaat dan in dezelfde 2.0.0 mee, of de release-PR wordt eerder gemerged.
+- **Eén PR naar `main`** met alle stappen als losse commits, zodat elke stap in de geschiedenis te volgen is. Elke push zet de PR opnieuw op acc.
+- **Release:** de PR bevat een commit met `Release-As: 2.0.0`. Na de merge maakt release-please de release-PR 2.0.0, en het mergen daarvan zet het in productie.
 
 ### Stappen
 
