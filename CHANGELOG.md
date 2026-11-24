@@ -5,7 +5,6 @@
 
 ### Features
 
-* FinanceApp 2.0 - Insights en Manage met één gedeeld filter ([368096b](https://github.com/shelly-nas/FinanceApp/commit/368096b0adc4c87ff284255e0624beb5b11e63e2))
 * **insights:** filter every summary on accounts and categories ([1b2ddd2](https://github.com/shelly-nas/FinanceApp/commit/1b2ddd2bcbcf97c64fadf22c84553da10ee9c11c))
 * **insights:** one shared filter for the dashboard and reports ([5d7c6f4](https://github.com/shelly-nas/FinanceApp/commit/5d7c6f452a9f1ed3cee91c60480c287b877237ea))
 * **manage:** To do and All on Transactions, Import & export, open and closed events ([d71a32c](https://github.com/shelly-nas/FinanceApp/commit/d71a32c7001dbabd19cd90961ad27320ba83f714))
