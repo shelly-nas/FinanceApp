@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Stack, Typography } from '@mui/material';
 import DashboardBox from '@/components/DashboardBox';
 import WidgetHeader from '@/components/WidgetHeader';
@@ -13,9 +13,6 @@ export interface CategorySums {
   color: string;
 }
 
-interface SpendingBreakdownProps {
-  onCategorySelect: (category: string) => void;
-}
 
 function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: CategorySums[] } {
   let categorySums: CategorySums[] = (items as unknown as CategorySums[]) || [];
@@ -34,8 +31,8 @@ function categorizeItems(items: unknown[]): { income: CategorySums[], expenses: 
   return { income, expenses };
 }
 
-const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect }) => {
-  const { period, accounts, categories } = useInsightsFilter();
+const SpendingBreakdown: React.FC = () => {
+  const { period, accounts, categories, filter, toggleCategory } = useInsightsFilter();
 
   const { data: results } = useGetCategorySumsQuery({
     startDate: period.startDate,
@@ -44,8 +41,6 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
     categories,
   });
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTable, setSelectedTable] = useState<'income' | 'expenses' | null>(null);
 
   const result = categorizeItems(results) || {};
 
@@ -59,17 +54,12 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
   // Both bars share one scale, so the longer side is visibly longer.
   const scale = Math.max(totalIncome, totalExpenses) || 1;
 
-  const handleRowClick = (category: string, table: 'income' | 'expenses') => {
-    setSelectedCategory(selectedCategory === category ? null : category);
-    setSelectedTable(table);
-    onCategorySelect(category);
-  };
 
   return (
     <DashboardBox>
       <WidgetHeader
         title="Spending breakdown"
-        subtitle="Select a category to see its transactions below"
+        subtitle="Click a category to filter everything on it"
       />
 
       <Stack spacing={4} useFlexGap sx={{ mb: 4 }}>
@@ -107,15 +97,15 @@ const SpendingBreakdown: React.FC<SpendingBreakdownProps> = ({ onCategorySelect 
           title="Income"
           items={result.income}
           totalAmount={totalIncome}
-          onRowClick={(category) => handleRowClick(category, 'income')}
-          selectedCategory={selectedTable === 'income' ? selectedCategory : null}
+          onRowClick={toggleCategory}
+          selectedCategories={filter.categories}
         />
         <SortableSpendingTable
           title="Expenses"
           items={result.expenses}
           totalAmount={totalExpenses}
-          onRowClick={(category) => handleRowClick(category, 'expenses')}
-          selectedCategory={selectedTable === 'expenses' ? selectedCategory : null}
+          onRowClick={toggleCategory}
+          selectedCategories={filter.categories}
         />
       </Stack>
     </DashboardBox>
