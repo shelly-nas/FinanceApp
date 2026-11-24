@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, Typography, Button, Select, MenuItem, Alert, Stack,
+  Box, Typography, Button, Select, MenuItem, Alert, Stack, Chip, Tabs, Tab,
   CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
   TablePagination,
 } from '@mui/material';
@@ -16,6 +16,8 @@ import FilterBar from '@/scenes/transactions/FilterBar';
 import TransferReview from '@/scenes/transactions/TransferReview';
 import BulkTagControl from '@/scenes/transactions/BulkTagControl';
 import UnknownAccounts from '@/scenes/transactions/UnknownAccounts';
+import NeedsCategory from '@/scenes/transactions/NeedsCategory';
+import { useTodoCount } from '@/scenes/transactions/useTodoCount';
 import {
   SearchFilters,
   TransactionRow,
@@ -43,7 +45,7 @@ const PAGE_SIZES = [25, 50, 100, 250];
  */
 const Transactions: React.FC = () => {
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Set by UploadButton after an import, or by the dashboard when drilling into
   // a category from the spending breakdown.
@@ -55,24 +57,43 @@ const Transactions: React.FC = () => {
     presetCategory?: string;
     presetStart?: string;
     presetEnd?: string;
-    /** The dashboard's account selection, carried along with a drill-down. */
+    /** The Overview selection, carried along with "Open in Transactions". */
     presetAccounts?: string[];
+    presetCategories?: string[];
+    /** That selection in words, for the chip that shows it was carried over. */
+    presetLabel?: string;
   } = location.state ?? {};
 
+  // To do is what an import left to decide; All is every transaction. An
+  // import and the menu counter open To do, everything else opens All.
+  const todo = useTodoCount();
+  const tabParam = searchParams.get('tab');
+  const tab: 'todo' | 'all' = tabParam === 'todo' || tabParam === 'all'
+    ? tabParam
+    : searchParams.get('review') === 'true' || navState.imported !== undefined ? 'todo' : 'all';
+  const setTab = (next: 'todo' | 'all') => {
+    const params = new URLSearchParams(searchParams);
+    params.set('tab', next);
+    params.delete('review');
+    setSearchParams(params, { replace: true });
+  };
+
+  const fromInsights = navState.presetLabel !== undefined || navState.presetCategory !== undefined;
+  const [carried, setCarried] = useState<string | null>(navState.presetLabel ?? null);
+
   const [filters, setFilters] = useState<SearchFilters>(() => ({
-    // Arriving from an import or the tab badge means there is something to
-    // decide; opening the tab deliberately means browsing everything.
-    uncategorised: searchParams.get('review') === 'true' || navState.imported !== undefined,
-    // A drill-down from the dashboard carries its category and month across, so
-    // the user continues where they were rather than re-entering the filters.
-    categories: navState.presetCategory ? [navState.presetCategory] : undefined,
+    // "Open in Transactions" carries the Overview selection across, so the
+    // user continues where they were rather than re-entering the filters.
+    categories: navState.presetCategories?.length
+      ? navState.presetCategories
+      : navState.presetCategory ? [navState.presetCategory] : undefined,
     accounts: navState.presetAccounts,
     startDate: navState.presetStart,
     endDate: navState.presetEnd,
     // Transfers between own accounts are listed, marked with an icon and filed
-    // under Overboekingen. A drill-down from the dashboard hides them, because
-    // the figure it came from leaves them out and the list should add up to it.
-    includeInternal: !navState.presetCategory,
+    // under Overboekingen. Coming from Overview they follow its rule instead,
+    // so the list adds up to the figures it came from.
+    includeInternal: !fromInsights,
     sortBy: 'date_str',
     sortDir: 'desc',
   }));
@@ -127,6 +148,7 @@ const Transactions: React.FC = () => {
   };
 
   const resetFilters = () => {
+    setCarried(null);
     setFilters({ includeInternal: true, sortBy: 'date_str', sortDir: 'desc' });
     setPage(0);
     setSelectedIds([]);
@@ -219,7 +241,7 @@ const Transactions: React.FC = () => {
     <>
       <PageHeader
         title="Transactions"
-        subtitle="Search, correct and categorise every transaction"
+        subtitle="Review what came in, then browse and correct everything"
         actions={<ImportActions />}
       />
 
@@ -236,9 +258,42 @@ const Transactions: React.FC = () => {
           </Alert>
         )}
 
-        <UnknownAccounts />
-        <TransferReview transactionIds={navState.transactionIds} />
+        <Tabs
+          value={tab}
+          onChange={(_e, next) => setTab(next)}
+          aria-label="Transactions"
+          sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 40, '& .MuiTab-root': { minHeight: 40, textTransform: 'none' } }}
+        >
+          <Tab
+            value="todo"
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                To do
+                <Chip size="small" label={todo.total} color={todo.total > 0 ? 'primary' : 'default'} sx={{ height: 20 }} />
+              </Box>
+            }
+          />
+          <Tab value="all" label="All transactions" />
+        </Tabs>
 
+        {tab === 'todo' && (
+          <>
+            <UnknownAccounts />
+            <TransferReview transactionIds={navState.transactionIds} suggestionsOnly />
+            <NeedsCategory categories={categories} onEdit={handleEdit} savingIds={savingIds} />
+            {todo.total === 0 && (
+              <DashboardBox>
+                <Typography variant="body1" sx={{ color: 'text.primary' }}>Nothing to do.</Typography>
+                <Typography variant="body2" sx={{ mt: 1, mb: 3 }}>
+                  Every account is known, every transfer decided and every transaction has a category.
+                </Typography>
+                <Button variant="outlined" onClick={() => setTab('all')}>All transactions</Button>
+              </DashboardBox>
+            )}
+          </>
+        )}
+
+        {tab === 'all' && (
         <DashboardBox>
           {/* Filters and the bulk bar stay above the rows while the table
               scrolls, so a filter can be changed from anywhere in the list. */}
@@ -282,9 +337,20 @@ const Transactions: React.FC = () => {
                   <Button variant="text" onClick={() => setSelectedIds([])}>Clear selection</Button>
                 </>
               ) : (
-                <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                  {range} · click a cell to edit · Enter saves · Esc cancels
-                </Typography>
+                <>
+                  {carried && (
+                    <Chip
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      label={`From Overview: ${carried}`}
+                      onDelete={resetFilters}
+                    />
+                  )}
+                  <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                    {range} · click a cell to edit · Enter saves · Esc cancels
+                  </Typography>
+                </>
               )}
               {isFetching && <CircularProgress size={16} aria-label="Loading" sx={{ ml: 'auto' }} />}
             </Box>
@@ -328,6 +394,7 @@ const Transactions: React.FC = () => {
             </>
           )}
         </DashboardBox>
+        )}
       </Stack>
 
       <Dialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>

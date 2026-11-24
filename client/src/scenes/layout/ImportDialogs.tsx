@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import UploadButton from '@/components/UploadButton';
+import UploadButton, { BACKUP } from '@/components/UploadButton';
 import UploadInvestButton from '@/components/UploadInvestButton';
 
 /**
@@ -15,6 +15,7 @@ const ImportDialogs: React.FC = () => {
   const close = () => {
     const params = new URLSearchParams(searchParams);
     params.delete('import');
+    params.delete('source');
     setSearchParams(params, { replace: true });
   };
 
@@ -24,6 +25,7 @@ const ImportDialogs: React.FC = () => {
         open={opened === 'transactions'}
         onClose={close}
         onUploadSuccess={() => navigate('/transactions')}
+        initialSource={searchParams.get('source') === 'backup' ? BACKUP : undefined}
       />
       <UploadInvestButton open={opened === 'investments'} onClose={close} />
     </>

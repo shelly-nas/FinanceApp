@@ -23,8 +23,8 @@ const UnknownAccounts: React.FC = () => {
   return (
     <DashboardBox>
       <WidgetHeader
-        title="New accounts in this import"
-        subtitle="Give these a name and an opening balance so they show up in your balances and can be matched as transfers."
+        title="New accounts"
+        subtitle="Seen in your transactions, not yet added. Give them a name and an opening balance so balances and transfers are right."
         action={
           <Button variant="outlined" component={Link} to="/accounts">
             Set up accounts
