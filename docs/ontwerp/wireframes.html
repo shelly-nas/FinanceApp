@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FinanceApp - wireframes navigatie en filters</title>
+<!--
+  Wireframes for docs/ontwerp/navigatie-en-filters.md. Low fidelity on purpose:
+  layout, hierarchy and labels, in the app's own tokens (client/src/theme.ts)
+  so proportions read true. Numbers are made up. Charts are placeholders.
+  Each <section class="frame"> is rendered to docs/ontwerp/img/<id>.png.
+-->
+<style>
+  :root {
+    --bg: #F8F9FB; --surface: #FFFFFF; --surface2: #F2F4F7; --surface3: #E6E9EF;
+    --border: #E1E5EB; --border-strong: #C9D0DA; --text: #12161C; --body: #343B48;
+    --muted: #5F6878; --disabled: #8A93A3; --primary: #1F4FC4; --primary-soft: #EEF4FF;
+    --primary-soft2: #DCE7FE; --success: #1A7F4B; --success-soft: #E7F6EE;
+    --warning: #9A5200; --warning-soft: #FFF4DB; --error: #C8322B; --error-soft: #FDECEB;
+    --s1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px; background: #D9DDE4; font-family: Figtree, system-ui, sans-serif; color: var(--body); font-size: 14px; line-height: 1.5; }
+  h1.doc { font-size: 24px; color: var(--text); margin: 0 0 8px; }
+  .frame { width: 1280px; margin: 0 auto 48px; }
+  .frame > .caption { font-size: 13px; color: #3a4250; margin: 0 0 8px; font-weight: 600; }
+  .screen { width: 1280px; height: 800px; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; display: flex; box-shadow: 0 8px 24px rgba(16,24,40,.12); }
+
+  /* Sidebar */
+  .side { width: 264px; flex: none; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 16px; }
+  .logo { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-soft2); display: grid; place-items: center; color: var(--primary); font-weight: 700; }
+  .brand b { color: var(--text); display: block; line-height: 1.2; }
+  .brand small { color: var(--muted); font-size: 12px; }
+  .group { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 4px; display: flex; justify-content: space-between; align-items: center; }
+  .group a { text-transform: none; letter-spacing: 0; color: var(--primary); font-weight: 600; font-size: 12px; }
+  .nav { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 8px; color: var(--body); font-weight: 500; }
+  .nav i { width: 18px; font-style: normal; text-align: center; font-size: 15px; opacity: .75; flex: none; }
+  .nav.on { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+  .nav .count { margin-left: auto; font-size: 11px; font-weight: 700; background: var(--primary); color: #fff; border-radius: 99px; padding: 0 7px; line-height: 18px; }
+  .side .bottom { margin-top: auto; }
+  .fwrap { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+  .fade { position: absolute; left: 0; right: 0; bottom: 0; height: 36px; background: linear-gradient(rgba(255,255,255,0), var(--surface)); }
+
+  /* Filter panel inside the sidebar */
+  .fp { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); margin: 2px 2px 6px; }
+  .fsec { border-top: 1px solid var(--border); padding: 8px 10px; }
+  .fsec:first-child { border-top: 0; }
+  .fhead { display: flex; align-items: center; justify-content: space-between; font-weight: 600; color: var(--text); font-size: 13px; }
+  .fhead span { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .caret { display: inline-block; width: 12px; color: var(--muted); }
+  .seg { display: flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; margin-top: 6px; }
+  .seg span { flex: 1; text-align: center; font-size: 11.5px; padding: 3px 0; border-left: 1px solid var(--border-strong); color: var(--body); }
+  .seg span:first-child { border-left: 0; }
+  .seg .on { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+  .stepper { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-weight: 600; color: var(--text); font-size: 13px; }
+  .stepper b { color: var(--muted); font-weight: 600; padding: 0 6px; }
+  .sub { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--disabled); margin: 6px 0 2px; }
+  .cb { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 2px 0; color: var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cb::before { content: ""; width: 13px; height: 13px; border: 1.5px solid var(--border-strong); border-radius: 3px; flex: none; }
+  .cb.on::before { background: var(--primary); border-color: var(--primary); box-shadow: inset 0 0 0 2px #fff; }
+  .cb em { margin-left: auto; font-style: normal; color: var(--disabled); font-size: 11px; }
+  .sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+  /* Main */
+  .main { flex: 1; min-width: 0; padding: 24px 28px; overflow: hidden; display: flex; flex-direction: column; gap: 14px; }
+  .ph-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .title { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .subtitle { color: var(--muted); margin-top: 4px; }
+  .actions { display: flex; gap: 8px; align-items: center; }
+  .btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); font-weight: 600; font-size: 13px; color: var(--primary); display: inline-flex; align-items: center; gap: 6px; }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .btn.quiet { border-color: transparent; background: none; }
+  .btn.danger { color: var(--error); border-color: #e9b4b0; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 99px; border: 1px solid var(--border-strong); font-size: 12px; color: var(--body); background: var(--surface); white-space: nowrap; }
+  .chip.on { background: var(--primary-soft); border-color: var(--primary-soft2); color: var(--primary); font-weight: 600; }
+  .chip .x { color: var(--muted); font-weight: 700; }
+  .chip.ok { border-color: #9fd3b6; color: var(--success); }
+  .chip.warn { border-color: #f0cf8f; color: var(--warning); background: var(--warning-soft); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--s1); padding: 16px; min-width: 0; }
+  .card h3 { margin: 0; font-size: 16px; color: var(--text); font-weight: 600; }
+  .card .ch { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .card .cs { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .ov { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kstrip { display: grid; grid-template-columns: repeat(4, 1fr); padding: 12px 0; }
+  .kstrip .k { padding: 0 16px; border-left: 1px solid var(--border); min-width: 0; }
+  .kstrip .k:first-child { border-left: 0; }
+  .kstrip .v { font-size: 18px; color: var(--text); margin-top: 2px; font-variant-numeric: tabular-nums; line-height: 1.3; }
+  .kstrip .d { color: var(--muted); font-size: 12px; }
+  .kstrip.m { grid-template-columns: 1fr 1fr; padding: 0; }
+  .kstrip.m .k { padding: 10px 12px; border-left: 0; }
+  .kstrip.m .k:nth-child(2n) { border-left: 1px solid var(--border); }
+  .kstrip.m .k:nth-child(n+3) { border-top: 1px solid var(--border); }
+  .kpi .v { font-size: 22px; color: var(--text); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .kpi .d { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .pos { color: var(--success) !important; } .neg { color: var(--error) !important; }
+  .bar { height: 10px; border-radius: 99px; background: var(--surface3); overflow: hidden; display: flex; gap: 2px; }
+  .bar i { display: block; height: 100%; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; color: var(--body); }
+  td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.hl td { background: var(--primary-soft); }
+  .mini { height: 6px; border-radius: 99px; background: var(--surface3); width: 140px; overflow: hidden; }
+  .mini i { display: block; height: 100%; border-radius: 99px; }
+  .chart { border-radius: 8px; background: linear-gradient(var(--surface), var(--surface)); position: relative; }
+  .note { font-size: 12px; color: var(--muted); }
+  .pin { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #E5A000; color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 3px rgba(229,160,0,.25); z-index: 5; }
+  .legend { margin: 10px 0 0; padding: 12px 16px 12px 36px; background: #FFF8E1; border: 1px solid #EBD48A; border-radius: 10px; font-size: 13px; color: #4a3b00; }
+  .legend li { margin: 2px 0; }
+  .legend li::marker { font-weight: 700; }
+  .callout { position: absolute; background: #FFF8C5; border: 1px solid #E5D36B; color: #5c4a00; font-size: 12px; line-height: 1.35; padding: 6px 8px; border-radius: 6px; max-width: 230px; box-shadow: 0 2px 6px rgba(0,0,0,.12); z-index: 5; }
+  .callout::before { content: attr(data-n); font-weight: 700; margin-right: 4px; }
+  .rel { position: relative; }
+  .tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--border); }
+  .tabs span { padding: 8px 0; font-weight: 500; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+  .tabs .on { color: var(--text); font-weight: 600; box-shadow: inset 0 -2px 0 var(--primary); }
+  .tabs .count { font-size: 11px; font-weight: 700; background: var(--surface3); color: var(--body); border-radius: 99px; padding: 0 7px; line-height: 18px; }
+  .tabs .on .count { background: var(--primary); color: #fff; }
+  .field { height: 30px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); display: flex; align-items: center; padding: 0 10px; color: var(--disabled); font-size: 12.5px; }
+  .drop { border: 1.5px dashed var(--border-strong); border-radius: 10px; padding: 18px; text-align: center; color: var(--muted); background: var(--surface2); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .phone { width: 390px; height: 760px; border: 1px solid var(--border-strong); border-radius: 28px; background: var(--bg); overflow: hidden; position: relative; box-shadow: 0 8px 24px rgba(16,24,40,.12); flex: none; }
+  .topbar { height: 56px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; padding: 0 12px; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 600px; background: var(--surface); border-radius: 16px 16px 0 0; box-shadow: 0 -8px 24px rgba(16,24,40,.18); padding: 12px 16px; }
+  .scrim { position: absolute; inset: 0; background: rgba(15,18,23,.45); }
+  .grab { width: 36px; height: 4px; border-radius: 99px; background: var(--border-strong); margin: 0 auto 10px; }
+</style>
+</head>
+<body>
+<h1 class="doc">FinanceApp - wireframes navigatie en filters</h1>
+
+<!-- ============================================================ -->
+<section class="frame" id="01-overview">
+  <p class="caption">01 · Overview (Insights) - desktop</p>
+  <div class="screen">
+    <aside class="side rel">
+      <div class="brand"><div class="logo">€</div><div><b>Finance</b><small>Personal overview</small></div></div>
+      <div class="group">Insights</div>
+      <div class="nav on"><i>◧</i>Overview</div>
+      <div class="nav"><i>↗</i>Trends</div>
+      <div class="group">Manage</div>
+      <div class="nav"><i>≡</i>Transactions<span class="count">4</span></div>
+      <div class="nav"><i>⌂</i>Accounts</div>
+      <div class="nav"><i>◔</i>Categories</div>
+      <div class="nav"><i>◷</i>Events</div>
+      <div class="nav"><i>⇅</i>Import &amp; export</div>
+      <div class="group">Filters <a>Reset</a></div>
+      <div class="fwrap">
+      <div class="fp">
+        <div class="fsec">
+          <div class="fhead"><span class="caret">▾</span>Period<span style="margin-left:auto">1 month</span></div>
+          <div class="seg"><span class="on">Month</span><span>3M</span><span>6M</span><span>12M</span><span>Year</span><span>…</span></div>
+          <div class="stepper"><b>‹</b>October 2026<b>›</b></div>
+        </div>
+        <div class="fsec">
+          <div class="fhead"><span class="caret">▾</span>Accounts<span style="margin-left:auto">3 of 8</span></div>
+          <div class="sub">Checking</div>
+          <div class="cb">Ashley's Betaalrekening</div>
+          <div class="cb on">Gezamenlijke Betaalrekening</div>
+          <div class="cb">Jelle's Betaalrekening</div>
+          <div class="sub">Savings</div>
+          <div class="cb">Ashley's Spaarrekening</div>
+          <div class="cb on">Gezamenlijke Spaarrekening</div>
+          <div class="cb on">Jelle's Spaarrekening</div>
+          <div class="sub">Investments</div>
+          <div class="cb">Coinbase</div>
+          <div class="cb">DEGIRO</div>
+        </div>
+        <div class="fsec"><div class="fhead"><span class="caret">▸</span>Categories<span style="margin-left:auto">All</span></div></div>
+      </div>
+      <div class="fade"></div>
+      </div>
+      <span class="pin" style="left:76px;top:445px">1</span>
+      <span class="pin" style="left:104px;top:578px">2</span>
+    </aside>
+    <main class="main rel">
+      <div class="ph-row">
+        <div><div class="title">Overview</div><div class="subtitle">October 2026 · 3 of 8 accounts</div></div>
+      </div>
+      <div class="card kstrip">
+        <div class="k"><div class="ov">Net worth</div><div class="v">€ 18.420,55</div><div class="d">3 accounts · 31 Oct</div></div>
+        <div class="k"><div class="ov">Income</div><div class="v pos">+€ 4.950,00</div><div class="d">€ 4.950 fixed</div></div>
+        <div class="k"><div class="ov">Expenses</div><div class="v neg">−€ 3.112,40</div><div class="d">incl. € 500 to Jelle's Betaal</div></div>
+        <div class="k"><div class="ov">Net income</div><div class="v pos">+€ 1.837,60</div><div class="d">37.1% saved</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>Spending breakdown</h3><div class="cs">Click a category to filter everything on it</div></div></div>
+        <div class="ov" style="margin-bottom:4px">Expenses</div>
+        <div class="bar" style="margin-bottom:10px"><i style="width:37%;background:#d55e8a"></i><i style="width:19%;background:#8cc2b3"></i><i style="width:16%;background:#c2b2d1"></i><i style="width:9%;background:#d2c1c2"></i><i style="width:7%;background:#f1b6a7"></i></div>
+        <table>
+          <tr><th>Category</th><th></th><th class="r">Total</th><th class="r">Share</th></tr>
+          <tr><td>Woonlasten</td><td><div class="mini"><i style="width:80%;background:#d55e8a"></i></div></td><td class="r">€ 1.150,00</td><td class="r">37%</td></tr>
+          <tr class="hl"><td>Boodschappen <span class="chip" style="height:18px;margin-left:6px">Filter on this</span></td><td><div class="mini"><i style="width:42%;background:#8cc2b3"></i></div></td><td class="r">€ 592,10</td><td class="r">19%</td></tr>
+          <tr><td>Overboekingen</td><td><div class="mini"><i style="width:35%;background:#c2b2d1"></i></div></td><td class="r">€ 500,00</td><td class="r">16%</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="ch"><div><h3>Transactions in this selection</h3><div class="cs">48 in October</div></div><span class="btn">Open in Transactions</span></div>
+        <table><tr><th>Date</th><th>Description</th><th class="r">Amount</th><th>Category</th><th>Account</th></tr>
+          <tr><td>2026-10-31</td><td>J. van der Graaf</td><td class="r pos">+€ 500,00</td><td>Overboekingen</td><td>Jelle's Spaarrekening</td></tr>
+          <tr><td>2026-10-27</td><td>Albert Heijn</td><td class="r neg">−€ 82,00</td><td>Boodschappen</td><td>Gezamenlijke Betaalrekening</td></tr>
+        </table>
+      </div>
+      <span class="pin" style="left:232px;top:56px">3</span>
+      <span class="pin" style="left:242px;top:370px">4</span>
+      <span class="pin" style="left:790px;top:480px">5</span>
+      <span class="pin" style="left:4px;top:110px">6</span>
+    </main>
+  </div>
+  <ol class="legend">
+    <li value="1">One filter for all of Insights. Kept when switching between Overview and Trends.</li>
+    <li value="2">Grouped by type, like the "Per account" list. Remembered between visits.</li>
+    <li value="3">The subtitle says in words what the figures cover. The selection itself lives in the panel only.</li>
+    <li value="4">Drill-down sets the category filter, so Trends follows too.</li>
+    <li value="5">Carries the selection to Manage → Transactions.</li>
+    <li value="6">Key figures as one compact strip instead of four tiles: half the height, same four numbers.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="02-trends">
+  <p class="caption">02 · Trends (Insights) - same selection, period widened to 12 months</p>
+  <div class="screen">
+    <aside class="side">
+      <div class="brand"><div class="logo">€</div><div><b>Finance</b><small>Personal overview</small></div></div>
+      <div class="group">Insights</div>
+      <div class="nav"><i>◧</i>Overview</div>
+      <div class="nav on"><i>↗</i>Trends</div>
+      <div class="group">Manage</div>
+      <div class="nav"><i>≡</i>Transactions<span class="count">4</span></div>
+      <div class="nav"><i>⌂</i>Accounts</div>
+      <div class="nav"><i>◔</i>Categories</div>
+      <div class="nav"><i>◷</i>Events</div>
+      <div class="nav"><i>⇅</i>Import &amp; export</div>
+      <div class="group">Filters <a>Reset</a></div>
+      <div class="fwrap">
+      <div class="fp">
+        <div class="fsec">
+          <div class="fhead"><span class="caret">▾</span>Period<span style="margin-left:auto">12 months</span></div>
+          <div class="seg"><span>Month</span><span>3M</span><span>6M</span><span class="on">12M</span><span>Year</span><span>…</span></div>
+          <div class="stepper"><b>‹</b>Nov 2025 – Oct 2026<b>›</b></div>
+        </div>
+        <div class="fsec"><div class="fhead"><span class="caret">▸</span>Accounts<span style="margin-left:auto">3 of 8</span></div></div>
+        <div class="fsec"><div class="fhead"><span class="caret">▸</span>Categories<span style="margin-left:auto">1 of 17</span></div></div>
+      </div>
+      <div class="fade"></div>
+      </div>
+    </aside>
+    <main class="main rel">
+      <div class="ph-row"><div><div class="title">Trends</div><div class="subtitle">Nov 2025 – Oct 2026, per month · 3 of 8 accounts · Boodschappen</div></div></div>
+      <div class="grid2">
+        <div class="card"><div class="ch"><div><h3>Net worth</h3><div class="cs">Selected accounts, at each month end</div></div></div>
+          <div style="display:flex;gap:24px;margin-bottom:8px"><div><div class="ov">Now</div><div style="font-size:18px;color:var(--text)">€ 18.420</div></div><div><div class="ov">Change</div><div class="pos" style="font-weight:600">+€ 3.310 (+21.9%)</div></div></div>
+          <svg width="100%" height="150" viewBox="0 0 440 150"><polyline fill="none" stroke="#1F4FC4" stroke-width="2" points="0,120 40,112 80,115 120,98 160,92 200,85 240,80 280,70 320,66 360,55 400,48 440,40"/><line x1="0" y1="149" x2="440" y2="149" stroke="#E1E5EB"/></svg>
+        </div>
+        <div class="card"><div class="ch"><div><h3>Income and spending</h3><div class="cs">Per month, with what was saved</div></div></div>
+          <div style="display:flex;gap:24px;margin-bottom:8px"><div><div class="ov">Saved</div><div class="pos" style="font-size:18px">€ 14.820</div></div><div><div class="ov">Savings rate</div><div class="pos" style="font-weight:600">24.9%</div></div></div>
+          <svg width="100%" height="150" viewBox="0 0 440 150"><g fill="#7b5cc4">
+            <rect x="6" y="40" width="14" height="110"/><rect x="42" y="44" width="14" height="106"/><rect x="78" y="38" width="14" height="112"/><rect x="114" y="42" width="14" height="108"/><rect x="150" y="30" width="14" height="120"/><rect x="186" y="44" width="14" height="106"/><rect x="222" y="40" width="14" height="110"/><rect x="258" y="42" width="14" height="108"/><rect x="294" y="36" width="14" height="114"/><rect x="330" y="44" width="14" height="106"/><rect x="366" y="40" width="14" height="110"/><rect x="402" y="38" width="14" height="112"/></g>
+            <g fill="#c2553a"><rect x="21" y="70" width="14" height="80"/><rect x="57" y="74" width="14" height="76"/><rect x="93" y="62" width="14" height="88"/><rect x="129" y="72" width="14" height="78"/><rect x="165" y="66" width="14" height="84"/><rect x="201" y="78" width="14" height="72"/><rect x="237" y="70" width="14" height="80"/><rect x="273" y="68" width="14" height="82"/><rect x="309" y="74" width="14" height="76"/><rect x="345" y="72" width="14" height="78"/><rect x="381" y="66" width="14" height="84"/><rect x="417" y="70" width="14" height="80"/></g></svg>
+        </div>
+      </div>
+      <div class="card"><div class="ch"><div><h3>Spending by category</h3><div class="cs">Per month, with the three-month moving average of the total</div></div></div>
+        <svg width="100%" height="130" viewBox="0 0 900 130"><g fill="#8cc2b3"><rect x="20" y="50" width="50" height="80"/><rect x="95" y="44" width="50" height="86"/><rect x="170" y="56" width="50" height="74"/><rect x="245" y="40" width="50" height="90"/><rect x="320" y="48" width="50" height="82"/><rect x="395" y="52" width="50" height="78"/><rect x="470" y="36" width="50" height="94"/><rect x="545" y="46" width="50" height="84"/><rect x="620" y="42" width="50" height="88"/><rect x="695" y="50" width="50" height="80"/><rect x="770" y="38" width="50" height="92"/><rect x="845" y="44" width="50" height="86"/></g><polyline fill="none" stroke="#12161C" stroke-width="2" stroke-dasharray="6 4" points="195,52 270,48 345,46 420,46 495,44 570,44 645,42 720,46 795,43 870,44"/></svg>
+        <table><tr><th>Category</th><th class="r">Total</th><th class="r">Avg / month</th><th class="r">Min</th><th class="r">Max</th><th class="r">Trend / month</th><th>Shape</th></tr>
+          <tr><td>Boodschappen</td><td class="r">€ 6.910,40</td><td class="r">€ 575,87</td><td class="r">€ 482,10</td><td class="r">€ 688,00</td><td class="r neg">+€ 9,40</td><td><svg width="90" height="18"><polyline fill="none" stroke="#8cc2b3" stroke-width="1.5" points="0,12 8,9 16,13 24,6 32,10 40,11 48,4 56,9 64,7 72,10 80,5 88,8"/></svg></td></tr>
+        </table>
+      </div>
+      <span class="pin" style="left:452px;top:56px">1</span>
+      <span class="pin" style="left:4px;top:56px">2</span>
+    </main>
+  </div>
+  <ol class="legend">
+    <li value="1">Same selection as Overview: the accounts and the Boodschappen filter came along.</li>
+    <li value="2">With a 1-month period, Trends shows the 12 months up to it and says so in the subtitle.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="03-filterpaneel">
+  <p class="caption">03 · Filter panel in detail - period options and categories expanded</p>
+  <div class="screen" style="height:620px;background:var(--surface2);justify-content:center;gap:48px;padding:28px">
+    <div style="width:280px">
+      <div class="note" style="margin-bottom:6px">Period: "…" opens a custom range</div>
+      <div class="fp" style="box-shadow:var(--s1)">
+        <div class="fsec">
+          <div class="fhead"><span class="caret">▾</span>Period<span style="margin-left:auto">Custom</span></div>
+          <div class="seg"><span>Month</span><span>3M</span><span>6M</span><span>12M</span><span>Year</span><span class="on">…</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><div><div class="ov">From</div><div class="field">01-05-2026</div></div><div><div class="ov">To</div><div class="field">31-10-2026</div></div></div>
+          <div class="note" style="margin-top:6px">‹ › step by the length of the period: 6 months back or forward.</div>
+        </div>
+      </div>
+      <div class="note" style="margin:18px 0 6px">Collapsed sections say what is selected</div>
+      <div class="fp" style="box-shadow:var(--s1)">
+        <div class="fsec"><div class="fhead"><span class="caret">▸</span>Accounts<span style="margin-left:auto">3 of 8</span></div></div>
+        <div class="fsec"><div class="fhead"><span class="caret">▸</span>Categories<span style="margin-left:auto">All</span></div></div>
+      </div>
+    </div>
+    <div style="width:280px">
+      <div class="note" style="margin-bottom:6px">Categories expanded: grouped like the dashboard</div>
+      <div class="fp" style="box-shadow:var(--s1)">
+        <div class="fsec">
+          <div class="fhead"><span class="caret">▾</span>Categories<span style="margin-left:auto">2 of 17</span></div>
+          <div class="field" style="margin:6px 0">Search categories…</div>
+          <div class="sub">Income</div>
+          <div class="cb"><span class="sw" style="background:#8fc069"></span>Vast Inkomen</div>
+          <div class="cb"><span class="sw" style="background:#80bfb4"></span>Variabel Inkomen</div>
+          <div class="sub">Expenses · fixed</div>
+          <div class="cb on"><span class="sw" style="background:#8cc2b3"></span>Boodschappen<em>only</em></div>
+          <div class="cb"><span class="sw" style="background:#d55e8a"></span>Woonlasten</div>
+          <div class="cb"><span class="sw" style="background:#d2c1c2"></span>Utiliteiten</div>
+          <div class="cb"><span class="sw" style="background:#f1b6a7"></span>Verzekeringen</div>
+          <div class="sub">Expenses · variable</div>
+          <div class="cb on"><span class="sw" style="background:#dba47e"></span>Uiteten, Drankjes<em>only</em></div>
+          <div class="cb"><span class="sw" style="background:#e69050"></span>Vakanties</div>
+          <div class="cb"><span class="sw" style="background:#c2b2d1"></span>Overboekingen</div>
+          <div class="note">+ 8 more</div>
+        </div>
+      </div>
+    </div>
+    <div style="width:330px;padding-top:24px" class="note">
+      <p style="margin-top:0"><b style="color:var(--text)">Behaviour</b></p>
+      <p>· Nothing ticked means all. Ticking narrows.</p>
+      <p>· "only" on hover selects just that item, the quickest way to look at one account or category.</p>
+      <p>· The group heading ticks or clears the whole group (e.g. all savings accounts).</p>
+      <p>· Changes apply at once; there is no "Apply" button.</p>
+      <p>· State lives in the URL (<code>?period=12m&amp;to=2026-10&amp;accounts=…&amp;categories=…</code>), so reload, back and a shared link all keep it.</p>
+      <p>· Remembered between visits: the accounts. The period starts at the current month again, categories at all.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="04-transactions-todo">
+  <p class="caption">04 · Manage → Transactions, tab "To do" - what an import left to decide</p>
+  <div class="screen">
+    <aside class="side rel">
+      <div class="brand"><div class="logo">€</div><div><b>Finance</b><small>Personal overview</small></div></div>
+      <div class="group">Insights</div>
+      <div class="nav"><i>◧</i>Overview</div>
+      <div class="nav"><i>↗</i>Trends</div>
+      <div class="group">Manage</div>
+      <div class="nav on"><i>≡</i>Transactions<span class="count">4</span></div>
+      <div class="nav"><i>⌂</i>Accounts</div>
+      <div class="nav"><i>◔</i>Categories</div>
+      <div class="nav"><i>◷</i>Events</div>
+      <div class="nav"><i>⇅</i>Import &amp; export</div>
+      <span class="pin" style="left:228px;top:226px">1</span>
+    </aside>
+    <main class="main rel">
+      <div class="ph-row"><div><div class="title">Transactions</div><div class="subtitle">Review what came in, then browse and correct everything</div></div><div class="actions"><span class="btn primary">Import transactions</span></div></div>
+      <div class="tabs"><span class="on">To do <span class="count">4</span></span><span>All transactions <span class="count">1.284</span></span></div>
+      <div class="card"><div class="ch"><div><h3>New accounts</h3><div class="cs">Seen in your transactions, not yet added. Add them so balances and transfers are right.</div></div><span class="btn">Set up accounts</span></div>
+        <span class="chip">NL01DEMO0000000003 · 1×</span></div>
+      <div class="card"><div class="ch"><div><h3>Transfers to confirm</h3><div class="cs">A payment and a deposit of the same amount between your accounts</div></div><span class="chip on">1 to confirm</span></div>
+        <table><tr><th>Date</th><th>Description</th><th>From</th><th>To</th><th class="r">Amount</th><th>Status</th><th class="r">Action</th></tr>
+          <tr><td>2026-10-26</td><td>Naar Spaarrekening → Van Betaalrekening</td><td>Betaalrekening</td><td>Spaarrekening</td><td class="r">€ 400,00</td><td><span class="chip ok">✓ Certain</span></td><td class="r"><span class="btn quiet">Not a transfer</span> <span class="btn">Confirm</span></td></tr></table>
+      </div>
+      <div class="card"><div class="ch"><div><h3>Needs a category</h3><div class="cs">The classifier was not sure. Pick one, or select several and set them at once.</div></div><span class="chip warn">2</span></div>
+        <table><tr><th>Date</th><th>Description</th><th class="r">Amount</th><th>Category</th><th>Account</th></tr>
+          <tr><td>2026-10-19</td><td>Demo Incasso Onbekend</td><td class="r neg">−€ 64,99</td><td><span class="field" style="width:200px;height:26px">Choose a category ▾</span></td><td>Gezamenlijke Betaalrekening</td></tr>
+          <tr><td>2026-10-13</td><td>DEMO ONBEKEND 7742</td><td class="r neg">−€ 27,40</td><td><span class="field" style="width:200px;height:26px">Choose a category ▾</span></td><td>Jelle's Betaalrekening</td></tr></table>
+      </div>
+      <span class="pin" style="left:100px;top:126px">2</span>
+      <span class="pin" style="left:196px;top:288px">3</span>
+    </main>
+  </div>
+  <ol class="legend">
+    <li value="1">On Manage pages the filter panel is gone; the Insights filter is not theirs.</li>
+    <li value="2">The nav counter counts exactly these items. Nothing left: the tab says so and points to All.</li>
+    <li value="3">Recognised transfers are no longer listed here: they show with ⇄ in All, where the toggle undoes them.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="05-transactions-all">
+  <p class="caption">05 · Manage → Transactions, tab "All" - opened from Overview, selection carried over</p>
+  <div class="screen">
+    <aside class="side">
+      <div class="brand"><div class="logo">€</div><div><b>Finance</b><small>Personal overview</small></div></div>
+      <div class="group">Insights</div>
+      <div class="nav"><i>◧</i>Overview</div>
+      <div class="nav"><i>↗</i>Trends</div>
+      <div class="group">Manage</div>
+      <div class="nav on"><i>≡</i>Transactions<span class="count">4</span></div>
+      <div class="nav"><i>⌂</i>Accounts</div>
+      <div class="nav"><i>◔</i>Categories</div>
+      <div class="nav"><i>◷</i>Events</div>
+      <div class="nav"><i>⇅</i>Import &amp; export</div>
+    </aside>
+    <main class="main rel">
+      <div class="ph-row"><div><div class="title">Transactions</div><div class="subtitle">Review what came in, then browse and correct everything</div></div><div class="actions"><span class="btn primary">Import transactions</span></div></div>
+      <div class="tabs"><span>To do <span class="count">4</span></span><span class="on">All transactions <span class="count">48</span></span></div>
+      <div class="card" style="padding:12px 16px">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:8px;align-items:end">
+          <div><div class="ov">Search</div><div class="field">Description, counterparty or account</div></div>
+          <div><div class="ov">Period</div><div class="field" style="color:var(--body)">Oct 2026</div></div>
+          <div><div class="ov">Accounts</div><div class="field" style="color:var(--body)">3 selected ▾</div></div>
+          <div><div class="ov">Category</div><div class="field">Any ▾</div></div>
+          <div><div class="ov">Event</div><div class="field">Any ▾</div></div>
+          <div><div class="ov">Amount</div><div class="field">Min – max</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;align-items:center"><span class="chip">Needs a category</span><span class="chip">Hide transfers</span><span class="chip on">From Overview: Oct 2026 · 3 accounts <span class="x">✕</span></span><span class="note" style="margin-left:auto">1–48 of 48 · click a cell to edit</span></div>
+      </div>
+      <div class="card" style="padding:0 0 4px">
+        <table><tr><th style="padding-left:16px">☐</th><th>⇄</th><th>Date</th><th>Description</th><th class="r">Amount</th><th>Category</th><th>Account</th><th>Counterparty</th><th>Tags</th></tr>
+          <tr><td style="padding-left:16px">☐</td><td style="color:var(--primary)">⇄</td><td>2026-10-31</td><td>J. van der Graaf</td><td class="r pos">+€ 500,00</td><td>Overboekingen</td><td>Jelle's Spaarrekening</td><td>NL37ASNB…1680</td><td class="note">Add tag</td></tr>
+          <tr><td style="padding-left:16px">☐</td><td style="color:var(--disabled)">⇄</td><td>2026-10-27</td><td>Albert Heijn</td><td class="r neg">−€ 82,00</td><td>Boodschappen</td><td>Gezamenlijke Betaalrekening</td><td></td><td><span class="chip" style="height:20px">Weekend weg</span></td></tr>
+          <tr><td style="padding-left:16px">☐</td><td style="color:var(--disabled)">⇄</td><td>2026-10-25</td><td>Salaris Werkgever BV</td><td class="r pos">+€ 3.262,00</td><td>Vast Inkomen</td><td>Gezamenlijke Betaalrekening</td><td>NL01DEMO9…</td><td class="note">Add tag</td></tr>
+          <tr><td style="padding-left:16px">☐</td><td style="color:var(--disabled)">⇄</td><td>2026-10-22</td><td>Albert Heijn</td><td class="r neg">−€ 69,00</td><td>Boodschappen</td><td>Gezamenlijke Betaalrekening</td><td></td><td class="note">Add tag</td></tr>
+        </table>
+      </div>
+      <span class="pin" style="left:4px;top:176px">1</span>
+      <span class="pin" style="left:526px;top:212px">2</span>
+    </main>
+  </div>
+  <ol class="legend">
+    <li value="1">The table keeps its own filters (search, amount, event): those are management tools, not part of Insights.</li>
+    <li value="2">What came from Overview is one chip: visible, and gone with ✕.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="06-import-export">
+  <p class="caption">06 · Manage → Import &amp; export - every way data goes in or out, in one place</p>
+  <div class="screen">
+    <aside class="side">
+      <div class="brand"><div class="logo">€</div><div><b>Finance</b><small>Personal overview</small></div></div>
+      <div class="group">Insights</div>
+      <div class="nav"><i>◧</i>Overview</div>
+      <div class="nav"><i>↗</i>Trends</div>
+      <div class="group">Manage</div>
+      <div class="nav"><i>≡</i>Transactions<span class="count">4</span></div>
+      <div class="nav"><i>⌂</i>Accounts</div>
+      <div class="nav"><i>◔</i>Categories</div>
+      <div class="nav"><i>◷</i>Events</div>
+      <div class="nav on"><i>⇅</i>Import &amp; export</div>
+    </aside>
+    <main class="main rel">
+      <div class="ph-row"><div><div class="title">Import &amp; export</div><div class="subtitle">Bank exports in, investment values, and a full backup</div></div></div>
+      <div class="grid2">
+        <div class="card"><div class="ch"><div><h3>Import bank exports</h3><div class="cs">One or more CSV files from the same bank. Rows already stored are skipped.</div></div></div>
+          <div class="ov">Bank</div><div class="field" style="margin-bottom:10px;color:var(--body)">ASN Bank ▾</div>
+          <div class="drop">Drop CSV files here, or <b style="color:var(--primary)">choose files</b></div>
+          <div class="note" style="margin-top:8px">Last import: 31 Oct 2026 · 87 imported, 12 skipped · <a style="color:var(--primary)">4 to review</a></div>
+        </div>
+        <div class="card"><div class="ch"><div><h3>Investments</h3><div class="cs">Accounts without an export: enter their value at a date.</div></div><span class="btn">Update values</span></div>
+          <table><tr><th>Account</th><th class="r">Last value</th><th>As of</th></tr><tr><td>DEGIRO</td><td class="r">€ ••••</td><td>30 Sep 2026</td></tr><tr><td>Coinbase</td><td class="r">€ ••••</td><td>30 Sep 2026</td></tr></table>
+        </div>
+      </div>
+      <div class="card"><div class="ch"><div><h3>Backup</h3><div class="cs">Everything in one JSON file: transactions, accounts, categories, events, transfers.</div></div><span class="btn">Export everything</span></div></div>
+      <div class="card" style="border-color:#efc2bf"><div class="ch"><div><h3>Restore a backup</h3><div class="cs">Merge adds what is missing. Replace deletes everything currently stored first, and cannot be undone.</div></div><div class="actions"><span class="btn">Merge…</span><span class="btn danger">Replace everything…</span></div></div></div>
+      <span class="pin" style="left:200px;top:16px">1</span>
+    </main>
+  </div>
+  <ol class="legend">
+    <li value="1">Was spread over page headers and the sidebar. "Import transactions" stays as the quick action on Transactions.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="07-events">
+  <p class="caption">07 · Manage → Events - list, and where the money for one event went</p>
+  <div class="screen">
+    <aside class="side">
+      <div class="brand"><div class="logo">€</div><div><b>Finance</b><small>Personal overview</small></div></div>
+      <div class="group">Insights</div>
+      <div class="nav"><i>◧</i>Overview</div>
+      <div class="nav"><i>↗</i>Trends</div>
+      <div class="group">Manage</div>
+      <div class="nav"><i>≡</i>Transactions<span class="count">4</span></div>
+      <div class="nav"><i>⌂</i>Accounts</div>
+      <div class="nav"><i>◔</i>Categories</div>
+      <div class="nav on"><i>◷</i>Events</div>
+      <div class="nav"><i>⇅</i>Import &amp; export</div>
+    </aside>
+    <main class="main rel">
+      <div class="ph-row"><div><div class="title">Events</div><div class="subtitle">Spending that spans months, like a holiday or a renovation</div></div><div class="actions"><span class="btn primary">New event</span></div></div>
+      <div class="tabs"><span class="on">Open <span class="count">3</span></span><span>Closed <span class="count">5</span></span></div>
+      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px">
+        <div class="card" style="padding:0 0 4px">
+          <table><tr><th style="padding-left:16px">Event</th><th>Period</th><th class="r">Spent</th><th class="r">Budget</th><th></th></tr>
+            <tr class="hl"><td style="padding-left:16px"><span class="sw" style="display:inline-block;background:#e69050;margin-right:6px"></span>Italy 2027</td><td>Jun – Aug 2027</td><td class="r">€ 2.140,00</td><td class="r">€ 3.000</td><td><div class="mini" style="width:80px"><i style="width:71%;background:var(--primary)"></i></div></td></tr>
+            <tr><td style="padding-left:16px"><span class="sw" style="display:inline-block;background:#8cc2b3;margin-right:6px"></span>Weekend weg</td><td>Oct 2026</td><td class="r">€ 412,50</td><td class="r">—</td><td></td></tr>
+            <tr><td style="padding-left:16px"><span class="sw" style="display:inline-block;background:#b99c77;margin-right:6px"></span>Badkamer</td><td>Sep – Dec 2026</td><td class="r">€ 6.880,00</td><td class="r">€ 6.500</td><td><div class="mini" style="width:80px"><i style="width:100%;background:var(--error)"></i></div></td></tr>
+          </table>
+        </div>
+        <div class="card"><div class="ch"><div><h3>Italy 2027</h3><div class="cs">Where the money for this event went</div></div><div class="actions"><span class="btn quiet">Edit</span><span class="btn">Transactions</span></div></div>
+          <div style="display:flex;gap:24px;margin-bottom:10px"><div><div class="ov">Spent</div><div style="font-size:18px;color:var(--text)">€ 2.140,00</div></div><div><div class="ov">Budget left</div><div class="pos" style="font-weight:600">€ 860,00</div></div></div>
+          <table><tr><th>Category</th><th></th><th class="r">Total</th></tr>
+            <tr><td>Vakanties</td><td><div class="mini" style="width:100px"><i style="width:70%;background:#e69050"></i></div></td><td class="r">€ 1.480,00</td></tr>
+            <tr><td>Uiteten, Drankjes</td><td><div class="mini" style="width:100px"><i style="width:24%;background:#dba47e"></i></div></td><td class="r">€ 520,00</td></tr>
+            <tr><td>Boodschappen</td><td><div class="mini" style="width:100px"><i style="width:7%;background:#8cc2b3"></i></div></td><td class="r">€ 140,00</td></tr></table>
+        </div>
+      </div>
+      <span class="pin" style="left:100px;top:16px">1</span>
+    </main>
+  </div>
+  <ol class="legend">
+    <li value="1">Events leave Insights entirely; their summary stays here, beside the list.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ -->
+<section class="frame" id="08-mobiel">
+  <p class="caption">08 · Mobile - Overview, and the filter panel opened as a sheet</p>
+  <div style="display:flex;gap:48px;justify-content:center;padding:24px;background:var(--surface2);border:1px solid var(--border-strong);border-radius:12px">
+    <div class="phone">
+      <div class="topbar"><span style="font-size:20px">☰</span><div class="logo" style="width:26px;height:26px">€</div><b style="color:var(--text)">Finance</b></div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end"><div><div class="title" style="font-size:22px">Overview</div><div class="subtitle">October 2026</div></div><span class="btn">Filters · 3</span></div>
+        <div class="card kstrip m">
+          <div class="k"><div class="ov">Net worth</div><div class="v">€ 18.420</div></div>
+          <div class="k"><div class="ov">Net income</div><div class="v pos">+€ 1.838</div></div>
+          <div class="k"><div class="ov">Income</div><div class="v pos">+€ 4.950</div></div>
+          <div class="k"><div class="ov">Expenses</div><div class="v neg">−€ 3.112</div></div>
+        </div>
+        <div class="card"><h3>Spending breakdown</h3><div class="bar" style="margin:10px 0"><i style="width:37%;background:#d55e8a"></i><i style="width:19%;background:#8cc2b3"></i><i style="width:16%;background:#c2b2d1"></i></div><table><tr><td>Woonlasten</td><td class="r">€ 1.150</td></tr><tr><td>Boodschappen</td><td class="r">€ 592</td></tr></table></div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="topbar"><span style="font-size:20px">☰</span><div class="logo" style="width:26px;height:26px">€</div><b style="color:var(--text)">Finance</b></div>
+      <div style="padding:16px"><div class="title" style="font-size:22px">Overview</div></div>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:var(--text);font-size:16px">Filters</b><span class="btn quiet">Reset</span></div>
+        <div class="fp">
+          <div class="fsec"><div class="fhead"><span class="caret">▾</span>Period<span style="margin-left:auto">1 month</span></div><div class="seg"><span class="on">Month</span><span>3M</span><span>6M</span><span>12M</span><span>Year</span><span>…</span></div><div class="stepper"><b>‹</b>October 2026<b>›</b></div></div>
+          <div class="fsec"><div class="fhead"><span class="caret">▾</span>Accounts<span style="margin-left:auto">3 of 8</span></div>
+            <div class="sub">Checking</div><div class="cb" style="padding:6px 0">Ashley's Betaalrekening</div><div class="cb on" style="padding:6px 0">Gezamenlijke Betaalrekening</div><div class="cb" style="padding:6px 0">Jelle's Betaalrekening</div>
+            <div class="sub">Savings</div><div class="cb on" style="padding:6px 0">Gezamenlijke Spaarrekening</div><div class="cb on" style="padding:6px 0">Jelle's Spaarrekening</div></div>
+          <div class="fsec"><div class="fhead"><span class="caret">▸</span>Categories<span style="margin-left:auto">All</span></div></div>
+        </div>
+        <div style="position:absolute;left:16px;right:16px;bottom:16px"><span class="btn primary" style="width:100%;justify-content:center;height:44px">Show 48 transactions</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>
