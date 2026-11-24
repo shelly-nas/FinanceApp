@@ -1,21 +1,8 @@
 import { test, describe, assert } from 'vitest';
-import { parseStoredSelection, groupAccounts, effectiveSelection } from '@/scenes/dashboard/accountSelection';
+import { groupAccounts, effectiveSelection } from '@/scenes/dashboard/accountSelection';
 
 const account = (details: string, account_type: string, account_name = details) => ({
   details, account_type, account_name, current_balance: '0',
-});
-
-describe('parseStoredSelection', () => {
-  test('reads a stored list of account identifiers', () => {
-    assert.deepEqual(parseStoredSelection('["NL01","NL02"]'), ['NL01', 'NL02']);
-  });
-
-  test('falls back to no selection on anything else', () => {
-    assert.deepEqual(parseStoredSelection(null), []);
-    assert.deepEqual(parseStoredSelection('not json'), []);
-    assert.deepEqual(parseStoredSelection('{"a":1}'), []);
-    assert.deepEqual(parseStoredSelection('[1,2]'), []);
-  });
 });
 
 describe('effectiveSelection', () => {

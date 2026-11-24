@@ -12,9 +12,10 @@ export type ImportKind = 'transactions' | 'investments';
  */
 export const useOpenImport = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  return (kind: ImportKind) => {
+  return (kind: ImportKind, extra: Record<string, string> = {}) => {
     const params = new URLSearchParams(searchParams);
     params.set('import', kind);
+    Object.entries(extra).forEach(([key, value]) => params.set(key, value));
     setSearchParams(params);
   };
 };

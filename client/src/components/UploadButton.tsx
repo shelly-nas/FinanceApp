@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button, CircularProgress, Typography, Select, MenuItem, FormControl, InputLabel,
   Divider, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
@@ -11,7 +11,7 @@ import type { ImportSummary } from '@/api';
 
 // Sentinel in the same dropdown as the banks: the file to pick is chosen the
 // same way whether it is a bank export or a backup, so it belongs in one list.
-const BACKUP = '__BACKUP__';
+export const BACKUP = '__BACKUP__';
 
 const SOURCE_LABELS: Record<string, string> = {
   ING_NL: 'ING (NL)',
@@ -25,12 +25,18 @@ interface UploadButtonProps {
   /** Opened by the page headers' import action. */
   open: boolean;
   onClose: () => void;
+  /** Preselects the source, e.g. BACKUP from "Restore a backup". */
+  initialSource?: string;
 }
 
-const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onClose }) => {
+const UploadButton: React.FC<UploadButtonProps> = ({ onUploadSuccess, open, onClose, initialSource }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [bank, setBank] = useState('');
+  // A dialog opened for a given source starts on it.
+  useEffect(() => {
+    if (open && initialSource) setBank(initialSource);
+  }, [open, initialSource]);
   const [error, setError] = useState<string | null>(null);
   // "2 of 3" while several files are imported one after another.
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);

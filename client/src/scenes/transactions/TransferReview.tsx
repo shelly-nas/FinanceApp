@@ -22,6 +22,12 @@ const formatCurrency = (value: number) =>
 interface Props {
   /** JSON array of the ids just imported, to scope the review to that import. */
   transactionIds?: string | null;
+  /**
+   * Only the pairs waiting for a decision, as on the To do tab. Recognised
+   * transfers need none: they show with ⇄ under All, where the toggle undoes
+   * them.
+   */
+  suggestionsOnly?: boolean;
 }
 
 const STATUS = {
@@ -50,15 +56,15 @@ const STATUS = {
  * put back. Pairs are proposed only: two unrelated payments of the same amount
  * on the same day look exactly like a transfer.
  */
-const TransferReview: React.FC<Props> = ({ transactionIds }) => {
+const TransferReview: React.FC<Props> = ({ transactionIds, suggestionsOnly = false }) => {
   const scope = transactionIds ? { ids: transactionIds } : {};
-  const { data: oneSided } = useGetOneSidedTransfersQuery(scope);
+  const { data: oneSided } = useGetOneSidedTransfersQuery(scope, { skip: suggestionsOnly });
   const { data: candidates } = useGetTransferCandidatesQuery(scope);
   const [confirmTransfer] = useConfirmTransferMutation();
   const [rejectTransfer] = useRejectTransferMutation();
   const [unmarkInternal] = useUnmarkInternalMutation();
 
-  const rows = buildTransferReviewRows(oneSided ?? [], candidates ?? []);
+  const rows = buildTransferReviewRows(suggestionsOnly ? [] : oneSided ?? [], candidates ?? []);
   if (rows.length === 0) return null;
 
   const toConfirm = rows.filter((r) => r.status !== 'recognised').length;
@@ -93,8 +99,10 @@ const TransferReview: React.FC<Props> = ({ transactionIds }) => {
   return (
     <DashboardBox>
       <WidgetHeader
-        title="Transfers between your own accounts"
-        subtitle="Money moved between your accounts, filed under Overboekingen and kept out of income and spending. Confirm the suggested pairs; put back anything that was a real payment."
+        title={suggestionsOnly ? 'Transfers to confirm' : 'Transfers between your own accounts'}
+        subtitle={suggestionsOnly
+          ? 'A payment and a deposit of the same amount between your accounts. Confirming files both under Overboekingen and keeps them out of income and spending.'
+          : 'Money moved between your accounts, filed under Overboekingen and kept out of income and spending. Confirm the suggested pairs; put back anything that was a real payment.'}
         action={
           <>
             {toConfirm > 0 && <Chip size="small" color="primary" label={`${toConfirm} to confirm`} />}

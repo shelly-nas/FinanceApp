@@ -1,19 +1,5 @@
 import type { AccountBalance } from '@/api';
 
-/** Where the dashboard remembers which accounts were selected. */
-export const STORAGE_KEY = 'dashboard.accounts';
-
-/** The stored selection, or none when the value is missing or not a list of identifiers. */
-export const parseStoredSelection = (raw: string | null): string[] => {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.every((v) => typeof v === 'string') ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
 /**
  * The selection limited to accounts that still exist. An account that was
  * renamed or removed would otherwise filter everything away; with nothing

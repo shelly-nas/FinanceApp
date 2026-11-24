@@ -440,12 +440,18 @@ class FinanceManager {
     }
   }
 
-  public async getCategorySums(startDate?: string, endDate?: string, accounts?: string[]): Promise<any[]> {
+  public async getCategorySums(
+    startDate?: string,
+    endDate?: string,
+    accounts?: string[],
+    categories?: string[],
+  ): Promise<any[]> {
     const client = await dbContext.connect();
     const params: any[] = [];
     // The account selection, when there is one, is always $1.
     const selection = accounts && accounts.length > 0 ? '$1' : undefined;
     if (selection) params.push(accounts);
+    const categoryParam = categories && categories.length > 0 ? `$${params.push(categories)}` : undefined;
 
     let query = `
       SELECT 
@@ -469,6 +475,7 @@ class FinanceManager {
         -- unless they leave the selected accounts; see internalScope.
         AND ${internalScope('ja', selection)}
         ${selection ? `AND ja.account = ANY(${selection}::text[])` : ''}
+        ${categoryParam ? `AND ja.category = ANY(${categoryParam}::text[])` : ''}
     `;
 
     let paramIndex = params.length + 1;
@@ -499,12 +506,18 @@ class FinanceManager {
     }
   }
 
-  public async getIncomeExpensesSum(startDate?: string, endDate?: string, accounts?: string[]): Promise<any[]> {
+  public async getIncomeExpensesSum(
+    startDate?: string,
+    endDate?: string,
+    accounts?: string[],
+    categories?: string[],
+  ): Promise<any[]> {
     const client = await dbContext.connect();
     const params: any[] = [];
     // The account selection, when there is one, is always $1.
     const selection = accounts && accounts.length > 0 ? '$1' : undefined;
     if (selection) params.push(accounts);
+    const categoryParam = categories && categories.length > 0 ? `$${params.push(categories)}` : undefined;
 
     let query = `
       WITH categorized_transactions AS (
@@ -538,6 +551,7 @@ class FinanceManager {
           -- selected accounts does count; see internalScope.
           AND ${internalScope('ja', selection)}
           ${selection ? `AND ja.account = ANY(${selection}::text[])` : ''}
+          ${categoryParam ? `AND ja.category = ANY(${categoryParam}::text[])` : ''}
     `;
 
     let paramIndex = params.length + 1;
@@ -731,11 +745,14 @@ class FinanceManager {
     if (filters.categories && filters.categories.length > 0) {
       where.push(`t.category = ANY(${add(filters.categories)}::text[])`);
     }
+    let accountsParam: string | undefined;
     if (filters.accounts && filters.accounts.length > 0) {
-      where.push(`t.account = ANY(${add(filters.accounts)}::text[])`);
+      accountsParam = add(filters.accounts);
+      where.push(`t.account = ANY(${accountsParam}::text[])`);
     }
+    // A transfer leaving the selected accounts counts; see internalScope.
     if (!filters.includeInternal) {
-      where.push('t.is_internal IS NOT TRUE');
+      where.push(internalScope('t', accountsParam));
     }
 
     // Uncategorised rows are left out: they would all collapse into one unnamed
@@ -779,8 +796,16 @@ class FinanceManager {
    * salary lowers income. Months without categorised transactions are absent
    * rather than zero, so the chart shows a gap instead of a month of nothing.
    */
-  public async getCashflowHistory(startDate: string, endDate: string): Promise<any[]> {
+  public async getCashflowHistory(
+    startDate: string,
+    endDate: string,
+    filters: { accounts?: string[]; categories?: string[] } = {},
+  ): Promise<any[]> {
     const client = await dbContext.connect();
+    const params: any[] = [startDate, endDate];
+    const add = (value: any) => `$${params.push(value)}`;
+    const accountsParam = filters.accounts?.length ? add(filters.accounts) : undefined;
+    const categoriesParam = filters.categories?.length ? add(filters.categories) : undefined;
 
     const query = `
       SELECT
@@ -793,14 +818,17 @@ class FinanceManager {
       JOIN public.${category_table} c ON c.category_name = t.category
       WHERE t.date_str >= $1
         AND t.date_str <= $2
-        -- An internal transfer is neither income nor spending.
-        AND t.is_internal IS NOT TRUE
+        -- An internal transfer is neither income nor spending - unless it
+        -- leaves the selected accounts; see internalScope.
+        AND ${internalScope('t', accountsParam)}
+        ${accountsParam ? `AND t.account = ANY(${accountsParam}::text[])` : ''}
+        ${categoriesParam ? `AND t.category = ANY(${categoriesParam}::text[])` : ''}
       GROUP BY 1
       ORDER BY 1;
     `;
 
     try {
-      const result = await client.query(query, [startDate, endDate]);
+      const result = await client.query(query, params);
       return result.rows;
     } finally {
       client.release();
@@ -814,7 +842,7 @@ class FinanceManager {
    * month, so a month in which an account saw no activity keeps its previous
    * balance rather than dropping to zero.
    */
-  public async getNetWorthHistory(startDate: string, endDate: string): Promise<any[]> {
+  public async getNetWorthHistory(startDate: string, endDate: string, accounts?: string[]): Promise<any[]> {
     const client = await dbContext.connect();
 
     const query = `
@@ -848,6 +876,8 @@ class FinanceManager {
           END AS balance
         FROM months m
         CROSS JOIN public.${account_table} a
+        -- $3 is the account selection, NULL for every account.
+        WHERE $3::text[] IS NULL OR a.details = ANY($3::text[])
       )
       SELECT
         TO_CHAR(month_end, 'YYYY-MM') AS month,
@@ -859,8 +889,10 @@ class FinanceManager {
         -- figure carried backwards - a flat line that was never observed. The
         -- chart leaves those months out rather than draw it.
         (
-          EXISTS (SELECT 1 FROM public.${transaction_table} t WHERE t.date_str <= month_end)
-          OR EXISTS (SELECT 1 FROM public.${investment_table} i WHERE i.date_str <= month_end)
+          EXISTS (SELECT 1 FROM public.${transaction_table} t
+                  WHERE t.date_str <= month_end AND ($3::text[] IS NULL OR t.account = ANY($3::text[])))
+          OR EXISTS (SELECT 1 FROM public.${investment_table} i
+                     WHERE i.date_str <= month_end AND ($3::text[] IS NULL OR i.account = ANY($3::text[])))
         ) AS has_data
       FROM balances
       GROUP BY month_end
@@ -868,7 +900,7 @@ class FinanceManager {
     `;
 
     try {
-      const result = await client.query(query, [startDate, endDate]);
+      const result = await client.query(query, [startDate, endDate, accounts?.length ? accounts : null]);
       return result.rows;
     } finally {
       client.release();

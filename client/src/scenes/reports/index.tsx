@@ -1,146 +1,53 @@
-import React, { useMemo, useState } from 'react';
-import {
-  Box, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack,
-} from '@mui/material';
+import React from 'react';
+import { Chip, Stack } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import PageHeader from '@/components/PageHeader';
-import StickyBar from '@/components/StickyBar';
 import NetWorthChart from '@/scenes/reports/NetWorthChart';
 import CategoryTrendChart from '@/scenes/reports/CategoryTrendChart';
 import CashflowChart from '@/scenes/reports/CashflowChart';
-import { useGetCategoriesQuery } from '@/api';
-
-/** Named ranges, in months back from the current month. */
-const PRESETS = [
-  { label: '6 months', months: 6 },
-  { label: '12 months', months: 12 },
-  { label: '24 months', months: 24 },
-] as const;
-
-const toIso = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-
-/** A range ending with the last day of the current month, `months` long. */
-const presetRange = (months: number) => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return { startDate: toIso(start), endDate: toIso(end) };
-};
-
-const yearToDate = () => {
-  const now = new Date();
-  return {
-    startDate: toIso(new Date(now.getFullYear(), 0, 1)),
-    endDate: toIso(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
-  };
-};
+import MobileFilters from '@/scenes/insights/MobileFilters';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
+import { useSelectionLabel } from '@/scenes/insights/useSelectionLabel';
+import { toMonthKey } from '@/utils/monthRange';
 
 /**
- * How things developed, rather than what one month did.
+ * Trends: how the selection developed, per month.
  *
- * The time axis is a range instead of the dashboard's single month, which is the
- * whole reason this is a separate screen: the dashboard answers "what happened in
- * August", this one answers "what has been happening".
+ * Reads the same filter as Overview, so switching between the two keeps the
+ * selection. A single month has nothing to show per month, so the charts then
+ * cover the twelve months up to it, and the subtitle says so.
  */
 const Reports: React.FC = () => {
-  const [preset, setPreset] = useState<string>('12');
-  const [range, setRange] = useState(() => presetRange(12));
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
-  const { data: categoryList } = useGetCategoriesQuery();
-  // Income categories are not part of the spending chart, so offering them as
-  // a filter would select something that can never show up.
-  const categories = useMemo(
-    () => (categoryList ?? [])
-      .filter((c) => c.income_outcome !== 'Inkomsten')
-      .map((c) => c.category_name)
-      .sort((a, b) => a.localeCompare(b)),
-    [categoryList],
-  );
-
-  const toggleCategory = (name: string) =>
-    setSelectedCategories((current) =>
-      current.includes(name) ? current.filter((c) => c !== name) : [...current, name],
-    );
-
-  const applyPreset = (value: string) => {
-    setPreset(value);
-    if (value === 'ytd') {
-      setRange(yearToDate());
-    } else if (value !== 'custom') {
-      setRange(presetRange(Number(value)));
-    }
-  };
+  const { filter, toggleCategory, trend } = useInsightsFilter();
+  const subtitle = useSelectionLabel('trend');
 
   // The current month is still running, so its figures are partial. Saying so
   // beats a reader concluding that spending collapsed this month.
-  const endsThisMonth = range.endDate.slice(0, 7) === toIso(new Date()).slice(0, 7);
+  const endsThisMonth = trend.to === toMonthKey(new Date());
 
   return (
     <>
-      <PageHeader title="Reports" subtitle="How things developed over a period, rather than what one month did" />
-
-      {/* The period applies to every chart, so it stays in view while the
-          page scrolls. Category filters live in the card they apply to. */}
-      <StickyBar sx={{ mb: 4, py: 2 }}>
-        <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <ToggleButtonGroup
-            exclusive
-            value={preset}
-            onChange={(_e, value) => value && applyPreset(value)}
-            aria-label="Period"
-          >
-            {PRESETS.map((option) => (
-              <ToggleButton key={option.months} value={String(option.months)}>
-                {option.label}
-              </ToggleButton>
-            ))}
-            <ToggleButton value="ytd">This year</ToggleButton>
-          </ToggleButtonGroup>
-
-          <TextField
-            type="date"
-            label="From"
-            value={range.startDate}
-            onChange={(e) => {
-              setPreset('custom');
-              setRange((prev) => ({ ...prev, startDate: e.target.value }));
-            }}
-            sx={{ minWidth: 150 }}
-          />
-          <TextField
-            type="date"
-            label="To"
-            value={range.endDate}
-            onChange={(e) => {
-              setPreset('custom');
-              setRange((prev) => ({ ...prev, endDate: e.target.value }));
-            }}
-            sx={{ minWidth: 150 }}
-          />
-
-          {endsThisMonth && (
-            <Chip
-              variant="outlined"
-              icon={<InfoIcon />}
-              label="This month is still running"
-              sx={{ ml: 'auto', height: 40, borderRadius: 2, px: 1 }}
-            />
-          )}
-        </Box>
-      </StickyBar>
+      <PageHeader
+        title="Trends"
+        subtitle={trend.widened ? `${subtitle} - the 12 months up to the selected month` : subtitle}
+        actions={
+          <>
+            {endsThisMonth && (
+              <Chip variant="outlined" size="small" icon={<InfoIcon />} label="This month is still running" />
+            )}
+            <MobileFilters />
+          </>
+        }
+      />
 
       <Stack spacing={4} useFlexGap>
-        <NetWorthChart startDate={range.startDate} endDate={range.endDate} />
-        <CashflowChart startDate={range.startDate} endDate={range.endDate} />
+        <NetWorthChart startDate={trend.startDate} endDate={trend.endDate} />
+        <CashflowChart startDate={trend.startDate} endDate={trend.endDate} />
         <CategoryTrendChart
-          startDate={range.startDate}
-          endDate={range.endDate}
-          allCategories={categories}
-          selected={selectedCategories}
+          startDate={trend.startDate}
+          endDate={trend.endDate}
+          selected={filter.categories}
           onToggleCategory={toggleCategory}
-          onClearCategories={() => setSelectedCategories([])}
         />
       </Stack>
     </>

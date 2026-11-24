@@ -9,7 +9,8 @@ interface SortableSpendingTableProps {
   items: CategorySums[];
   totalAmount: number;
   onRowClick: (category: string) => void;
-  selectedCategory: string | null;
+  /** The categories selected in the Insights filter. */
+  selectedCategories: string[];
 }
 
 const formatCurrency = (value: number) =>
@@ -19,10 +20,11 @@ const formatPercentage = (value: number) => value.toFixed(1) + '%';
 
 /**
  * One side of the breakdown, a row per category. A row is a button: clicking
- * it, or Enter on it, shows that category's transactions below.
+ * it, or Enter on it, puts the category in the Insights filter, so the whole
+ * page - and Trends - narrows to it. Clicking it again takes it out.
  */
 const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
-  title, items, totalAmount, onRowClick, selectedCategory,
+  title, items, totalAmount, onRowClick, selectedCategories,
 }) => {
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [orderBy, setOrderBy] = useState<'amount' | 'percentage'>('amount');
@@ -70,7 +72,7 @@ const SortableSpendingTable: React.FC<SortableSpendingTableProps> = ({
         </TableHead>
         <TableBody>
           {sortedItems.map((item) => {
-            const selected = selectedCategory === item.category;
+            const selected = selectedCategories.includes(item.category);
             const share = totalAmount > 0 ? (item.total_amount / totalAmount) * 100 : 0;
             const cellSx = { fontWeight: selected ? 600 : undefined, color: selected ? 'text.primary' : undefined };
 

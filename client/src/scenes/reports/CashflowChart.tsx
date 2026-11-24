@@ -13,6 +13,7 @@ import {
 } from '@/scenes/reports/chartTheme';
 import { buildCashflow, toneFor } from '@/scenes/reports/reportMath';
 import { useGetCashflowHistoryQuery } from '@/api';
+import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 
 interface Props {
   startDate: string;
@@ -30,7 +31,8 @@ const formatPct = (value: number | null) => (value === null ? '–' : `${value.t
  */
 const CashflowChart: React.FC<Props> = ({ startDate, endDate }) => {
   const { palette } = useTheme();
-  const { data } = useGetCashflowHistoryQuery({ startDate, endDate });
+  const { accounts, categories } = useInsightsFilter();
+  const { data } = useGetCashflowHistoryQuery({ startDate, endDate, accounts, categories });
   const rows = useMemo(() => buildCashflow(data ?? []), [data]);
 
   if (rows.length === 0) {

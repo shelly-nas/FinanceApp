@@ -3,6 +3,7 @@ import {
   Box, Typography, TableBody, TableCell, TableHead, TableRow, Stack,
   LinearProgress, IconButton, Button, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, Chip, Tooltip,
+  Tabs, Tab,
 } from '@mui/material';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
@@ -37,6 +38,11 @@ const Tags: React.FC = () => {
   const [deleteTag] = useDeleteTagMutation();
 
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+  // Open events are the ones still collecting spending; closed ones are done.
+  const [show, setShow] = useState<'open' | 'closed'>('open');
+  const openCount = (tags ?? []).filter((t) => !t.is_closed).length;
+  const closedCount = (tags ?? []).length - openCount;
+  const visible = (tags ?? []).filter((t) => (show === 'closed' ? t.is_closed : !t.is_closed));
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newBudget, setNewBudget] = useState('');
@@ -124,10 +130,24 @@ const Tags: React.FC = () => {
       />
 
       <Stack spacing={4} useFlexGap>
+        <Tabs
+          value={show}
+          onChange={(_e, next) => setShow(next)}
+          aria-label="Events"
+          sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 40, '& .MuiTab-root': { minHeight: 40, textTransform: 'none' } }}
+        >
+          <Tab value="open" label={`Open (${openCount})`} />
+          <Tab value="closed" label={`Closed (${closedCount})`} />
+        </Tabs>
+
         <DashboardBox>
           {(!tags || tags.length === 0) ? (
             <Typography variant="body2">
               No events yet. Create one, then tag its transactions on the Transactions page.
+            </Typography>
+          ) : visible.length === 0 ? (
+            <Typography variant="body2">
+              {show === 'closed' ? 'No closed events.' : 'No open events. Reopen a closed one, or create a new one.'}
             </Typography>
           ) : (
             <CardTable>
@@ -141,7 +161,7 @@ const Tags: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tags.map((tag) => (
+                {visible.map((tag) => (
                   <TableRow
                     key={tag.id}
                     hover
