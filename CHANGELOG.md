@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/shelly-nas/FinanceApp/compare/v2.0.1...v2.1.0) (2026-11-25)
+
+
+### Features
+
+* **trends:** income per category, beside spending ([ac0bd63](https://github.com/shelly-nas/FinanceApp/commit/ac0bd63a9e44b14ae80016f771cb5c04edd4a8ab))
+* **trends:** inkomsten per categorie naast uitgaven ([5323130](https://github.com/shelly-nas/FinanceApp/commit/532313007d0d9682778e2d460e4a9e9cceeb7661))
+
 ## [2.0.1](https://github.com/shelly-nas/FinanceApp/compare/v2.0.0...v2.0.1) (2026-11-24)
 
 
