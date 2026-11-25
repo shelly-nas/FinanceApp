@@ -315,9 +315,9 @@ router.get('/account-overview', async (req: Request, res: Response, next: NextFu
   }
 });
 
-// Spending per category per month, for the trend chart.
+// Spending or income per category per month, for the trend chart.
 router.get('/reports/category-history', async (req: Request, res: Response, next: NextFunction) => {
-  const { startDate, endDate, categories, accounts, includeInternal } = req.query;
+  const { startDate, endDate, categories, accounts, includeInternal, side } = req.query;
   const isDate = (v: unknown) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
 
   if (!isDate(startDate) || !isDate(endDate)) {
@@ -325,6 +325,9 @@ router.get('/reports/category-history', async (req: Request, res: Response, next
   }
   if ((startDate as string) > (endDate as string)) {
     return res.status(400).json({ error: 'startDate must not be after endDate' });
+  }
+  if (side !== undefined && side !== 'expenses' && side !== 'income') {
+    return res.status(400).json({ error: 'side must be expenses or income' });
   }
 
   const parseList = (value: unknown): string[] | undefined => {
@@ -342,6 +345,7 @@ router.get('/reports/category-history', async (req: Request, res: Response, next
       categories: parseList(categories),
       accounts: parseList(accounts),
       includeInternal: includeInternal === 'true',
+      side: side as 'expenses' | 'income' | undefined,
     });
     res.status(200).json(rows);
   } catch (error) {

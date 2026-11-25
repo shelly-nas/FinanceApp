@@ -731,11 +731,12 @@ class FinanceManager {
   public async getCategoryHistory(
     startDate: string,
     endDate: string,
-    filters: { categories?: string[]; accounts?: string[]; includeInternal?: boolean } = {},
+    filters: { categories?: string[]; accounts?: string[]; includeInternal?: boolean; side?: 'expenses' | 'income' } = {},
   ): Promise<any[]> {
     const client = await dbContext.connect();
     const params: any[] = [startDate, endDate];
     const where: string[] = ['t.date_str >= $1', 't.date_str <= $2'];
+    const income = filters.side === 'income';
 
     const add = (value: any) => {
       params.push(value);
@@ -759,10 +760,9 @@ class FinanceManager {
     // series that says nothing about where money goes.
     where.push('t.category IS NOT NULL');
 
-    // Income categories are excluded: this chart answers "what did things cost",
-    // and a salary of a few thousand as a negative series drags the axis below
-    // zero and makes every real cost a sliver by comparison.
-    where.push("c.income_outcome IS DISTINCT FROM 'Inkomsten'");
+    // One side at a time. Mixed, a salary of a few thousand would make every
+    // real cost a sliver, and the two would push the axis both ways.
+    where.push(income ? "c.income_outcome = 'Inkomsten'" : "c.income_outcome IS DISTINCT FROM 'Inkomsten'");
 
     const query = `
       SELECT
@@ -770,9 +770,9 @@ class FinanceManager {
         t.category,
         c.color,
         c.income_outcome,
-        -- Debits positive: this chart answers "what did this cost", so spending
-        -- reads as a positive height and a refund pulls it back down.
-        SUM(CASE WHEN t.debit_credit = 'Debit' THEN t.amount ELSE -t.amount END)::numeric AS total
+        -- Positive on its own side: spending as debits, so a refund pulls it
+        -- back down; income as credits, so a correction does.
+        SUM(CASE WHEN t.debit_credit = '${income ? 'Credit' : 'Debit'}' THEN t.amount ELSE -t.amount END)::numeric AS total
       FROM public.${transaction_table} t
       JOIN public.${category_table} c ON c.category_name = t.category
       WHERE ${where.join(' AND ')}

@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Box, Typography, Chip, useTheme } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Typography, Chip, ToggleButton, ToggleButtonGroup, useTheme } from '@mui/material';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
@@ -11,9 +11,9 @@ import StatRow from '@/scenes/reports/StatRow';
 import CategoryStatsTable from '@/scenes/reports/CategoryStatsTable';
 import { formatCurrency, formatCompact, formatMonthShort } from '@/scenes/reports/chartTheme';
 import {
-  buildCategoryRows, summariseCategories, trendSlope, toneFor, OTHER, OTHER_COLOR,
+  buildCategoryRows, summariseCategories, trendSlope, toneFor, defaultSide, Side, OTHER, OTHER_COLOR,
 } from '@/scenes/reports/reportMath';
-import { useGetCategoryHistoryQuery } from '@/api';
+import { useGetCategoriesQuery, useGetCategoryHistoryQuery } from '@/api';
 import { useInsightsFilter } from '@/scenes/insights/InsightsFilterContext';
 
 interface Props {
@@ -29,9 +29,11 @@ interface Props {
 const MAX_SERIES = 8;
 
 /**
- * Spending per category over time: stacked bars for what each month consisted
- * of, a three-month moving average of the total over them for the direction,
- * and a table below with the per-category figures and their own trend.
+ * Spending or income per category over time: stacked bars for what each month
+ * consisted of, a three-month moving average of the total over them for the
+ * direction, and a table below with the per-category figures and their own
+ * trend. One side at a time: mixed, a salary would make every cost a sliver.
+ * Selecting only income categories in the filter switches to income.
  *
  * Only months with data are drawn. A month that was never imported is not a
  * month of zero spending, and a zero bar would say it was.
@@ -39,11 +41,19 @@ const MAX_SERIES = 8;
 const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, selected, onToggleCategory }) => {
   const { palette } = useTheme();
   const { accounts } = useInsightsFilter();
+  const { data: categoryList = [] } = useGetCategoriesQuery();
+  const suggested = defaultSide(selected, categoryList);
+  const [side, setSide] = useState<Side>(suggested);
+  // A change in the filter picks the side again; the toggle can still override.
+  useEffect(() => setSide(suggested), [suggested]);
+  const income = side === 'income';
+
   const { data: history } = useGetCategoryHistoryQuery({
     startDate,
     endDate,
     categories: selected.length > 0 ? selected : undefined,
     accounts,
+    side,
   });
 
   const { rows, series, colors, labels } = useMemo(
@@ -53,11 +63,26 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, selected, onT
   const stats = useMemo(() => summariseCategories(history ?? []), [history]);
 
 
+  const toggle = (
+    <ToggleButtonGroup
+      exclusive
+      size="small"
+      value={side}
+      onChange={(_e, next) => next && setSide(next)}
+      aria-label="Spending or income"
+    >
+      <ToggleButton value="expenses">Spending</ToggleButton>
+      <ToggleButton value="income">Income</ToggleButton>
+    </ToggleButtonGroup>
+  );
+
   if (rows.length === 0) {
     return (
       <DashboardBox>
-        <WidgetHeader title="Spending by category" />
-        <Typography variant="body2">No data for this period.</Typography>
+        <WidgetHeader title="By category" action={toggle} />
+        <Typography variant="body2">
+          {income ? 'No income in these categories for this period.' : 'No spending in these categories for this period.'}
+        </Typography>
       </DashboardBox>
     );
   }
@@ -70,12 +95,15 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, selected, onT
   return (
     <DashboardBox>
       <WidgetHeader
-        title="Spending by category"
-        subtitle="Per month, with the three-month moving average of the total"
+        title="By category"
+        subtitle={`${income ? 'Income' : 'Spending'} per month, with the three-month moving average of the total`}
         action={
-          Object.values(labels).includes(OTHER) && (
-            <Chip size="small" variant="outlined" label={`Top ${MAX_SERIES}, rest as Other`} />
-          )
+          <>
+            {Object.values(labels).includes(OTHER) && (
+              <Chip size="small" variant="outlined" label={`Top ${MAX_SERIES}, rest as Other`} />
+            )}
+            {toggle}
+          </>
         }
       />
 
@@ -88,8 +116,8 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, selected, onT
           {
             label: 'Trend / month',
             value: slope === null ? '–' : `${slope >= 0 ? '+' : ''}${formatCurrency(slope)}`,
-            // More spending is the bad direction.
-            tone: toneFor(slope, { higherIsBetter: false }),
+            // More spending is the bad direction, more income the good one.
+            tone: toneFor(slope, { higherIsBetter: income }),
           },
           { label: 'Months', value: String(rows.length) },
         ]}
@@ -143,7 +171,7 @@ const CategoryTrendChart: React.FC<Props> = ({ startDate, endDate, selected, onT
       </Box>
 
       <Box sx={{ mt: 4 }}>
-        <CategoryStatsTable stats={stats} selected={selected} onToggle={onToggleCategory} />
+        <CategoryStatsTable stats={stats} selected={selected} onToggle={onToggleCategory} higherIsBetter={income} />
       </Box>
     </DashboardBox>
   );

@@ -474,12 +474,14 @@ export const api = createApi({
       categories?: string[];
       accounts?: string[];
       includeInternal?: boolean;
+      side?: 'expenses' | 'income';
     }>({
-      query: ({ startDate, endDate, categories, accounts, includeInternal }) => {
+      query: ({ startDate, endDate, categories, accounts, includeInternal, side }) => {
         const params = new URLSearchParams({ startDate, endDate });
         if (categories?.length) params.set('categories', JSON.stringify(categories));
         if (accounts?.length) params.set('accounts', JSON.stringify(accounts));
         if (includeInternal) params.set('includeInternal', 'true');
+        if (side === 'income') params.set('side', 'income');
         return { url: `api/reports/category-history`, params };
       },
       providesTags: ["categoryHistory"],
